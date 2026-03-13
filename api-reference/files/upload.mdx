@@ -1,0 +1,62 @@
+---
+title: 'Upload file'
+api: "POST /v1/files"
+description: 'Upload a file for use in table extraction.'
+---
+
+## Request body
+
+Send the file as `multipart/form-data` with a `file` field.
+
+<ParamField body="file" type="file" required>
+  The file to upload. Maximum size is 1 GB. Supported formats include PDF, CSV, XLSX, images, and more.
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">Unique file identifier. Use this when creating tables.</ResponseField>
+<ResponseField name="filename" type="string">Original file name.</ResponseField>
+<ResponseField name="size" type="integer">File size in bytes.</ResponseField>
+<ResponseField name="content_type" type="string">MIME type of the file.</ResponseField>
+<ResponseField name="created_at" type="string">ISO 8601 timestamp.</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const file = new File([buffer], "catalog.pdf", { type: "application/pdf" });
+const uploaded = await client.files.upload(file, "catalog.pdf");
+
+console.log(uploaded.id);       // "file_abc123"
+console.log(uploaded.filename); // "catalog.pdf"
+console.log(uploaded.size);     // 1048576
+```
+
+```python Python
+uploaded = client.files.upload("/path/to/catalog.pdf")
+
+print(uploaded["id"])        # "file_abc123"
+print(uploaded["filename"])  # "catalog.pdf"
+print(uploaded["size"])      # 1048576
+```
+
+```bash cURL
+curl -X POST "https://api.lasso.ai/v1/files" \
+  -H "Authorization: Bearer lasso_..." \
+  -F "file=@/path/to/catalog.pdf"
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "id": "file_abc123",
+  "filename": "catalog.pdf",
+  "size": 1048576,
+  "content_type": "application/pdf",
+  "created_at": "2025-03-10T14:30:00.000Z"
+}
+```
+</ResponseExample>
+
+<Note>
+  The TypeScript SDK accepts `File` or `Blob` objects. The Python SDK accepts a file path string and handles the multipart upload automatically.
+</Note>

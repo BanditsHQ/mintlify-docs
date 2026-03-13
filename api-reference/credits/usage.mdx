@@ -1,0 +1,107 @@
+---
+title: 'Get credit usage'
+api: "GET /v1/credits/usage"
+description: 'Retrieve a paginated history of credit transactions.'
+---
+
+## Query parameters
+
+<ParamField query="page" type="integer" default="1">
+  Page number for pagination.
+</ParamField>
+
+<ParamField query="limit" type="integer" default="25">
+  Number of items per page (max 100).
+</ParamField>
+
+<ParamField query="from" type="string">
+  Filter transactions from this ISO 8601 date.
+</ParamField>
+
+<ParamField query="to" type="string">
+  Filter transactions up to this ISO 8601 date.
+</ParamField>
+
+<ParamField query="service" type="string">
+  Filter by service type (e.g., `extraction`, `enhancement`).
+</ParamField>
+
+## Response
+
+<ResponseField name="data" type="array">
+  <Expandable title="Transaction object">
+    <ResponseField name="id" type="string">Unique transaction identifier.</ResponseField>
+    <ResponseField name="service" type="string">The service that consumed credits.</ResponseField>
+    <ResponseField name="amount" type="number">Credits consumed (negative value).</ResponseField>
+    <ResponseField name="table_id" type="string | null">Associated table ID, if applicable.</ResponseField>
+    <ResponseField name="description" type="string">Human-readable description.</ResponseField>
+    <ResponseField name="created_at" type="string">ISO 8601 timestamp.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  <Expandable title="Pagination metadata">
+    <ResponseField name="page" type="integer">Current page.</ResponseField>
+    <ResponseField name="limit" type="integer">Items per page.</ResponseField>
+    <ResponseField name="total" type="integer">Total number of transactions.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="total_used" type="number">
+  Total credits consumed across all matching transactions (not just the current page).
+</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const usage = await client.credits.usage({
+  from: "2025-01-01T00:00:00Z",
+  to: "2025-03-31T23:59:59Z",
+  limit: 50,
+});
+
+console.log(`Total used: ${usage.total_used} credits`);
+for (const tx of usage.data) {
+  console.log(`${tx.service}: ${tx.amount} credits - ${tx.description}`);
+}
+```
+
+```python Python
+usage = client.credits.usage(
+    from_="2025-01-01T00:00:00Z",
+    to="2025-03-31T23:59:59Z",
+    limit=50,
+)
+
+print(f"Total used: {usage['total_used']} credits")
+for tx in usage["data"]:
+    print(f"{tx['service']}: {tx['amount']} credits - {tx['description']}")
+```
+
+```bash cURL
+curl -X GET "https://api.lasso.ai/v1/credits/usage?from=2025-01-01T00:00:00Z&to=2025-03-31T23:59:59Z&limit=50" \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "data": [
+    {
+      "id": "tx_abc123",
+      "service": "enhancement",
+      "amount": -12,
+      "table_id": "tbl_xyz789",
+      "description": "Enhanced 6 rows × description column",
+      "created_at": "2025-03-10T14:30:00.000Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 50,
+    "total": 128
+  },
+  "total_used": 3420
+}
+```
+</ResponseExample>

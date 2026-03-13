@@ -1,0 +1,30 @@
+---
+title: 'Delete glossary term'
+api: "DELETE /v1/glossary/{term_id}"
+description: 'Delete a glossary term and all its translations.'
+---
+
+## Path parameters
+
+<ParamField path="term_id" type="string" required>
+  The unique identifier of the glossary term to delete.
+</ParamField>
+
+## Response
+
+Returns `204 No Content` on success. The term and all its translations are permanently removed.
+
+<RequestExample>
+```typescript TypeScript
+await client.glossary.delete("term_abc123");
+```
+
+```python Python
+client.glossary.delete("term_abc123")
+```
+
+```bash cURL
+curl -X DELETE "https://api.lasso.ai/v1/glossary/term_abc123" \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>

@@ -1,0 +1,62 @@
+---
+title: 'Enhance with AI'
+description: 'Use AI to generate content, translate text, and enrich your extracted data.'
+---
+
+## Enhance a column
+
+Use AI to generate or enrich values for a specific column across selected rows.
+
+```python
+rows = client.tables.rows("tbl_abc123", limit=100)
+
+job = client.enhance.cells(
+    "tbl_abc123",
+    row_ids=[r["id"] for r in rows["data"]],
+    column_key="description",
+    prompt="Write a compelling product description based on the product name and specifications.",
+    web_search=True,
+)
+
+print(job["id"])                 # "enhance_..."
+print(job["status"])             # "queued"
+print(job["estimated_credits"])  # 84
+```
+
+## Check enhancement progress
+
+```python
+status = client.enhance.status("tbl_abc123")
+
+for column, stats in status["columns"].items():
+    print(f"{column}: {stats['completed']}/{stats['total']} done")
+```
+
+## Enhance multiple columns at once
+
+Enhance several columns of a single row in one request:
+
+```python
+client.enhance.bulk(
+    "tbl_abc123",
+    row_id="row_xyz789",
+    columns=[
+        {"key": "description", "prompt": "Write a product description."},
+        {"key": "seo_title", "prompt": "Generate an SEO-optimized title."},
+        {"key": "description_de", "prompt": "Translate the description to German."},
+    ],
+)
+```
+
+## Cancel enhancements
+
+```python
+result = client.enhance.cancel("tbl_abc123")
+print(result["cancelled_count"])
+```
+
+## Next
+
+<Card title="Export data" icon="arrow-right" href="/quickstart/python/export">
+  Export your data as JSON, CSV, XLSX, or images.
+</Card>

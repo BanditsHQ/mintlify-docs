@@ -1,0 +1,109 @@
+---
+title: 'Get row traces'
+description: 'Retrieve AI extraction and enhancement traces for a row.'
+api: "GET /v1/tables/{table_id}/rows/{row_id}/traces"
+---
+
+Traces provide full transparency into how AI generated or enhanced each column value, including the prompts, model used, confidence scores, and source references.
+
+## Path parameters
+
+<ParamField path="table_id" type="string" required>
+  The unique identifier of the table.
+</ParamField>
+
+<ParamField path="row_id" type="string" required>
+  The unique identifier of the row.
+</ParamField>
+
+## Query parameters
+
+<ParamField query="column_key" type="string">
+  Filter traces to a specific column. Omit to get traces for all columns.
+</ParamField>
+
+## Response
+
+<ResponseField name="data" type="array">
+  <Expandable title="Trace object">
+    <ResponseField name="column_key" type="string">The column this trace belongs to.</ResponseField>
+    <ResponseField name="model" type="string | null">The AI model used.</ResponseField>
+    <ResponseField name="confidence" type="number | null">Confidence score (0-1).</ResponseField>
+    <ResponseField name="request" type="object">
+      <Expandable title="Request details">
+        <ResponseField name="system_prompt" type="string | null">The system prompt sent to the model.</ResponseField>
+        <ResponseField name="user_content" type="string | null">The user content sent to the model.</ResponseField>
+        <ResponseField name="tools" type="array">Tools available to the model.</ResponseField>
+      </Expandable>
+    </ResponseField>
+    <ResponseField name="response" type="object">
+      <Expandable title="Response details">
+        <ResponseField name="text" type="string | null">The raw model response.</ResponseField>
+        <ResponseField name="iterations" type="integer | null">Number of reasoning iterations.</ResponseField>
+        <ResponseField name="tool_calls" type="array">Tools called by the model.</ResponseField>
+        <ResponseField name="thought_summary" type="string | null">Summary of the model's reasoning.</ResponseField>
+        <ResponseField name="sources" type="array">Web sources used for grounding.</ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const traces = await client.enhance.traces(
+  "tbl_abc123",
+  "row_xyz789",
+  "description"
+);
+
+for (const trace of traces.data) {
+  console.log(trace.column_key);
+  console.log(trace.model);
+  console.log(trace.confidence);
+}
+```
+
+```python Python
+traces = client.enhance.traces(
+    "tbl_abc123",
+    "row_xyz789",
+    column_key="description",
+)
+
+for trace in traces["data"]:
+    print(trace["column_key"])
+    print(trace["model"])
+    print(trace["confidence"])
+```
+
+```bash cURL
+curl -X GET "https://api.lasso.ai/v1/tables/tbl_abc123/rows/row_xyz789/traces?column_key=description" \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "data": [
+    {
+      "column_key": "description",
+      "model": "gemini-pro",
+      "confidence": 0.92,
+      "request": {
+        "system_prompt": "You are a product data expert...",
+        "user_content": "Generate a description for: iPhone 15 Pro",
+        "tools": []
+      },
+      "response": {
+        "text": "The iPhone 15 Pro features...",
+        "iterations": 1,
+        "tool_calls": [],
+        "thought_summary": "Used product name and specs to generate description",
+        "sources": []
+      }
+    }
+  ]
+}
+```
+</ResponseExample>

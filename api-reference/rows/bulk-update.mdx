@@ -1,0 +1,71 @@
+---
+title: 'Bulk update rows'
+description: 'Update a specific column value across multiple rows at once.'
+api: "POST /v1/tables/{table_id}/rows/bulk-update"
+---
+
+## Path parameters
+
+<ParamField path="table_id" type="string" required>
+  The unique identifier of the table.
+</ParamField>
+
+## Request body
+
+<ParamField body="row_ids" type="string[]" required>
+  Array of row IDs to update.
+</ParamField>
+
+<ParamField body="column_key" type="string" required>
+  The column key to update.
+</ParamField>
+
+<ParamField body="value" type="any" required>
+  The new value to set for the specified column in all target rows.
+</ParamField>
+
+## Response
+
+<ResponseField name="updated_count" type="integer">Number of rows successfully updated.</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const result = await client.tables.bulkUpdate("tbl_abc123", {
+  row_ids: ["row_1", "row_2", "row_3"],
+  column_key: "status",
+  value: "approved",
+});
+
+console.log(result.updated_count); // 3
+```
+
+```python Python
+result = client.tables.bulk_update(
+    "tbl_abc123",
+    row_ids=["row_1", "row_2", "row_3"],
+    column_key="status",
+    value="approved",
+)
+
+print(result["updated_count"])  # 3
+```
+
+```bash cURL
+curl -X POST "https://api.lasso.ai/v1/tables/tbl_abc123/rows/bulk-update" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "row_ids": ["row_1", "row_2", "row_3"],
+    "column_key": "status",
+    "value": "approved"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "updated_count": 3
+}
+```
+</ResponseExample>

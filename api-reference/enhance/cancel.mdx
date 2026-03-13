@@ -1,0 +1,69 @@
+---
+title: 'Cancel enhancement'
+description: 'Cancel pending or in-progress enhancement operations.'
+api: "POST /v1/tables/{table_id}/enhance/cancel"
+---
+
+## Path parameters
+
+<ParamField path="table_id" type="string" required>
+  The unique identifier of the table.
+</ParamField>
+
+## Request body
+
+<ParamField body="column_key" type="string">
+  Cancel enhancements for a specific column only. Omit to cancel all pending enhancements.
+</ParamField>
+
+## Response
+
+<ResponseField name="cancelled_count" type="integer">Number of enhancement operations cancelled.</ResponseField>
+
+<Note>
+  Only enhancements with `pending` or `processing` status can be cancelled. Already completed enhancements are not affected.
+</Note>
+
+<RequestExample>
+```typescript TypeScript
+// Cancel all pending enhancements
+const result = await client.enhance.cancel("tbl_abc123");
+console.log(result.cancelled_count);
+
+// Cancel for a specific column
+const result2 = await client.enhance.cancel("tbl_abc123", "description");
+console.log(result2.cancelled_count);
+```
+
+```python Python
+# Cancel all pending enhancements
+result = client.enhance.cancel("tbl_abc123")
+print(result["cancelled_count"])
+
+# Cancel for a specific column
+result = client.enhance.cancel("tbl_abc123", column_key="description")
+print(result["cancelled_count"])
+```
+
+```bash cURL
+# Cancel all pending enhancements
+curl -X POST "https://api.lasso.ai/v1/tables/tbl_abc123/enhance/cancel" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{}'
+
+# Cancel enhancements for a specific column
+curl -X POST "https://api.lasso.ai/v1/tables/tbl_abc123/enhance/cancel" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{"column_key": "description"}'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "cancelled_count": 12
+}
+```
+</ResponseExample>

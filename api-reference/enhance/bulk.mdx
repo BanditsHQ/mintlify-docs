@@ -1,0 +1,96 @@
+---
+title: 'Bulk enhance'
+description: 'Enhance multiple columns of a single row in one request.'
+api: "POST /v1/tables/{table_id}/enhance/bulk"
+---
+
+## Path parameters
+
+<ParamField path="table_id" type="string" required>
+  The unique identifier of the table.
+</ParamField>
+
+## Request body
+
+<ParamField body="row_id" type="string" required>
+  The row ID to enhance.
+</ParamField>
+
+<ParamField body="columns" type="array" required>
+  Array of column enhancement configurations. Must be non-empty.
+  <Expandable title="Column object">
+    <ParamField body="key" type="string" required>Column key to enhance.</ParamField>
+    <ParamField body="prompt" type="string" required>Instructions for the AI.</ParamField>
+    <ParamField body="model" type="string">AI model to use for this column.</ParamField>
+    <ParamField body="web_search" type="boolean">Whether to enable web search.</ParamField>
+    <ParamField body="target_language" type="string">Target language for translation.</ParamField>
+  </Expandable>
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">Enhancement job identifier.</ResponseField>
+<ResponseField name="status" type="string">Always `queued`.</ResponseField>
+<ResponseField name="estimated_credits" type="number">Estimated credit cost.</ResponseField>
+<ResponseField name="rows_queued" type="integer">Always `1`.</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const job = await client.enhance.bulk("tbl_abc123", {
+  row_id: "row_xyz789",
+  columns: [
+    { key: "description", prompt: "Write a product description." },
+    { key: "seo_title", prompt: "Generate an SEO-optimized title.", web_search: true },
+    { key: "description_de", prompt: "Translate the description to German." },
+  ],
+});
+```
+
+```python Python
+job = client.enhance.bulk(
+    "tbl_abc123",
+    row_id="row_xyz789",
+    columns=[
+        {"key": "description", "prompt": "Write a product description."},
+        {"key": "seo_title", "prompt": "Generate an SEO-optimized title.", "web_search": True},
+        {"key": "description_de", "prompt": "Translate the description to German."},
+    ],
+)
+```
+
+```bash cURL
+curl -X POST "https://api.lasso.ai/v1/tables/tbl_abc123/enhance/bulk" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "row_id": "row_xyz789",
+    "columns": [
+      {
+        "key": "description",
+        "prompt": "Write a product description."
+      },
+      {
+        "key": "seo_title",
+        "prompt": "Generate an SEO-optimized title.",
+        "web_search": true
+      },
+      {
+        "key": "description_de",
+        "prompt": "Translate the description to German.",
+        "target_language": "de"
+      }
+    ]
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "id": "enhance_abc123",
+  "status": "queued",
+  "estimated_credits": 1.5,
+  "rows_queued": 1
+}
+```
+</ResponseExample>

@@ -1,0 +1,67 @@
+---
+title: 'Authentication'
+description: 'Authenticate your API requests using Bearer tokens.'
+---
+
+All API endpoints require authentication via a Bearer token in the `Authorization` header. API keys are prefixed with `lasso_`.
+
+## Creating an API key
+
+Generate API keys from the [Lasso dashboard](https://app.lasso.ai). Navigate to **Settings** > **API Keys** and click **Create API Key**.
+
+<Warning>
+  API keys are shown only once at creation time. Store them securely. If you lose a key, deactivate it and create a new one.
+</Warning>
+
+## Using your API key
+
+Include the key in the `Authorization` header of every request.
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://api.lasso.ai/v1/tables" \
+  -H "Authorization: Bearer lasso_your_api_key_here"
+```
+
+```typescript TypeScript
+import LassoClient from "@lasso-ai/sdk";
+
+const client = new LassoClient({
+  apiKey: "lasso_your_api_key_here",
+});
+```
+
+```python Python
+from lasso import LassoClient
+
+client = LassoClient(api_key="lasso_your_api_key_here")
+```
+</CodeGroup>
+
+## Key format
+
+| Property | Value |
+|---|---|
+| Prefix | `lasso_` |
+| Length | 70 characters |
+| Example | `lasso_a1b2c3d4e5f6...` |
+
+## Security best practices
+
+- Store API keys in environment variables, not in source code.
+- Use a separate key per environment (development, staging, production).
+- Rotate keys periodically and deactivate unused ones.
+- Keys are scoped to a single company. All resources accessed through a key belong to that company.
+
+## Error responses
+
+If authentication fails, the API returns a `401` status code.
+
+```json
+{
+  "status_code": 401,
+  "error_type": "unauthenticated",
+  "message": "Missing or invalid Authorization header. Use: Bearer lasso_...",
+  "request_id": "550e8400-e29b-41d4-a716-446655440000"
+}
+```

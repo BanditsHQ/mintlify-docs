@@ -1,0 +1,34 @@
+---
+title: 'Install & setup'
+description: 'Install the Lasso Python SDK and create your first client.'
+---
+
+## Prerequisites
+
+- [Create an API key](https://app.lasso.ai) from the Lasso dashboard
+- Python 3.8 or later
+
+## Install the SDK
+
+```bash
+pip install lasso-ai
+```
+
+## Initialize the client
+
+```python
+from lasso import LassoClient
+import os
+
+client = LassoClient(api_key=os.environ["LASSO_API_KEY"])
+```
+
+<Warning>
+  Store your API key in an environment variable. Never hardcode it in source code.
+</Warning>
+
+## Next
+
+<Card title="Extract data" icon="arrow-right" href="/quickstart/python/extract">
+  Create a schema, upload files, and run your first extraction.
+</Card>

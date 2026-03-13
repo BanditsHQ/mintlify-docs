@@ -1,0 +1,57 @@
+---
+title: 'Tables & extraction'
+description: 'Understand how Lasso extracts structured data from your source files.'
+---
+
+Tables are the core resource in Lasso. A table represents an extraction job that takes unstructured source data and produces structured rows of product information.
+
+## How extraction works
+
+When you create a table, Lasso processes your source files through an AI pipeline:
+
+1. **Document parsing** -- PDFs, spreadsheets, and images are parsed to extract raw text and visual elements.
+2. **Schema mapping** -- The AI maps the raw content to your schema's column definitions.
+3. **Row generation** -- Each detected product or item becomes a row with values for each column.
+4. **Validation** -- Extracted values are validated against column types (numbers, URLs, emails, etc.).
+
+## Source types
+
+You can provide data to extract from in three ways:
+
+| Source | Description |
+|---|---|
+| **Files** | Upload PDFs, spreadsheets, images, or documents via the [Files API](/api-reference/files/upload). |
+| **URLs** | Pass publicly accessible URLs directly when creating a table. |
+| **Text** | Provide raw text content for extraction. |
+
+## Table lifecycle
+
+A table moves through these statuses:
+
+```
+queued → processing → completed
+                    → failed
+```
+
+- **queued** -- The job is waiting to be picked up.
+- **processing** -- Extraction is actively running. The `progress` field (0-100) tracks completion.
+- **completed** -- All rows have been extracted and are ready to query.
+- **failed** -- Something went wrong. Check `error_message` for details.
+
+## Polling vs webhooks
+
+You have two options to know when extraction finishes:
+
+- **Polling** -- Use `client.tables.waitForCompletion()` (SDK) or poll `GET /v1/tables/{id}` until status is `completed`.
+- **Webhooks** -- Pass a `webhook_url` when creating the table. Lasso sends an HTTP POST when processing completes.
+
+## Working with rows
+
+Once a table is completed, each extracted item is a row. Rows contain:
+
+- **data** -- A key-value object matching your schema columns.
+- **validation_status** -- Whether the row passed type validation.
+- **enhancement_status** -- Per-column status of any AI enhancements.
+- **is_edited** -- Whether the row was manually modified via the API.
+
+Rows can be updated individually, in bulk, or deleted. See [Rows API](/api-reference/rows/list) for details.

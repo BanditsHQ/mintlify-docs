@@ -1,0 +1,69 @@
+---
+title: 'Enhancement status'
+description: 'Check the progress of enhancement operations on a table.'
+api: "GET /v1/tables/{table_id}/enhance/status"
+---
+
+## Path parameters
+
+<ParamField path="table_id" type="string" required>
+  The unique identifier of the table.
+</ParamField>
+
+## Response
+
+<ResponseField name="columns" type="object">
+  A map of column keys to their enhancement progress across all rows.
+  <Expandable title="Column status object">
+    <ResponseField name="total" type="integer">Total rows with enhancement for this column.</ResponseField>
+    <ResponseField name="completed" type="integer">Rows successfully enhanced.</ResponseField>
+    <ResponseField name="failed" type="integer">Rows where enhancement failed.</ResponseField>
+    <ResponseField name="pending" type="integer">Rows waiting to be processed.</ResponseField>
+    <ResponseField name="processing" type="integer">Rows currently being processed.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const status = await client.enhance.status("tbl_abc123");
+
+for (const [column, stats] of Object.entries(status.columns)) {
+  console.log(`${column}: ${stats.completed}/${stats.total} done`);
+}
+```
+
+```python Python
+status = client.enhance.status("tbl_abc123")
+
+for column, stats in status["columns"].items():
+    print(f"{column}: {stats['completed']}/{stats['total']} done")
+```
+
+```bash cURL
+curl -X GET "https://api.lasso.ai/v1/tables/tbl_abc123/enhance/status" \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "columns": {
+    "description": {
+      "total": 42,
+      "completed": 38,
+      "failed": 1,
+      "pending": 0,
+      "processing": 3
+    },
+    "seo_title": {
+      "total": 42,
+      "completed": 42,
+      "failed": 0,
+      "pending": 0,
+      "processing": 0
+    }
+  }
+}
+```
+</ResponseExample>

@@ -1,0 +1,45 @@
+---
+title: 'Install & setup'
+description: 'Install the Lasso TypeScript SDK and create your first client.'
+---
+
+## Prerequisites
+
+- [Create an API key](https://app.lasso.ai) from the Lasso dashboard
+- Node.js 18 or later
+
+## Install the SDK
+
+<CodeGroup>
+```bash npm
+npm install @lasso-ai/sdk
+```
+
+```bash yarn
+yarn add @lasso-ai/sdk
+```
+
+```bash pnpm
+pnpm add @lasso-ai/sdk
+```
+</CodeGroup>
+
+## Initialize the client
+
+```typescript
+import LassoClient from "@lasso-ai/sdk";
+
+const client = new LassoClient({
+  apiKey: process.env.LASSO_API_KEY,
+});
+```
+
+<Warning>
+  Store your API key in an environment variable. Never hardcode it in source code.
+</Warning>
+
+## Next
+
+<Card title="Extract data" icon="arrow-right" href="/quickstart/typescript/extract">
+  Create a schema, upload files, and run your first extraction.
+</Card>

@@ -1,0 +1,78 @@
+---
+title: 'List glossary terms'
+api: "GET /v1/glossary"
+description: 'Retrieve a paginated list of your glossary terms.'
+---
+
+## Query parameters
+
+<ParamField query="page" type="integer" default="1">
+  Page number for pagination.
+</ParamField>
+
+<ParamField query="limit" type="integer" default="25">
+  Number of items per page (max 100).
+</ParamField>
+
+## Response
+
+<ResponseField name="data" type="array">
+  <Expandable title="Glossary term object">
+    <ResponseField name="id" type="string">Unique term identifier.</ResponseField>
+    <ResponseField name="term" type="string">The original term.</ResponseField>
+    <ResponseField name="type" type="string">`do_not_translate`, `specific_translation`, or `context_dependent`.</ResponseField>
+    <ResponseField name="case_sensitive" type="boolean">Whether matching is case-sensitive.</ResponseField>
+    <ResponseField name="category" type="string">Term category.</ResponseField>
+    <ResponseField name="translations" type="object">Map of language code to translated term.</ResponseField>
+    <ResponseField name="created_at" type="string">ISO 8601 timestamp.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  <Expandable title="Pagination metadata">
+    <ResponseField name="page" type="integer">Current page.</ResponseField>
+    <ResponseField name="limit" type="integer">Items per page.</ResponseField>
+    <ResponseField name="total" type="integer">Total number of terms.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const result = await client.glossary.list({ page: 1, limit: 25 });
+
+for (const term of result.data) {
+  console.log(`${term.term} (${term.type})`);
+}
+```
+
+```python Python
+result = client.glossary.list(page=1, limit=25)
+
+for term in result["data"]:
+    print(f"{term['term']} ({term['type']})")
+```
+
+```bash cURL
+curl -X GET "https://api.lasso.ai/v1/glossary?page=1&limit=25" \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "data": [
+    {
+      "id": "term_abc123",
+      "term": "Lasso AI",
+      "type": "do_not_translate",
+      "case_sensitive": true,
+      "category": "brand",
+      "translations": {},
+      "created_at": "2025-03-01T10:00:00.000Z"
+    }
+  ],
+  "pagination": { "page": 1, "limit": 25, "total": 12 }
+}
+```
+</ResponseExample>

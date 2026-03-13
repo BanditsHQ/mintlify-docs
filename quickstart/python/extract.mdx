@@ -1,0 +1,92 @@
+---
+title: 'Extract data'
+description: 'Create a schema, upload a file, and extract structured product data.'
+---
+
+## 1. Create a schema
+
+A schema defines the columns you want to extract.
+
+```python
+schema = client.schemas.create(
+    name="Product Catalog",
+    columns=[
+        {"key": "product_name", "label": "Product Name", "type": "text", "required": True},
+        {"key": "price", "label": "Price", "type": "number"},
+        {"key": "description", "label": "Description", "type": "text"},
+        {"key": "image_url", "label": "Image", "type": "image"},
+    ],
+)
+
+print(schema["id"])
+```
+
+<Tip>
+  You can also generate a schema automatically from sample data:
+
+```python
+schema = client.schemas.generate(
+    sample_data="Product: iPhone 15 Pro, Price: $999, Storage: 128GB",
+    name="Smartphones",
+)
+```
+</Tip>
+
+## 2. Upload a file
+
+Upload a PDF, spreadsheet, or image to extract data from.
+
+```python
+uploaded = client.files.upload("/path/to/catalog.pdf")
+
+print(uploaded["id"])  # "file_abc123"
+```
+
+## 3. Create a table
+
+Start the extraction by creating a table with your schema and uploaded file.
+
+```python
+table = client.tables.create(
+    schema_id=schema["id"],
+    name="Q1 Product Catalog",
+    file_ids=[uploaded["id"]],
+)
+
+print(table["id"])      # "tbl_..."
+print(table["status"])  # "processing"
+```
+
+## 4. Wait for results
+
+The SDK includes a polling helper that waits for extraction to complete.
+
+```python
+completed = client.tables.wait_for_completion(
+    table["id"],
+    interval_s=3,
+    timeout_s=300,
+)
+
+print(completed["status"])      # "completed"
+print(completed["total_rows"])  # 42
+```
+
+## 5. Retrieve rows
+
+```python
+rows = client.tables.rows(completed["id"], limit=100)
+
+for row in rows["data"]:
+    print(row["data"]["product_name"], row["data"]["price"])
+
+# Or as a pandas DataFrame
+df = client.tables.results_as_dataframe(completed["id"])
+print(df.head())
+```
+
+## Next
+
+<Card title="Enhance with AI" icon="arrow-right" href="/quickstart/python/enhance">
+  Use AI to generate descriptions, translate content, and enrich your data.
+</Card>

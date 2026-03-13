@@ -1,0 +1,60 @@
+---
+title: 'List columns'
+api: 'GET /v1/tables/{table_id}/columns'
+description: 'Retrieve the column definitions for a table.'
+---
+
+## Path parameters
+
+<ParamField path="table_id" type="string" required>
+  The unique identifier of the table.
+</ParamField>
+
+## Response
+
+<ResponseField name="data" type="array">
+  <Expandable title="Column object">
+    <ResponseField name="key" type="string">Machine-readable column key (snake_case).</ResponseField>
+    <ResponseField name="label" type="string">Human-readable column label.</ResponseField>
+    <ResponseField name="type" type="string">
+      Column data type. One of: `text`, `number`, `url`, `email`, `date`, `boolean`, `richtext`, `enum`, `tags`, `image`, `images`, `json`.
+    </ResponseField>
+    <ResponseField name="required" type="boolean">Whether the column is required.</ResponseField>
+    <ResponseField name="description" type="string">Optional description of the column.</ResponseField>
+    <ResponseField name="enum_values" type="string[]">Allowed values for `enum` type columns.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const columns = await client.tables.columns("tbl_abc123");
+
+for (const col of columns.data) {
+  console.log(`${col.key} (${col.type}): ${col.label}`);
+}
+```
+
+```python Python
+columns = client.tables.columns("tbl_abc123")
+
+for col in columns["data"]:
+    print(f"{col['key']} ({col['type']}): {col['label']}")
+```
+
+```bash cURL
+curl -X GET "https://api.lasso.ai/v1/tables/tbl_abc123/columns" \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "data": [
+    { "key": "product_name", "label": "Product Name", "type": "text", "required": true },
+    { "key": "price", "label": "Price", "type": "number" },
+    { "key": "image_url", "label": "Image", "type": "image" }
+  ]
+}
+```
+</ResponseExample>

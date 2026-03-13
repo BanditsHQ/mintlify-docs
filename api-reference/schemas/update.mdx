@@ -1,0 +1,98 @@
+---
+title: 'Update schema'
+api: "PUT /v1/schemas/{schema_id}"
+description: 'Update the name, description, or column definitions of a schema.'
+---
+
+## Path parameters
+
+<ParamField path="schema_id" type="string" required>
+  The unique identifier of the schema.
+</ParamField>
+
+## Request body
+
+All fields are optional. Only provided fields are updated.
+
+<ParamField body="name" type="string">
+  New name for the schema.
+</ParamField>
+
+<ParamField body="description" type="string">
+  New description.
+</ParamField>
+
+<ParamField body="is_default" type="boolean">
+  Whether this should be the default schema.
+</ParamField>
+
+<ParamField body="columns" type="array">
+  Updated column definitions. Replaces the entire column list. Must be a non-empty array with valid column objects.
+</ParamField>
+
+## Response
+
+Returns the full updated schema object (same shape as [Get schema](/api-reference/schemas/get)).
+
+<RequestExample>
+```typescript TypeScript
+const updated = await client.schemas.update("schema_abc123", {
+  name: "Updated Electronics Schema",
+  columns: [
+    { key: "product_name", label: "Product Name", type: "text", required: true },
+    { key: "price", label: "Price (USD)", type: "number" },
+    { key: "brand", label: "Brand", type: "text" },
+    { key: "weight_kg", label: "Weight (kg)", type: "number" },
+  ],
+});
+```
+
+```python Python
+updated = client.schemas.update(
+    "schema_abc123",
+    name="Updated Electronics Schema",
+    columns=[
+        {"key": "product_name", "label": "Product Name", "type": "text", "required": True},
+        {"key": "price", "label": "Price (USD)", "type": "number"},
+        {"key": "brand", "label": "Brand", "type": "text"},
+        {"key": "weight_kg", "label": "Weight (kg)", "type": "number"},
+    ],
+)
+```
+
+```bash cURL
+curl -X PUT "https://api.lasso.ai/v1/schemas/schema_abc123" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated Electronics Schema",
+    "columns": [
+      {"key": "product_name", "label": "Product Name", "type": "text", "required": true},
+      {"key": "price", "label": "Price (USD)", "type": "number"},
+      {"key": "brand", "label": "Brand", "type": "text"},
+      {"key": "weight_kg", "label": "Weight (kg)", "type": "number"}
+    ]
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "id": "schema_abc123",
+  "name": "Electronics Catalog",
+  "description": "Schema for consumer electronics",
+  "is_default": false,
+  "columns": [
+    { "key": "product_name", "label": "Product Name", "type": "text", "required": true },
+    { "key": "price", "label": "Price", "type": "number" }
+  ],
+  "created_at": "2025-03-01T10:00:00.000Z",
+  "updated_at": "2025-03-01T10:00:00.000Z"
+}
+```
+</ResponseExample>
+
+<Warning>
+  Updating columns replaces the entire column definition. Include all columns you want to keep, not just the changes.
+</Warning>

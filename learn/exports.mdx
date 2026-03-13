@@ -1,0 +1,77 @@
+---
+title: 'Exporting data'
+description: 'Export your extracted and enhanced data in multiple formats.'
+---
+
+Once your table is complete, you can export the data in several formats.
+
+## Available formats
+
+| Format | Description | Use case |
+|---|---|---|
+| **JSON** | Array of row objects | Programmatic processing, API integrations |
+| **CSV** | Semicolon-delimited file | Spreadsheet import, data analysis |
+| **XLSX** | Excel spreadsheet | Business users, reporting |
+| **Images** | ZIP archive of all images | Asset management, media libraries |
+
+## Exporting via SDK
+
+<CodeGroup>
+```typescript TypeScript
+// JSON -- returns data directly
+const data = await client.export.json("tbl_abc123");
+
+// CSV -- returns raw CSV string
+const csv = await client.export.csv("tbl_abc123");
+
+// XLSX -- returns binary buffer
+const xlsx = await client.export.xlsx("tbl_abc123");
+
+// Images -- returns ZIP buffer
+const images = await client.export.images("tbl_abc123");
+```
+
+```python Python
+# JSON -- returns list of dicts
+data = client.export.json("tbl_abc123")
+
+# CSV -- returns raw CSV string
+csv = client.export.csv("tbl_abc123")
+
+# XLSX -- save directly to file
+client.export.xlsx("tbl_abc123", path="export.xlsx")
+
+# Images -- save ZIP to file
+client.export.images("tbl_abc123", path="images.zip")
+```
+</CodeGroup>
+
+## Selecting columns
+
+By default, all columns are exported. To export only specific columns, pass a comma-separated list of column keys:
+
+<CodeGroup>
+```typescript TypeScript
+const data = await client.export.json("tbl_abc123", {
+  columns: "product_name,price,image_url",
+});
+```
+
+```python Python
+data = client.export.json("tbl_abc123", columns="product_name,price,image_url")
+```
+</CodeGroup>
+
+## Pandas integration (Python)
+
+The Python SDK includes a helper to load all rows as a pandas DataFrame:
+
+```python
+df = client.tables.results_as_dataframe("tbl_abc123")
+
+# Filter, analyze, or export further
+expensive = df[df["price"] > 100]
+df.to_csv("products.csv", index=False)
+```
+
+This fetches all pages automatically and returns a ready-to-use DataFrame.

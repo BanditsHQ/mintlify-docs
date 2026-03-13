@@ -1,122 +1,205 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
-  "name": "Mint Starter Kit",
+  "theme": "maple",
+  "name": "Lasso",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#1B1F1F",
+    "light": "#1B1F1F",
+    "dark": "#1B1F1F"
   },
-  "favicon": "/favicon.svg",
+  "background": {
+    "color": {
+      "light": "#F1F3F3",
+      "dark": "#1B1F1F"
+    }
+  },
+  "favicon": "/favicon.png",
+  "fonts": {
+    "heading": {
+      "family": "Mona Sans",
+      "weight": 600,
+      "source": "https://cdn.jsdelivr.net/fontsource/fonts/mona-sans:vf@latest/latin-wght-normal.woff2",
+      "format": "woff2"
+    },
+    "body": {
+      "family": "Inter",
+      "weight": 400
+    }
+  },
+  "api": {
+    "baseUrl": "https://api.lasso.ai/v1",
+    "auth": {
+      "method": "bearer"
+    }
+  },
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Documentation",
+        "icon": "book",
         "groups": [
           {
             "group": "Getting started",
             "pages": [
-              "index",
-              "quickstart",
-              "development"
+              "quickstart/introduction"
             ]
           },
           {
-            "group": "Customization",
+            "group": "TypeScript",
+            "icon": "js",
             "pages": [
-              "essentials/settings",
-              "essentials/navigation"
+              "quickstart/typescript/setup",
+              "quickstart/typescript/extract",
+              "quickstart/typescript/enhance",
+              "quickstart/typescript/export"
             ]
           },
           {
-            "group": "Writing content",
+            "group": "Python",
+            "icon": "python",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
+              "quickstart/python/setup",
+              "quickstart/python/extract",
+              "quickstart/python/enhance",
+              "quickstart/python/export"
             ]
           },
           {
-            "group": "AI tools",
+            "group": "Learn",
             "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
+              "learn/tables",
+              "learn/schemas",
+              "learn/enhancement",
+              "learn/files",
+              "learn/exports",
+              "learn/glossary",
+              "learn/credits"
             ]
           }
         ]
       },
       {
-        "tab": "API reference",
+        "tab": "API Reference",
+        "icon": "rectangle-terminal",
         "groups": [
           {
-            "group": "API documentation",
+            "group": "Overview",
             "pages": [
-              "api-reference/introduction"
+              "api-reference/introduction",
+              "api-reference/authentication",
+              "api-reference/errors",
+              "api-reference/pagination",
+              "api-reference/webhooks"
             ]
           },
           {
-            "group": "Endpoint examples",
+            "group": "Tables",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "api-reference/tables/list",
+              "api-reference/tables/create",
+              "api-reference/tables/get",
+              "api-reference/tables/update",
+              "api-reference/tables/delete",
+              "api-reference/tables/columns",
+              "api-reference/tables/export"
+            ]
+          },
+          {
+            "group": "Rows",
+            "pages": [
+              "api-reference/rows/list",
+              "api-reference/rows/get",
+              "api-reference/rows/update",
+              "api-reference/rows/delete",
+              "api-reference/rows/bulk-update",
+              "api-reference/rows/bulk-delete",
+              "api-reference/rows/traces"
+            ]
+          },
+          {
+            "group": "Enhance",
+            "pages": [
+              "api-reference/enhance/run",
+              "api-reference/enhance/bulk",
+              "api-reference/enhance/status",
+              "api-reference/enhance/cancel"
+            ]
+          },
+          {
+            "group": "Schemas",
+            "pages": [
+              "api-reference/schemas/list",
+              "api-reference/schemas/create",
+              "api-reference/schemas/get",
+              "api-reference/schemas/update",
+              "api-reference/schemas/delete",
+              "api-reference/schemas/generate"
+            ]
+          },
+          {
+            "group": "Files",
+            "pages": [
+              "api-reference/files/list",
+              "api-reference/files/upload",
+              "api-reference/files/delete"
+            ]
+          },
+          {
+            "group": "Glossary",
+            "pages": [
+              "api-reference/glossary/list",
+              "api-reference/glossary/create",
+              "api-reference/glossary/update",
+              "api-reference/glossary/delete"
+            ]
+          },
+          {
+            "group": "Credits",
+            "pages": [
+              "api-reference/credits/balance",
+              "api-reference/credits/usage"
             ]
           }
         ]
       }
     ],
     "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
     }
   },
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "light": "/logo/dark.png",
+    "dark": "/logo/light.png"
   },
   "navbar": {
     "links": [
       {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "label": "Sign In",
+        "href": "https://app.lasso.ai/login"
       }
     ],
     "primary": {
       "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
+      "label": "Get Started",
+      "href": "https://app.lasso.ai/register"
     }
   },
   "contextual": {
     "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "perplexity",
+      "mcp",
+      "cursor",
+      "vscode"
+    ]
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "x": "https://x.com/lasso_ai",
+      "github": "https://github.com/lasso-ai",
+      "linkedin": "https://linkedin.com/company/lasso-ai"
     }
   }
 }

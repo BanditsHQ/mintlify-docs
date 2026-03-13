@@ -1,0 +1,75 @@
+---
+title: 'AI enhancement'
+description: 'Enrich your extracted data with AI-generated content, translations, and web research.'
+---
+
+Enhancement lets you use AI to fill in, improve, or transform column values after extraction. This is useful for generating descriptions, translating content, or enriching data with web-sourced information.
+
+## How enhancement works
+
+1. **Select rows and a column** -- Choose which rows to enhance and which column to fill.
+2. **Write a prompt** -- Describe what the AI should generate, using context from other columns.
+3. **AI processes each row** -- The model reads the row's existing data and generates a value.
+4. **Results are written back** -- Enhanced values replace or fill the target column.
+
+## Enhancement types
+
+### Content generation
+
+Generate new content based on existing data:
+
+```
+"Write a compelling product description based on the product name and specifications."
+```
+
+### Translation
+
+Translate content to another language, optionally using your glossary:
+
+```
+"Translate the description to German."
+```
+
+Set `target_language` and `use_glossary: true` to apply your glossary terms during translation.
+
+### Web research
+
+Enable `web_search: true` to let the AI search the web for additional information:
+
+```
+"Find the current retail price for this product from major retailers."
+```
+
+## Single column vs bulk
+
+- **Single column** -- Enhance one column across multiple rows. Use [`POST /v1/tables/{id}/enhance`](/api-reference/enhance/run).
+- **Bulk** -- Enhance multiple columns of a single row at once. Use [`POST /v1/tables/{id}/enhance/bulk`](/api-reference/enhance/bulk).
+
+## Tracking progress
+
+Enhancement runs asynchronously. Check progress with:
+
+<CodeGroup>
+```typescript TypeScript
+const status = await client.enhance.status("tbl_abc123");
+
+for (const [column, stats] of Object.entries(status.columns)) {
+  console.log(`${column}: ${stats.completed}/${stats.total} done`);
+}
+```
+
+```python Python
+status = client.enhance.status("tbl_abc123")
+
+for column, stats in status["columns"].items():
+    print(f"{column}: {stats['completed']}/{stats['total']} done")
+```
+</CodeGroup>
+
+## Credits
+
+Each enhancement consumes credits. The estimated cost is returned when you start an enhancement job. Check your balance at any time via the [Credits API](/api-reference/credits/balance).
+
+## Traces
+
+Every AI-generated value has a trace showing the prompt, model used, confidence score, and sources. See [Row traces](/api-reference/rows/traces) for details.

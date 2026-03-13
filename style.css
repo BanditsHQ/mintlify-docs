@@ -1,0 +1,21 @@
+/* Taller top navigation bar */
+.lg\:flex.fixed.top-0.left-\[19rem\] {
+  height: 64px !important;
+}
+
+/* Hide the active tab underline bar */
+.nav-tabs-item .absolute.bottom-0 {
+  display: none !important;
+}
+
+/* Make tab text slightly bigger, remove text-shadow trick */
+.nav-tabs-item {
+  text-shadow: none !important;
+  font-size: 0.875rem !important;
+}
+
+/* Active tab: semibold instead of underline */
+.nav-tabs-item.text-gray-800,
+.nav-tabs-item.dark\:text-gray-200 {
+  font-weight: 600 !important;
+}

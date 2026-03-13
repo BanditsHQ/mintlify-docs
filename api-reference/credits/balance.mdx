@@ -1,0 +1,40 @@
+---
+title: 'Get credit balance'
+api: "GET /v1/credits/balance"
+description: 'Check your current credit balance.'
+---
+
+## Response
+
+<ResponseField name="balance" type="number">Your current credit balance.</ResponseField>
+<ResponseField name="currency" type="string">Always `credits`.</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const balance = await client.credits.balance();
+
+console.log(balance.balance);  // 4250
+console.log(balance.currency); // "credits"
+```
+
+```python Python
+balance = client.credits.balance()
+
+print(balance["balance"])   # 4250
+print(balance["currency"])  # "credits"
+```
+
+```bash cURL
+curl -X GET "https://api.lasso.ai/v1/credits/balance" \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "balance": 4250,
+  "currency": "credits"
+}
+```
+</ResponseExample>

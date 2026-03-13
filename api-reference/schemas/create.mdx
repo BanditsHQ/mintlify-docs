@@ -1,0 +1,131 @@
+---
+title: 'Create schema'
+api: "POST /v1/schemas"
+description: 'Create a new product schema with column definitions.'
+---
+
+## Request body
+
+<ParamField body="name" type="string" required>
+  A name for the schema.
+</ParamField>
+
+<ParamField body="description" type="string">
+  A description of what this schema is used for.
+</ParamField>
+
+<ParamField body="is_default" type="boolean" default="false">
+  Whether this should be the default schema.
+</ParamField>
+
+<ParamField body="columns" type="array" required>
+  Array of column definitions. Must be non-empty.
+  <Expandable title="Column object">
+    <ParamField body="key" type="string" required>Machine-readable key (snake_case).</ParamField>
+    <ParamField body="label" type="string" required>Human-readable label.</ParamField>
+    <ParamField body="type" type="string" required>
+      Column type. One of: `text`, `number`, `url`, `email`, `date`, `boolean`, `richtext`, `enum`, `tags`, `image`, `images`, `json`.
+    </ParamField>
+    <ParamField body="required" type="boolean">Whether this column is required.</ParamField>
+    <ParamField body="description" type="string">Description of the column.</ParamField>
+    <ParamField body="enum_values" type="string[]">Allowed values for `enum` type columns.</ParamField>
+  </Expandable>
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">Unique schema identifier.</ResponseField>
+<ResponseField name="name" type="string">Schema name.</ResponseField>
+<ResponseField name="description" type="string | null">Schema description.</ResponseField>
+<ResponseField name="is_default" type="boolean">Whether this is the default schema.</ResponseField>
+<ResponseField name="columns" type="array">The column definitions.</ResponseField>
+<ResponseField name="created_at" type="string">ISO 8601 timestamp.</ResponseField>
+<ResponseField name="updated_at" type="string">ISO 8601 timestamp.</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const schema = await client.schemas.create({
+  name: "Electronics Catalog",
+  description: "Schema for consumer electronics",
+  columns: [
+    { key: "product_name", label: "Product Name", type: "text", required: true },
+    { key: "price", label: "Price", type: "number" },
+    { key: "brand", label: "Brand", type: "text" },
+    { key: "category", label: "Category", type: "enum", enum_values: ["phones", "laptops", "tablets"] },
+    { key: "image_url", label: "Image", type: "image" },
+    { key: "specs", label: "Specifications", type: "json" },
+  ],
+});
+
+console.log(schema.id);
+```
+
+```python Python
+schema = client.schemas.create(
+    name="Electronics Catalog",
+    description="Schema for consumer electronics",
+    columns=[
+        {"key": "product_name", "label": "Product Name", "type": "text", "required": True},
+        {"key": "price", "label": "Price", "type": "number"},
+        {"key": "brand", "label": "Brand", "type": "text"},
+        {"key": "category", "label": "Category", "type": "enum", "enum_values": ["phones", "laptops", "tablets"]},
+        {"key": "image_url", "label": "Image", "type": "image"},
+        {"key": "specs", "label": "Specifications", "type": "json"},
+    ],
+)
+
+print(schema["id"])
+```
+
+```bash cURL
+curl -X POST "https://api.lasso.ai/v1/schemas" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Electronics Catalog",
+    "description": "Schema for consumer electronics",
+    "columns": [
+      {"key": "product_name", "label": "Product Name", "type": "text", "required": true},
+      {"key": "price", "label": "Price", "type": "number"},
+      {"key": "brand", "label": "Brand", "type": "text"},
+      {"key": "category", "label": "Category", "type": "enum", "enum_values": ["phones", "laptops", "tablets"]},
+      {"key": "image_url", "label": "Image", "type": "image"},
+      {"key": "specs", "label": "Specifications", "type": "json"}
+    ]
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "id": "schema_abc123",
+  "name": "Electronics Catalog",
+  "description": "Schema for consumer electronics",
+  "is_default": false,
+  "columns": [
+    { "key": "product_name", "label": "Product Name", "type": "text", "required": true },
+    { "key": "price", "label": "Price", "type": "number" }
+  ],
+  "created_at": "2025-03-01T10:00:00.000Z",
+  "updated_at": "2025-03-01T10:00:00.000Z"
+}
+```
+</ResponseExample>
+
+## Column types
+
+| Type | Description |
+|---|---|
+| `text` | Plain text string. |
+| `number` | Numeric value (integer or float). |
+| `url` | A valid URL. |
+| `email` | An email address. |
+| `date` | A date or datetime string. |
+| `boolean` | `true` or `false`. |
+| `richtext` | HTML or markdown formatted text. |
+| `enum` | One of a predefined set of values (see `enum_values`). |
+| `tags` | Array of string tags. |
+| `image` | A single image URL. |
+| `images` | Array of image URLs. |
+| `json` | Arbitrary JSON object. |

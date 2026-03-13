@@ -1,0 +1,60 @@
+---
+title: 'Credits & billing'
+description: 'Understand how credits work and track your usage.'
+---
+
+Lasso uses a credit-based system for extraction and enhancement operations.
+
+## What consumes credits
+
+| Operation | Credit cost |
+|---|---|
+| **Table extraction** | Varies by file size and complexity |
+| **Single cell enhancement** | ~2 credits per cell |
+| **Bulk enhancement** | ~0.5 credits per column |
+
+Credit estimates are returned when you create an enhancement job, so you know the cost before processing begins.
+
+## Checking your balance
+
+<CodeGroup>
+```typescript TypeScript
+const balance = await client.credits.balance();
+console.log(`${balance.balance} credits remaining`);
+```
+
+```python Python
+balance = client.credits.balance()
+print(f"{balance['balance']} credits remaining")
+```
+</CodeGroup>
+
+## Tracking usage
+
+View your credit transaction history with optional filters:
+
+<CodeGroup>
+```typescript TypeScript
+const usage = await client.credits.usage({
+  from: "2025-01-01T00:00:00Z",
+  to: "2025-03-31T23:59:59Z",
+  service: "enhancement",
+});
+
+console.log(`Total used: ${usage.total_used} credits`);
+```
+
+```python Python
+usage = client.credits.usage(
+    from_="2025-01-01T00:00:00Z",
+    to="2025-03-31T23:59:59Z",
+    service="enhancement",
+)
+
+print(f"Total used: {usage['total_used']} credits")
+```
+</CodeGroup>
+
+## Insufficient credits
+
+If you do not have enough credits for an operation, the API returns a `402` error with `error_type: "insufficient_credits"`. Check your balance before starting large enhancement jobs.

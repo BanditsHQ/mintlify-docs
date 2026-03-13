@@ -1,0 +1,65 @@
+---
+title: 'File uploads'
+description: 'Upload source files for data extraction.'
+---
+
+Lasso accepts a variety of file formats as source data for extraction. Upload files first, then reference them by ID when creating a table.
+
+## Supported formats
+
+| Format | Extensions | Notes |
+|---|---|---|
+| PDF | `.pdf` | Scanned and text-based PDFs are both supported. |
+| Spreadsheets | `.xlsx`, `.xls`, `.csv` | Each sheet or file is parsed for product data. |
+| Images | `.jpg`, `.png`, `.webp` | OCR extracts text from images. |
+| Documents | `.docx`, `.doc` | Word documents are parsed for content. |
+
+## Upload flow
+
+<Steps>
+  <Step title="Upload the file">
+    Send the file as `multipart/form-data` to `POST /v1/files`. Maximum size is 1 GB.
+  </Step>
+  <Step title="Get the file ID">
+    The response includes an `id` field. Store this for the next step.
+  </Step>
+  <Step title="Create a table">
+    Pass the file ID in the `file_ids` array when creating a table.
+  </Step>
+</Steps>
+
+## Example
+
+<CodeGroup>
+```typescript TypeScript
+const file = new File([buffer], "catalog.pdf", { type: "application/pdf" });
+const uploaded = await client.files.upload(file, "catalog.pdf");
+
+const table = await client.tables.create({
+  schema_id: "schema_abc",
+  name: "My Catalog",
+  file_ids: [uploaded.id],
+});
+```
+
+```python Python
+uploaded = client.files.upload("/path/to/catalog.pdf")
+
+table = client.tables.create(
+    schema_id="schema_abc",
+    name="My Catalog",
+    file_ids=[uploaded["id"]],
+)
+```
+</CodeGroup>
+
+## Alternative sources
+
+If you do not want to upload files, you can also provide:
+
+- **URLs** -- Pass `file_urls` with publicly accessible URLs. Lasso downloads and processes them server-side.
+- **Text** -- Pass `source_text` with raw text content for extraction.
+
+## Managing files
+
+Files can be listed and deleted through the [Files API](/api-reference/files/list). Deleting a file does not affect tables that were already created from it.

@@ -1,0 +1,74 @@
+---
+title: 'List files'
+api: "GET /v1/files"
+description: 'Retrieve a paginated list of your uploaded files.'
+---
+
+## Query parameters
+
+<ParamField query="page" type="integer" default="1">
+  Page number for pagination.
+</ParamField>
+
+<ParamField query="limit" type="integer" default="25">
+  Number of items per page (max 100).
+</ParamField>
+
+## Response
+
+<ResponseField name="data" type="array">
+  <Expandable title="File object">
+    <ResponseField name="id" type="string">Unique file identifier.</ResponseField>
+    <ResponseField name="filename" type="string">Original file name.</ResponseField>
+    <ResponseField name="size" type="integer">File size in bytes.</ResponseField>
+    <ResponseField name="content_type" type="string">MIME type of the file.</ResponseField>
+    <ResponseField name="created_at" type="string">ISO 8601 timestamp.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  <Expandable title="Pagination metadata">
+    <ResponseField name="page" type="integer">Current page.</ResponseField>
+    <ResponseField name="limit" type="integer">Items per page.</ResponseField>
+    <ResponseField name="total" type="integer">Total number of files.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const result = await client.files.list({ page: 1, limit: 10 });
+
+for (const file of result.data) {
+  console.log(`${file.filename} (${file.size} bytes)`);
+}
+```
+
+```python Python
+result = client.files.list(page=1, limit=10)
+
+for file in result["data"]:
+    print(f"{file['filename']} ({file['size']} bytes)")
+```
+
+```bash cURL
+curl -X GET "https://api.lasso.ai/v1/files?page=1&limit=10" \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "data": [
+    {
+      "id": "file_abc123",
+      "filename": "catalog.pdf",
+      "size": 1048576,
+      "content_type": "application/pdf",
+      "created_at": "2025-03-10T14:30:00.000Z"
+    }
+  ],
+  "pagination": { "page": 1, "limit": 10, "total": 5 }
+}
+```
+</ResponseExample>

@@ -1,0 +1,96 @@
+---
+title: 'Update glossary term'
+api: "PUT /v1/glossary/{term_id}"
+description: 'Update an existing glossary term and its translations.'
+---
+
+## Path parameters
+
+<ParamField path="term_id" type="string" required>
+  The unique identifier of the glossary term.
+</ParamField>
+
+## Request body
+
+All fields are optional. Only provided fields are updated.
+
+<ParamField body="term" type="string">
+  Updated original term.
+</ParamField>
+
+<ParamField body="type" type="string">
+  Updated type: `do_not_translate`, `specific_translation`, or `context_dependent`.
+</ParamField>
+
+<ParamField body="case_sensitive" type="boolean">
+  Updated case sensitivity.
+</ParamField>
+
+<ParamField body="category" type="string">
+  Updated category.
+</ParamField>
+
+<ParamField body="translations" type="object">
+  Updated translation map. Replaces all existing translations.
+</ParamField>
+
+## Response
+
+Returns the full updated glossary term object (same shape as the object in [List glossary terms](/api-reference/glossary/list)).
+
+<RequestExample>
+```typescript TypeScript
+const updated = await client.glossary.update("term_abc123", {
+  type: "specific_translation",
+  translations: {
+    de: "Datenextraktion",
+    fr: "extraction de données",
+  },
+});
+```
+
+```python Python
+updated = client.glossary.update(
+    "term_abc123",
+    type="specific_translation",
+    translations={
+        "de": "Datenextraktion",
+        "fr": "extraction de données",
+    },
+)
+```
+
+```bash cURL
+curl -X PUT "https://api.lasso.ai/v1/glossary/term_abc123" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "specific_translation",
+    "translations": {
+      "de": "Datenextraktion",
+      "fr": "extraction de données"
+    }
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "id": "term_abc123",
+  "term": "data extraction",
+  "type": "specific_translation",
+  "case_sensitive": false,
+  "category": "custom",
+  "translations": {
+    "de": "Datenextraktion",
+    "fr": "extraction de données"
+  },
+  "created_at": "2025-03-01T10:00:00.000Z"
+}
+```
+</ResponseExample>
+
+<Warning>
+  Updating `translations` replaces all existing translations. Include all language pairs you want to keep.
+</Warning>

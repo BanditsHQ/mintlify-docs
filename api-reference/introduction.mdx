@@ -1,33 +1,96 @@
 ---
 title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+description: 'Understand general concepts, response codes, and authentication strategies.'
 ---
 
-<Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
-</Note>
+The Lasso API is built on REST principles. All requests use HTTPS and return JSON responses.
 
-## Welcome
+## Base URL
 
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
+All requests contain the following base URL:
 
-<Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
->
-  View the OpenAPI specification file
-</Card>
+```
+https://api.lasso.ai/v1
+```
 
 ## Authentication
 
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
+To authenticate you need to add an `Authorization` header with the contents of the header being `Bearer lasso_xxxxxxxxx` where `lasso_xxxxxxxxx` is your [API Key](https://app.lasso.ai).
+
+```
+Authorization: Bearer lasso_xxxxxxxxx
+```
+
+API keys are scoped to a single company. All resources accessed through a key belong to that company. See the [Authentication](/api-reference/authentication) page for more details on key management and security best practices.
+
+## SDKs
+
+Official SDKs are available for TypeScript and Python.
+
+<CodeGroup>
+```bash npm
+npm install @lasso-ai/sdk
+```
+
+```bash pip
+pip install lasso-ai
+```
+</CodeGroup>
+
+<CodeGroup>
+```typescript TypeScript
+import LassoClient from "@lasso-ai/sdk";
+
+const client = new LassoClient({ apiKey: "lasso_..." });
+```
+
+```python Python
+from lasso import LassoClient
+
+client = LassoClient(api_key="lasso_...")
+```
+</CodeGroup>
+
+## Response codes
+
+Lasso uses standard HTTP codes to indicate the success or failure of your requests.
+
+| Status | Type | Description |
+|---|---|---|
+| `200` | Success | Successful request. |
+| `201` | Created | Resource successfully created. |
+| `204` | No Content | Successful deletion. |
+| `400` | `invalid_request` | The request is malformed or uses an unsupported HTTP method. |
+| `401` | `unauthenticated` | Missing, invalid, or deactivated API key. |
+| `402` | `insufficient_credits` | Your account does not have enough credits. |
+| `403` | `forbidden` | The API key does not have permission for this action. |
+| `404` | `not_found` | The resource does not exist or does not belong to your company. |
+| `409` | `conflict` | The request conflicts with the current state of the resource. |
+| `422` | `validation_error` | Missing required fields or invalid values. |
+| `429` | `rate_limited` | Too many requests. Back off and retry. |
+| `500` | `internal_error` | An unexpected error on the server. |
+
+See [Errors](/api-reference/errors) for the full error response format.
+
+## Pagination
+
+List endpoints support page-based pagination with `page` and `limit` query parameters. The default page size is 25 and the maximum is 100.
 
 ```json
-"security": [
-  {
-    "bearerAuth": []
+{
+  "data": [...],
+  "pagination": {
+    "page": 1,
+    "limit": 25,
+    "total": 143
   }
-]
+}
 ```
+
+See [Pagination](/api-reference/pagination) for details and iteration examples.
+
+## Webhooks
+
+Configure a `webhook_url` when creating a table to receive HTTP POST notifications when processing completes. Webhook payloads are signed with HMAC-SHA256 and retried up to 3 times with exponential backoff.
+
+See [Webhooks](/api-reference/webhooks) for delivery format, signature verification, and retry policy.

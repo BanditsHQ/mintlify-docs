@@ -1,0 +1,129 @@
+---
+title: 'Create glossary term'
+api: "POST /v1/glossary"
+description: 'Add a new term to your glossary.'
+---
+
+Glossary terms control how specific words or phrases are handled during AI enhancement and translation.
+
+## Request body
+
+<ParamField body="term" type="string" required>
+  The original term to add.
+</ParamField>
+
+<ParamField body="type" type="string" required>
+  How to handle this term. One of:
+  - `do_not_translate` -- Keep the term as-is in all languages.
+  - `specific_translation` -- Use the provided translations.
+  - `context_dependent` -- Let the AI decide based on context.
+</ParamField>
+
+<ParamField body="case_sensitive" type="boolean" default="false">
+  Whether matching should be case-sensitive.
+</ParamField>
+
+<ParamField body="category" type="string" default="custom">
+  A category for organizing terms.
+</ParamField>
+
+<ParamField body="translations" type="object">
+  Map of language codes to translated terms. Required when `type` is `specific_translation`.
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">Unique term identifier.</ResponseField>
+<ResponseField name="term" type="string">The original term.</ResponseField>
+<ResponseField name="type" type="string">Term type.</ResponseField>
+<ResponseField name="case_sensitive" type="boolean">Case sensitivity setting.</ResponseField>
+<ResponseField name="category" type="string">Term category.</ResponseField>
+<ResponseField name="translations" type="object">Translation map.</ResponseField>
+<ResponseField name="created_at" type="string">ISO 8601 timestamp.</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+// Brand term -- do not translate
+await client.glossary.create({
+  term: "Lasso AI",
+  type: "do_not_translate",
+  case_sensitive: true,
+  category: "brand",
+});
+
+// Term with specific translations
+await client.glossary.create({
+  term: "data extraction",
+  type: "specific_translation",
+  translations: {
+    de: "Datenextraktion",
+    fr: "extraction de données",
+    es: "extracción de datos",
+  },
+});
+```
+
+```python Python
+# Brand term -- do not translate
+client.glossary.create(
+    term="Lasso AI",
+    type="do_not_translate",
+    case_sensitive=True,
+    category="brand",
+)
+
+# Term with specific translations
+client.glossary.create(
+    term="data extraction",
+    type="specific_translation",
+    translations={
+        "de": "Datenextraktion",
+        "fr": "extraction de données",
+        "es": "extracción de datos",
+    },
+)
+```
+
+```bash cURL
+curl -X POST "https://api.lasso.ai/v1/glossary" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "term": "Lasso AI",
+    "type": "do_not_translate",
+    "case_sensitive": true,
+    "category": "brand"
+  }'
+
+# With specific translations
+curl -X POST "https://api.lasso.ai/v1/glossary" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "term": "data extraction",
+    "type": "specific_translation",
+    "translations": {
+      "de": "Datenextraktion",
+      "fr": "extraction de données",
+      "es": "extracción de datos"
+    }
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "id": "term_abc123",
+  "term": "data extraction",
+  "type": "specific_translation",
+  "case_sensitive": false,
+  "category": "custom",
+  "translations": {
+    "de": "Datenextraktion",
+    "fr": "extraction de données"
+  },
+  "created_at": "2025-03-01T10:00:00.000Z"
+}
+```
+</ResponseExample>

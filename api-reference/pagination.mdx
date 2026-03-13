@@ -1,0 +1,92 @@
+---
+title: 'Pagination'
+description: 'Navigate through large result sets with page-based pagination.'
+---
+
+All list endpoints return paginated results. You control pagination with `page` and `limit` query parameters.
+
+## Parameters
+
+<ParamField query="page" type="integer" default="1">
+  The page number to retrieve. Must be 1 or greater.
+</ParamField>
+
+<ParamField query="limit" type="integer" default="25">
+  The number of items per page. Minimum 1, maximum 100.
+</ParamField>
+
+## Response format
+
+Every paginated response includes a `pagination` object alongside the `data` array.
+
+```json
+{
+  "data": [...],
+  "pagination": {
+    "page": 1,
+    "limit": 25,
+    "total": 143
+  }
+}
+```
+
+<ResponseField name="pagination" type="object">
+  <Expandable title="Properties">
+    <ResponseField name="page" type="integer">
+      The current page number.
+    </ResponseField>
+    <ResponseField name="limit" type="integer">
+      The number of items per page.
+    </ResponseField>
+    <ResponseField name="total" type="integer">
+      The total number of items across all pages.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Example
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://api.lasso.ai/v1/tables?page=2&limit=10" \
+  -H "Authorization: Bearer lasso_..."
+```
+
+```typescript TypeScript
+const result = await client.tables.list({ page: 2, limit: 10 });
+console.log(result.pagination.total); // 143
+```
+
+```python Python
+result = client.tables.list(page=2, limit=10)
+print(result["pagination"]["total"])  # 143
+```
+</CodeGroup>
+
+## Iterating through all pages
+
+<CodeGroup>
+```typescript TypeScript
+let page = 1;
+const allTables = [];
+
+while (true) {
+  const result = await client.tables.list({ page, limit: 100 });
+  allTables.push(...result.data);
+  if (page * 100 >= result.pagination.total) break;
+  page++;
+}
+```
+
+```python Python
+all_tables = []
+page = 1
+
+while True:
+    result = client.tables.list(page=page, limit=100)
+    all_tables.extend(result["data"])
+    if page * 100 >= result["pagination"]["total"]:
+        break
+    page += 1
+```
+</CodeGroup>

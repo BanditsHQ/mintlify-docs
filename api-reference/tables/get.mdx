@@ -1,0 +1,72 @@
+---
+title: 'Get table'
+api: 'GET /v1/tables/{table_id}'
+description: 'Retrieve details of a specific extraction table.'
+---
+
+## Path parameters
+
+<ParamField path="table_id" type="string" required>
+  The unique identifier of the table.
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">Unique table identifier.</ResponseField>
+<ResponseField name="name" type="string">Table name.</ResponseField>
+<ResponseField name="schema_id" type="string">Schema used for extraction.</ResponseField>
+<ResponseField name="status" type="string">`queued`, `processing`, `completed`, or `failed`.</ResponseField>
+<ResponseField name="progress" type="integer">Extraction progress (0-100).</ResponseField>
+<ResponseField name="total_rows" type="integer">Number of extracted rows.</ResponseField>
+<ResponseField name="source_type" type="string">`files` or `text`.</ResponseField>
+<ResponseField name="additional_context" type="string | null">Extraction context.</ResponseField>
+<ResponseField name="enhancement_context" type="string | null">Enhancement context.</ResponseField>
+<ResponseField name="error_message" type="string | null">Error message if processing failed.</ResponseField>
+<ResponseField name="files" type="array">Uploaded file metadata.</ResponseField>
+<ResponseField name="created_at" type="string">ISO 8601 timestamp.</ResponseField>
+<ResponseField name="updated_at" type="string">ISO 8601 timestamp.</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const table = await client.tables.get("tbl_abc123");
+
+console.log(table.name);
+console.log(table.status);
+console.log(table.total_rows);
+```
+
+```python Python
+table = client.tables.get("tbl_abc123")
+
+print(table["name"])
+print(table["status"])
+print(table["total_rows"])
+```
+
+```bash cURL
+curl -X GET "https://api.lasso.ai/v1/tables/tbl_abc123" \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "id": "tbl_abc123",
+  "name": "Q1 Product Catalog",
+  "schema_id": "schema_xyz789",
+  "status": "completed",
+  "progress": 100,
+  "total_rows": 42,
+  "source_type": "files",
+  "additional_context": null,
+  "enhancement_context": "Focus on technical specifications",
+  "error_message": null,
+  "files": [
+    { "name": "catalog.pdf", "path": "company_123/file_xyz/catalog.pdf", "size": 1048576 }
+  ],
+  "created_at": "2025-03-10T14:30:00.000Z",
+  "updated_at": "2025-03-10T15:45:00.000Z"
+}
+```
+</ResponseExample>

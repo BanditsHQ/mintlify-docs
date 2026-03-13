@@ -1,0 +1,100 @@
+---
+title: 'Enhance cells'
+description: 'Use AI to enhance or generate values for a specific column across selected rows.'
+api: "POST /v1/tables/{table_id}/enhance"
+---
+
+## Path parameters
+
+<ParamField path="table_id" type="string" required>
+  The unique identifier of the table.
+</ParamField>
+
+## Request body
+
+<ParamField body="row_ids" type="string[]" required>
+  Array of row IDs to enhance. Must be non-empty.
+</ParamField>
+
+<ParamField body="column_key" type="string" required>
+  The column key to enhance.
+</ParamField>
+
+<ParamField body="prompt" type="string" required>
+  Instructions for the AI describing what to generate or how to transform the data.
+</ParamField>
+
+<ParamField body="model" type="string" default="gemini-pro">
+  The AI model to use. Defaults to `gemini-pro`.
+</ParamField>
+
+<ParamField body="web_search" type="boolean" default="true">
+  Whether the AI can use web search to find additional information.
+</ParamField>
+
+<ParamField body="target_language" type="string">
+  Target language for translation-based enhancements.
+</ParamField>
+
+<ParamField body="use_glossary" type="boolean" default="false">
+  Whether to apply your glossary terms during enhancement.
+</ParamField>
+
+## Response
+
+Enhancement runs asynchronously. The response confirms the job was queued.
+
+<ResponseField name="id" type="string">Enhancement job identifier.</ResponseField>
+<ResponseField name="status" type="string">Always `queued`.</ResponseField>
+<ResponseField name="estimated_credits" type="number">Estimated credit cost.</ResponseField>
+<ResponseField name="rows_queued" type="integer">Number of rows queued for enhancement.</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const job = await client.enhance.cells("tbl_abc123", {
+  row_ids: ["row_1", "row_2", "row_3"],
+  column_key: "description",
+  prompt: "Write a compelling product description based on the product name and specifications.",
+  web_search: true,
+});
+
+console.log(job.id);                // "enhance_..."
+console.log(job.estimated_credits); // 6
+```
+
+```python Python
+job = client.enhance.cells(
+    "tbl_abc123",
+    row_ids=["row_1", "row_2", "row_3"],
+    column_key="description",
+    prompt="Write a compelling product description based on the product name and specifications.",
+    web_search=True,
+)
+
+print(job["id"])                 # "enhance_..."
+print(job["estimated_credits"])  # 6
+```
+
+```bash cURL
+curl -X POST "https://api.lasso.ai/v1/tables/tbl_abc123/enhance" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "row_ids": ["row_1", "row_2", "row_3"],
+    "column_key": "description",
+    "prompt": "Write a compelling product description based on the product name and specifications.",
+    "web_search": true
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "id": "enhance_abc123",
+  "status": "queued",
+  "estimated_credits": 6,
+  "rows_queued": 3
+}
+```
+</ResponseExample>

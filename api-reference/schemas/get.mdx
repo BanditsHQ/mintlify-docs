@@ -1,0 +1,70 @@
+---
+title: 'Get schema'
+api: "GET /v1/schemas/{schema_id}"
+description: 'Retrieve a specific schema with its full column definitions.'
+---
+
+## Path parameters
+
+<ParamField path="schema_id" type="string" required>
+  The unique identifier of the schema.
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">Unique schema identifier.</ResponseField>
+<ResponseField name="name" type="string">Schema name.</ResponseField>
+<ResponseField name="description" type="string | null">Schema description.</ResponseField>
+<ResponseField name="is_default" type="boolean">Whether this is the default schema.</ResponseField>
+<ResponseField name="columns" type="array">
+  <Expandable title="Column object">
+    <ResponseField name="key" type="string">Machine-readable column key.</ResponseField>
+    <ResponseField name="label" type="string">Human-readable label.</ResponseField>
+    <ResponseField name="type" type="string">Column data type.</ResponseField>
+    <ResponseField name="required" type="boolean">Whether the column is required.</ResponseField>
+    <ResponseField name="description" type="string">Column description.</ResponseField>
+  </Expandable>
+</ResponseField>
+<ResponseField name="created_at" type="string">ISO 8601 timestamp.</ResponseField>
+<ResponseField name="updated_at" type="string">ISO 8601 timestamp.</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const schema = await client.schemas.get("schema_abc123");
+
+console.log(schema.name);
+for (const col of schema.columns) {
+  console.log(`${col.key}: ${col.type}`);
+}
+```
+
+```python Python
+schema = client.schemas.get("schema_abc123")
+
+print(schema["name"])
+for col in schema["columns"]:
+    print(f"{col['key']}: {col['type']}")
+```
+
+```bash cURL
+curl -X GET "https://api.lasso.ai/v1/schemas/schema_abc123" \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "id": "schema_abc123",
+  "name": "Electronics Catalog",
+  "description": "Schema for consumer electronics",
+  "is_default": false,
+  "columns": [
+    { "key": "product_name", "label": "Product Name", "type": "text", "required": true },
+    { "key": "price", "label": "Price", "type": "number" }
+  ],
+  "created_at": "2025-03-01T10:00:00.000Z",
+  "updated_at": "2025-03-01T10:00:00.000Z"
+}
+```
+</ResponseExample>

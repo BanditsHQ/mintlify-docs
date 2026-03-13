@@ -1,0 +1,71 @@
+---
+title: 'Schemas'
+description: 'Define the structure of your extracted data with column definitions.'
+---
+
+A schema defines the columns that Lasso extracts from your source data. Think of it as a blueprint for your table.
+
+## Column definitions
+
+Each column has a key, label, and type:
+
+```json
+{
+  "key": "product_name",
+  "label": "Product Name",
+  "type": "text",
+  "required": true
+}
+```
+
+- **key** -- Machine-readable identifier (snake_case). Used to access data in rows.
+- **label** -- Human-readable name shown in exports and the dashboard.
+- **type** -- The data type Lasso should extract. See below.
+- **required** -- Whether this column must have a value for every row.
+
+## Column types
+
+| Type | Description | Example value |
+|---|---|---|
+| `text` | Plain text | `"iPhone 15 Pro"` |
+| `number` | Integer or decimal | `999.99` |
+| `url` | Valid URL | `"https://example.com"` |
+| `email` | Email address | `"info@example.com"` |
+| `date` | Date or datetime | `"2025-03-10"` |
+| `boolean` | True or false | `true` |
+| `richtext` | HTML or markdown | `"<p>Description</p>"` |
+| `enum` | One of predefined values | `"electronics"` |
+| `tags` | Array of strings | `["wireless", "bluetooth"]` |
+| `image` | Single image URL | `"https://cdn.example.com/img.jpg"` |
+| `images` | Array of image URLs | `["https://...1.jpg", "https://...2.jpg"]` |
+| `json` | Arbitrary JSON | `{"specs": {"weight": "187g"}}` |
+
+## Auto-generated schemas
+
+If you are not sure what columns to define, you can let the AI generate a schema from sample data:
+
+<CodeGroup>
+```typescript TypeScript
+const schema = await client.schemas.generate({
+  sample_data: "Product: iPhone 15 Pro, Price: $999, Color: Titanium",
+  name: "Smartphones",
+});
+
+console.log(schema.columns);
+```
+
+```python Python
+schema = client.schemas.generate(
+    sample_data="Product: iPhone 15 Pro, Price: $999, Color: Titanium",
+    name="Smartphones",
+)
+
+print(schema["columns"])
+```
+</CodeGroup>
+
+The AI analyzes your sample and infers appropriate column keys, labels, and types.
+
+## Reusing schemas
+
+Schemas are reusable across multiple tables. Create a schema once, then reference it by ID when creating new tables. You can update a schema at any time -- existing tables retain their original column definitions.

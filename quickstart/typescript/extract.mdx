@@ -1,0 +1,89 @@
+---
+title: 'Extract data'
+description: 'Create a schema, upload a file, and extract structured product data.'
+---
+
+## 1. Create a schema
+
+A schema defines the columns you want to extract.
+
+```typescript
+const schema = await client.schemas.create({
+  name: "Product Catalog",
+  columns: [
+    { key: "product_name", label: "Product Name", type: "text", required: true },
+    { key: "price", label: "Price", type: "number" },
+    { key: "description", label: "Description", type: "text" },
+    { key: "image_url", label: "Image", type: "image" },
+  ],
+});
+
+console.log(schema.id);
+```
+
+<Tip>
+  You can also generate a schema automatically from sample data:
+
+```typescript
+const schema = await client.schemas.generate({
+  sample_data: "Product: iPhone 15 Pro, Price: $999, Storage: 128GB",
+  name: "Smartphones",
+});
+```
+</Tip>
+
+## 2. Upload a file
+
+Upload a PDF, spreadsheet, or image to extract data from.
+
+```typescript
+const file = new File([buffer], "catalog.pdf", { type: "application/pdf" });
+const uploaded = await client.files.upload(file, "catalog.pdf");
+
+console.log(uploaded.id); // "file_abc123"
+```
+
+## 3. Create a table
+
+Start the extraction by creating a table with your schema and uploaded file.
+
+```typescript
+const table = await client.tables.create({
+  schema_id: schema.id,
+  name: "Q1 Product Catalog",
+  file_ids: [uploaded.id],
+});
+
+console.log(table.id);     // "tbl_..."
+console.log(table.status); // "processing"
+```
+
+## 4. Wait for results
+
+The SDK includes a polling helper that waits for extraction to complete.
+
+```typescript
+const completed = await client.tables.waitForCompletion(table.id, {
+  intervalMs: 3000,
+  timeoutMs: 300000,
+});
+
+console.log(completed.status);     // "completed"
+console.log(completed.total_rows); // 42
+```
+
+## 5. Retrieve rows
+
+```typescript
+const rows = await client.tables.rows(completed.id, { limit: 100 });
+
+for (const row of rows.data) {
+  console.log(row.data.product_name, row.data.price);
+}
+```
+
+## Next
+
+<Card title="Enhance with AI" icon="arrow-right" href="/quickstart/typescript/enhance">
+  Use AI to generate descriptions, translate content, and enrich your data.
+</Card>

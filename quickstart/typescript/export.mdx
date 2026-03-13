@@ -1,0 +1,56 @@
+---
+title: 'Export data'
+description: 'Export your extracted and enhanced data in multiple formats.'
+---
+
+## Export as JSON
+
+```typescript
+const data = await client.export.json("tbl_abc123");
+console.log(data); // [{ product_name: "...", price: 29.99 }, ...]
+```
+
+## Export as CSV
+
+```typescript
+const csv = await client.export.csv("tbl_abc123");
+```
+
+## Export as XLSX
+
+```typescript
+const xlsx = await client.export.xlsx("tbl_abc123");
+```
+
+## Export images
+
+Download all images from image columns as a ZIP:
+
+```typescript
+const images = await client.export.images("tbl_abc123");
+```
+
+## Select specific columns
+
+```typescript
+const data = await client.export.json("tbl_abc123", {
+  columns: "product_name,price,image_url",
+});
+```
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="API Reference" icon="code" href="/api-reference/introduction">
+    Explore all available endpoints.
+  </Card>
+  <Card title="Webhooks" icon="bell" href="/api-reference/webhooks">
+    Get notified when extraction completes.
+  </Card>
+  <Card title="Learn: Schemas" icon="diagram-project" href="/learn/schemas">
+    Understand column types and schema design.
+  </Card>
+  <Card title="Learn: Enhancement" icon="wand-magic-sparkles" href="/learn/enhancement">
+    Deep dive into AI enhancement features.
+  </Card>
+</CardGroup>

@@ -1,0 +1,77 @@
+---
+title: 'Export table'
+api: 'GET /v1/tables/{table_id}/export'
+description: 'Export table data as CSV, XLSX, JSON, or a ZIP of images.'
+---
+
+## Path parameters
+
+<ParamField path="table_id" type="string" required>
+  The unique identifier of the table.
+</ParamField>
+
+## Query parameters
+
+<ParamField query="format" type="string" required>
+  Export format. One of: `csv`, `xlsx`, `json`, `images`.
+</ParamField>
+
+<ParamField query="columns" type="string">
+  Comma-separated list of column keys to include. Omit to export all columns.
+</ParamField>
+
+## Response
+
+The response depends on the chosen format:
+
+| Format | Content-Type | Description |
+|---|---|---|
+| `csv` | `text/csv` | Semicolon-delimited CSV file. |
+| `xlsx` | `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` | Excel spreadsheet. |
+| `json` | `application/json` | JSON array of row objects. |
+| `images` | `application/zip` | ZIP archive of all images from image columns, organized by row. |
+
+<RequestExample>
+```typescript TypeScript
+// Export as JSON
+const data = await client.export.json("tbl_abc123");
+console.log(data); // [{ name: "...", price: 29.99 }, ...]
+
+// Export specific columns as CSV
+const csv = await client.export.csv("tbl_abc123", {
+  columns: "name,price,url",
+});
+
+// Export as XLSX
+const xlsx = await client.export.xlsx("tbl_abc123");
+
+// Export images as ZIP
+const images = await client.export.images("tbl_abc123");
+```
+
+```python Python
+# Export as JSON
+data = client.export.json("tbl_abc123")
+print(data)  # [{"name": "...", "price": 29.99}, ...]
+
+# Export specific columns as CSV
+csv_data = client.export.csv("tbl_abc123", columns="name,price,url")
+
+# Export as XLSX and save to file
+client.export.xlsx("tbl_abc123", path="export.xlsx")
+
+# Export images and save to file
+client.export.images("tbl_abc123", path="images.zip")
+```
+
+```bash cURL
+# Export as JSON
+curl -X GET "https://api.lasso.ai/v1/tables/tbl_abc123/export?format=json" \
+  -H "Authorization: Bearer lasso_..."
+
+# Export specific columns as CSV
+curl -X GET "https://api.lasso.ai/v1/tables/tbl_abc123/export?format=csv&columns=name,price,url" \
+  -H "Authorization: Bearer lasso_..." \
+  -o export.csv
+```
+</RequestExample>

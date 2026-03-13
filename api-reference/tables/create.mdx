@@ -1,0 +1,144 @@
+---
+title: 'Create table'
+api: 'POST /v1/tables'
+description: 'Create a new extraction table and start processing.'
+---
+
+## Request body
+
+<ParamField body="schema_id" type="string" required>
+  The ID of the schema to use for extraction.
+</ParamField>
+
+<ParamField body="name" type="string" required>
+  A name for the table.
+</ParamField>
+
+<ParamField body="file_ids" type="string[]">
+  Array of file IDs (from the Files API) to extract data from. Provide exactly one of `file_ids`, `file_urls`, or `source_text`.
+</ParamField>
+
+<ParamField body="file_urls" type="string[]">
+  Array of publicly accessible URLs to extract data from.
+</ParamField>
+
+<ParamField body="source_text" type="string">
+  Raw text content to extract data from.
+</ParamField>
+
+<ParamField body="additional_context" type="string">
+  Extra context to guide the extraction process.
+</ParamField>
+
+<ParamField body="enhancement_context" type="string">
+  Context for AI enhancement of extracted data.
+</ParamField>
+
+<ParamField body="webhook_url" type="string">
+  URL to receive webhook notifications when processing completes.
+</ParamField>
+
+## Response
+
+Returns the created table object with status `processing`.
+
+<ResponseField name="id" type="string">Unique table identifier.</ResponseField>
+<ResponseField name="name" type="string">Table name.</ResponseField>
+<ResponseField name="schema_id" type="string">Schema used for extraction.</ResponseField>
+<ResponseField name="status" type="string">Always `processing` for a new table.</ResponseField>
+<ResponseField name="progress" type="integer">Extraction progress (0-100).</ResponseField>
+<ResponseField name="total_rows" type="integer">Number of rows extracted so far (0 initially).</ResponseField>
+<ResponseField name="source_type" type="string">`files` or `text`.</ResponseField>
+<ResponseField name="additional_context" type="string | null">Extraction context.</ResponseField>
+<ResponseField name="enhancement_context" type="string | null">Enhancement context.</ResponseField>
+<ResponseField name="error_message" type="string | null">Error message if processing failed.</ResponseField>
+<ResponseField name="files" type="array">Uploaded file metadata.</ResponseField>
+<ResponseField name="created_at" type="string">ISO 8601 timestamp.</ResponseField>
+<ResponseField name="updated_at" type="string">ISO 8601 timestamp.</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const table = await client.tables.create({
+  schema_id: "schema_abc123",
+  name: "Q1 Product Catalog",
+  file_ids: ["file_xyz789"],
+  webhook_url: "https://your-server.com/webhooks",
+});
+
+console.log(table.id);     // "tbl_..."
+console.log(table.status); // "processing"
+```
+
+```python Python
+table = client.tables.create(
+    schema_id="schema_abc123",
+    name="Q1 Product Catalog",
+    file_ids=["file_xyz789"],
+    webhook_url="https://your-server.com/webhooks",
+)
+
+print(table["id"])      # "tbl_..."
+print(table["status"])  # "processing"
+```
+
+```bash cURL
+curl -X POST "https://api.lasso.ai/v1/tables" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "schema_id": "schema_abc123",
+    "name": "Q1 Product Catalog",
+    "file_ids": ["file_xyz789"],
+    "webhook_url": "https://your-server.com/webhooks"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "id": "tbl_abc123",
+  "name": "Q1 Product Catalog",
+  "schema_id": "schema_xyz789",
+  "status": "processing",
+  "progress": 0,
+  "total_rows": 0,
+  "source_type": "files",
+  "additional_context": null,
+  "enhancement_context": null,
+  "error_message": null,
+  "files": [
+    { "name": "catalog.pdf", "path": "company_123/file_xyz/catalog.pdf", "size": 1048576 }
+  ],
+  "created_at": "2025-03-10T14:30:00.000Z",
+  "updated_at": "2025-03-10T14:30:00.000Z"
+}
+```
+</ResponseExample>
+
+## Waiting for completion
+
+Tables are processed asynchronously. Use the SDK's built-in polling helper or configure a webhook.
+
+<CodeGroup>
+```typescript TypeScript
+const completed = await client.tables.waitForCompletion(table.id, {
+  intervalMs: 3000,
+  timeoutMs: 300000,
+});
+
+console.log(completed.status);     // "completed"
+console.log(completed.total_rows); // 42
+```
+
+```python Python
+completed = client.tables.wait_for_completion(
+    table["id"],
+    interval_s=3,
+    timeout_s=300,
+)
+
+print(completed["status"])      # "completed"
+print(completed["total_rows"])  # 42
+```
+</CodeGroup>

@@ -1,0 +1,86 @@
+---
+title: 'Glossary & translation'
+description: 'Control how specific terms are handled during AI enhancement and translation.'
+---
+
+The glossary lets you define how specific terms should be treated when the AI enhances or translates your data. This ensures brand names, technical terms, and industry jargon are handled consistently.
+
+## Term types
+
+| Type | Behavior |
+|---|---|
+| `do_not_translate` | Keep the term exactly as-is in all languages. Ideal for brand names. |
+| `specific_translation` | Use your provided translations instead of AI-generated ones. |
+| `context_dependent` | Let the AI decide based on context. |
+
+## Example: brand terms
+
+Prevent "Lasso AI" from being translated:
+
+<CodeGroup>
+```typescript TypeScript
+await client.glossary.create({
+  term: "Lasso AI",
+  type: "do_not_translate",
+  case_sensitive: true,
+  category: "brand",
+});
+```
+
+```python Python
+client.glossary.create(
+    term="Lasso AI",
+    type="do_not_translate",
+    case_sensitive=True,
+    category="brand",
+)
+```
+</CodeGroup>
+
+## Example: specific translations
+
+Provide exact translations for technical terms:
+
+<CodeGroup>
+```typescript TypeScript
+await client.glossary.create({
+  term: "data extraction",
+  type: "specific_translation",
+  translations: {
+    de: "Datenextraktion",
+    fr: "extraction de données",
+    es: "extracción de datos",
+  },
+});
+```
+
+```python Python
+client.glossary.create(
+    term="data extraction",
+    type="specific_translation",
+    translations={
+        "de": "Datenextraktion",
+        "fr": "extraction de données",
+        "es": "extracción de datos",
+    },
+)
+```
+</CodeGroup>
+
+## Using the glossary
+
+To apply your glossary during enhancement, set `use_glossary: true`:
+
+```typescript
+await client.enhance.cells("tbl_abc123", {
+  row_ids: ["row_1", "row_2"],
+  column_key: "description_de",
+  prompt: "Translate the description to German.",
+  target_language: "de",
+  use_glossary: true,
+});
+```
+
+## Managing terms
+
+Glossary terms can be listed, updated, and deleted through the [Glossary API](/api-reference/glossary/list). Updating translations replaces all existing translations for that term.

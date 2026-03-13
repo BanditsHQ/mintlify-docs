@@ -1,0 +1,100 @@
+---
+title: 'Webhooks'
+description: 'Receive real-time notifications when asynchronous operations complete.'
+---
+
+Instead of polling for status changes, you can configure a webhook URL when creating a table. The API sends HTTP POST requests to your endpoint when events occur.
+
+## Configuring a webhook
+
+Pass a `webhook_url` when creating a table.
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://api.lasso.ai/v1/tables" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "schema_id": "schema_abc123",
+    "name": "Product catalog",
+    "file_ids": ["file_xyz"],
+    "webhook_url": "https://your-server.com/webhooks/lasso"
+  }'
+```
+
+```typescript TypeScript
+await client.tables.create({
+  schema_id: "schema_abc123",
+  name: "Product catalog",
+  file_ids: ["file_xyz"],
+  webhook_url: "https://your-server.com/webhooks/lasso",
+});
+```
+
+```python Python
+client.tables.create(
+    schema_id="schema_abc123",
+    name="Product catalog",
+    file_ids=["file_xyz"],
+    webhook_url="https://your-server.com/webhooks/lasso",
+)
+```
+</CodeGroup>
+
+## Webhook payload
+
+Each delivery is a JSON POST request with the following structure.
+
+```json
+{
+  "event": "table.completed",
+  "timestamp": "2025-03-12T14:30:00.000Z",
+  "data": {
+    "table_id": "tbl_abc123",
+    "status": "completed",
+    "total_rows": 42
+  }
+}
+```
+
+## Headers
+
+Every webhook request includes these headers:
+
+| Header | Description |
+|---|---|
+| `Content-Type` | Always `application/json`. |
+| `X-Lasso-Event` | The event type (e.g., `table.completed`). |
+| `X-Lasso-Delivery-Id` | A unique identifier for this delivery attempt. |
+| `X-Lasso-Signature` | HMAC-SHA256 signature of the request body (if a secret is configured). |
+
+## Verifying signatures
+
+If you provide a webhook secret, the API signs each payload using HMAC-SHA256. The signature is sent in the `X-Lasso-Signature` header with a `sha256=` prefix.
+
+```python
+import hmac
+import hashlib
+
+def verify_signature(payload: bytes, signature: str, secret: str) -> bool:
+    expected = "sha256=" + hmac.new(
+        secret.encode(), payload, hashlib.sha256
+    ).hexdigest()
+    return hmac.compare_digest(expected, signature)
+```
+
+## Retry policy
+
+If your endpoint does not respond with a `2xx` status code within 10 seconds, the API retries with exponential backoff:
+
+| Attempt | Delay |
+|---|---|
+| 1st retry | 30 seconds |
+| 2nd retry | 5 minutes |
+| 3rd retry | 30 minutes |
+
+After 3 failed retries, the delivery is abandoned. You can check the table status via the API at any time.
+
+## Custom auth headers
+
+You can include a custom authentication header on webhook deliveries by setting `webhook_auth_header_name` and `webhook_auth_header_value` in your table creation input data.

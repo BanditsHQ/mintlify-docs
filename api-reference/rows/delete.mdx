@@ -1,0 +1,34 @@
+---
+title: 'Delete row'
+description: 'Delete a single row from a table.'
+api: "DELETE /v1/tables/{table_id}/rows/{row_id}"
+---
+
+## Path parameters
+
+<ParamField path="table_id" type="string" required>
+  The unique identifier of the table.
+</ParamField>
+
+<ParamField path="row_id" type="string" required>
+  The unique identifier of the row.
+</ParamField>
+
+## Response
+
+Returns `204 No Content` on success.
+
+<RequestExample>
+```typescript TypeScript
+await client.tables.deleteRow("tbl_abc123", "row_xyz789");
+```
+
+```python Python
+client.tables.delete_row("tbl_abc123", "row_xyz789")
+```
+
+```bash cURL
+curl -X DELETE "https://api.lasso.ai/v1/tables/tbl_abc123/rows/row_xyz789" \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>

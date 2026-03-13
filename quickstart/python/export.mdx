@@ -1,0 +1,65 @@
+---
+title: 'Export data'
+description: 'Export your extracted and enhanced data in multiple formats.'
+---
+
+## Export as JSON
+
+```python
+data = client.export.json("tbl_abc123")
+print(data)  # [{"product_name": "...", "price": 29.99}, ...]
+```
+
+## Export as CSV
+
+```python
+csv_data = client.export.csv("tbl_abc123")
+```
+
+## Export as XLSX
+
+```python
+client.export.xlsx("tbl_abc123", path="export.xlsx")
+```
+
+## Export images
+
+Download all images from image columns as a ZIP:
+
+```python
+client.export.images("tbl_abc123", path="images.zip")
+```
+
+## Select specific columns
+
+```python
+data = client.export.json("tbl_abc123", columns="product_name,price,image_url")
+```
+
+## Pandas integration
+
+Load all rows as a pandas DataFrame for analysis:
+
+```python
+df = client.tables.results_as_dataframe("tbl_abc123")
+
+expensive = df[df["price"] > 100]
+df.to_csv("products.csv", index=False)
+```
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="API Reference" icon="code" href="/api-reference/introduction">
+    Explore all available endpoints.
+  </Card>
+  <Card title="Webhooks" icon="bell" href="/api-reference/webhooks">
+    Get notified when extraction completes.
+  </Card>
+  <Card title="Learn: Schemas" icon="diagram-project" href="/learn/schemas">
+    Understand column types and schema design.
+  </Card>
+  <Card title="Learn: Enhancement" icon="wand-magic-sparkles" href="/learn/enhancement">
+    Deep dive into AI enhancement features.
+  </Card>
+</CardGroup>
