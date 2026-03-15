@@ -1,0 +1,98 @@
+---
+title: 'Aktualizovat schéma'
+api: "PUT /v1/schemas/{schema_id}"
+description: 'Aktualizace názvu, popisu nebo definic sloupců schématu.'
+---
+
+## Parametry cesty
+
+<ParamField path="schema_id" type="string" required>
+  Jedinečný identifikátor schématu.
+</ParamField>
+
+## Tělo požadavku
+
+Všechna pole jsou volitelná. Aktualizují se pouze zadaná pole.
+
+<ParamField body="name" type="string">
+  Nový název schématu.
+</ParamField>
+
+<ParamField body="description" type="string">
+  Nový popis.
+</ParamField>
+
+<ParamField body="is_default" type="boolean">
+  Zda by toto mělo být výchozí schéma.
+</ParamField>
+
+<ParamField body="columns" type="array">
+  Aktualizované definice sloupců. Nahradí celý seznam sloupců. Musí být neprázdné pole s platnými objekty sloupců.
+</ParamField>
+
+## Odpověď
+
+Vrací úplný aktualizovaný objekt schématu (stejný tvar jako [Získat schéma](/cs/api-reference/schemas/get)).
+
+<RequestExample>
+```typescript TypeScript
+const updated = await client.schemas.update("schema_abc123", {
+  name: "Updated Electronics Schema",
+  columns: [
+    { key: "product_name", label: "Product Name", type: "text", required: true },
+    { key: "price", label: "Price (USD)", type: "number" },
+    { key: "brand", label: "Brand", type: "text" },
+    { key: "weight_kg", label: "Weight (kg)", type: "number" },
+  ],
+});
+```
+
+```python Python
+updated = client.schemas.update(
+    "schema_abc123",
+    name="Updated Electronics Schema",
+    columns=[
+        {"key": "product_name", "label": "Product Name", "type": "text", "required": True},
+        {"key": "price", "label": "Price (USD)", "type": "number"},
+        {"key": "brand", "label": "Brand", "type": "text"},
+        {"key": "weight_kg", "label": "Weight (kg)", "type": "number"},
+    ],
+)
+```
+
+```bash cURL
+curl -X PUT "https://api.lasso.ai/v1/schemas/schema_abc123" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated Electronics Schema",
+    "columns": [
+      {"key": "product_name", "label": "Product Name", "type": "text", "required": true},
+      {"key": "price", "label": "Price (USD)", "type": "number"},
+      {"key": "brand", "label": "Brand", "type": "text"},
+      {"key": "weight_kg", "label": "Weight (kg)", "type": "number"}
+    ]
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "id": "schema_abc123",
+  "name": "Electronics Catalog",
+  "description": "Schema for consumer electronics",
+  "is_default": false,
+  "columns": [
+    { "key": "product_name", "label": "Product Name", "type": "text", "required": true },
+    { "key": "price", "label": "Price", "type": "number" }
+  ],
+  "created_at": "2025-03-01T10:00:00.000Z",
+  "updated_at": "2025-03-01T10:00:00.000Z"
+}
+```
+</ResponseExample>
+
+<Warning>
+  Aktualizace sloupců nahradí celou definici sloupců. Zahrňte všechny sloupce, které chcete zachovat, ne pouze změny.
+</Warning>

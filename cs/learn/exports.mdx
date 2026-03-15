@@ -1,0 +1,77 @@
+---
+title: 'Export dat'
+description: 'Exportujte extrahovaná a obohacená data v různých formátech.'
+---
+
+Jakmile je vaše tabulka dokončena, můžete data exportovat v několika formátech.
+
+## Dostupné formáty
+
+| Formát | Popis | Použití |
+|---|---|---|
+| **JSON** | Pole objektů řádků | Programové zpracování, API integrace |
+| **CSV** | Soubor oddělený středníky | Import do tabulek, analýza dat |
+| **XLSX** | Excel tabulka | Obchodní uživatelé, reporting |
+| **Images** | ZIP archiv všech obrázků | Správa médií, knihovny médií |
+
+## Export přes SDK
+
+<CodeGroup>
+```typescript TypeScript
+// JSON -- returns data directly
+const data = await client.export.json("tbl_abc123");
+
+// CSV -- returns raw CSV string
+const csv = await client.export.csv("tbl_abc123");
+
+// XLSX -- returns binary buffer
+const xlsx = await client.export.xlsx("tbl_abc123");
+
+// Images -- returns ZIP buffer
+const images = await client.export.images("tbl_abc123");
+```
+
+```python Python
+# JSON -- returns list of dicts
+data = client.export.json("tbl_abc123")
+
+# CSV -- returns raw CSV string
+csv = client.export.csv("tbl_abc123")
+
+# XLSX -- save directly to file
+client.export.xlsx("tbl_abc123", path="export.xlsx")
+
+# Images -- save ZIP to file
+client.export.images("tbl_abc123", path="images.zip")
+```
+</CodeGroup>
+
+## Výběr sloupců
+
+Ve výchozím nastavení se exportují všechny sloupce. Pro export pouze konkrétních sloupců předejte seznam klíčů sloupců oddělených čárkou:
+
+<CodeGroup>
+```typescript TypeScript
+const data = await client.export.json("tbl_abc123", {
+  columns: "product_name,price,image_url",
+});
+```
+
+```python Python
+data = client.export.json("tbl_abc123", columns="product_name,price,image_url")
+```
+</CodeGroup>
+
+## Integrace s Pandas (Python)
+
+Python SDK obsahuje pomocnou funkci pro načtení všech řádků jako pandas DataFrame:
+
+```python
+df = client.tables.results_as_dataframe("tbl_abc123")
+
+# Filter, analyze, or export further
+expensive = df[df["price"] > 100]
+df.to_csv("products.csv", index=False)
+```
+
+Tato funkce automaticky načte všechny stránky a vrátí DataFrame připravený k použití.

@@ -1,0 +1,60 @@
+---
+title: 'Seznam sloupců'
+api: 'GET /v1/tables/{table_id}/columns'
+description: 'Načtení definic sloupců pro tabulku.'
+---
+
+## Parametry cesty
+
+<ParamField path="table_id" type="string" required>
+  Jedinečný identifikátor tabulky.
+</ParamField>
+
+## Odpověď
+
+<ResponseField name="data" type="array">
+  <Expandable title="Objekt sloupce">
+    <ResponseField name="key" type="string">Strojově čitelný klíč sloupce (snake_case).</ResponseField>
+    <ResponseField name="label" type="string">Lidsky čitelný popisek sloupce.</ResponseField>
+    <ResponseField name="type" type="string">
+      Datový typ sloupce. Jeden z: `text`, `number`, `url`, `email`, `date`, `boolean`, `richtext`, `enum`, `tags`, `image`, `images`, `json`.
+    </ResponseField>
+    <ResponseField name="required" type="boolean">Zda je sloupec povinný.</ResponseField>
+    <ResponseField name="description" type="string">Volitelný popis sloupce.</ResponseField>
+    <ResponseField name="enum_values" type="string[]">Povolené hodnoty pro sloupce typu `enum`.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const columns = await client.tables.columns("tbl_abc123");
+
+for (const col of columns.data) {
+  console.log(`${col.key} (${col.type}): ${col.label}`);
+}
+```
+
+```python Python
+columns = client.tables.columns("tbl_abc123")
+
+for col in columns["data"]:
+    print(f"{col['key']} ({col['type']}): {col['label']}")
+```
+
+```bash cURL
+curl -X GET "https://api.lasso.ai/v1/tables/tbl_abc123/columns" \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "data": [
+    { "key": "product_name", "label": "Product Name", "type": "text", "required": true },
+    { "key": "price", "label": "Price", "type": "number" },
+    { "key": "image_url", "label": "Image", "type": "image" }
+  ]
+}
+```
+</ResponseExample>

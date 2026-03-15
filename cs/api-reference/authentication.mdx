@@ -1,0 +1,67 @@
+---
+title: 'Autentizace'
+description: 'Autentizujte své API požadavky pomocí Bearer tokenů.'
+---
+
+Všechny API endpointy vyžadují autentizaci pomocí Bearer tokenu v hlavičce `Authorization`. API klíče mají prefix `lasso_`.
+
+## Vytvoření API klíče
+
+API klíče vygenerujete v [Lasso dashboardu](https://app.lasso.ai). Přejděte do **Settings** > **API Keys** a klikněte na **Create API Key**.
+
+<Warning>
+  API klíče se zobrazí pouze jednou při vytvoření. Uložte je na bezpečné místo. Pokud klíč ztratíte, deaktivujte ho a vytvořte nový.
+</Warning>
+
+## Použití API klíče
+
+Klíč zahrňte do hlavičky `Authorization` každého požadavku.
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://api.lasso.ai/v1/tables" \
+  -H "Authorization: Bearer lasso_your_api_key_here"
+```
+
+```typescript TypeScript
+import LassoClient from "@lasso-ai/sdk";
+
+const client = new LassoClient({
+  apiKey: "lasso_your_api_key_here",
+});
+```
+
+```python Python
+from lasso import LassoClient
+
+client = LassoClient(api_key="lasso_your_api_key_here")
+```
+</CodeGroup>
+
+## Formát klíče
+
+| Vlastnost | Hodnota |
+|---|---|
+| Prefix | `lasso_` |
+| Délka | 70 znaků |
+| Příklad | `lasso_a1b2c3d4e5f6...` |
+
+## Bezpečnostní doporučení
+
+- Ukládejte API klíče do proměnných prostředí, ne do zdrojového kódu.
+- Používejte samostatný klíč pro každé prostředí (vývoj, staging, produkce).
+- Klíče pravidelně obměňujte a nepoužívané deaktivujte.
+- Klíče jsou vázané na jednu společnost. Všechny zdroje přístupné přes klíč patří dané společnosti.
+
+## Chybové odpovědi
+
+Pokud autentizace selže, API vrátí stavový kód `401`.
+
+```json
+{
+  "status_code": 401,
+  "error_type": "unauthenticated",
+  "message": "Missing or invalid Authorization header. Use: Bearer lasso_...",
+  "request_id": "550e8400-e29b-41d4-a716-446655440000"
+}
+```

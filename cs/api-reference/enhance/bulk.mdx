@@ -1,0 +1,96 @@
+---
+title: 'Hromadné obohacení'
+description: 'Obohacení více sloupců jednoho řádku v jednom požadavku.'
+api: "POST /v1/tables/{table_id}/enhance/bulk"
+---
+
+## Parametry cesty
+
+<ParamField path="table_id" type="string" required>
+  Jedinečný identifikátor tabulky.
+</ParamField>
+
+## Tělo požadavku
+
+<ParamField body="row_id" type="string" required>
+  ID řádku k obohacení.
+</ParamField>
+
+<ParamField body="columns" type="array" required>
+  Pole konfigurací obohacení sloupců. Nesmí být prázdné.
+  <Expandable title="Objekt sloupce">
+    <ParamField body="key" type="string" required>Klíč sloupce k obohacení.</ParamField>
+    <ParamField body="prompt" type="string" required>Instrukce pro AI.</ParamField>
+    <ParamField body="model" type="string">AI model k použití pro tento sloupec.</ParamField>
+    <ParamField body="web_search" type="boolean">Zda povolit webové vyhledávání.</ParamField>
+    <ParamField body="target_language" type="string">Cílový jazyk pro překlad.</ParamField>
+  </Expandable>
+</ParamField>
+
+## Odpověď
+
+<ResponseField name="id" type="string">Identifikátor úlohy obohacení.</ResponseField>
+<ResponseField name="status" type="string">Vždy `queued`.</ResponseField>
+<ResponseField name="estimated_credits" type="number">Odhadovaná cena v kreditech.</ResponseField>
+<ResponseField name="rows_queued" type="integer">Vždy `1`.</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const job = await client.enhance.bulk("tbl_abc123", {
+  row_id: "row_xyz789",
+  columns: [
+    { key: "description", prompt: "Write a product description." },
+    { key: "seo_title", prompt: "Generate an SEO-optimized title.", web_search: true },
+    { key: "description_de", prompt: "Translate the description to German." },
+  ],
+});
+```
+
+```python Python
+job = client.enhance.bulk(
+    "tbl_abc123",
+    row_id="row_xyz789",
+    columns=[
+        {"key": "description", "prompt": "Write a product description."},
+        {"key": "seo_title", "prompt": "Generate an SEO-optimized title.", "web_search": True},
+        {"key": "description_de", "prompt": "Translate the description to German."},
+    ],
+)
+```
+
+```bash cURL
+curl -X POST "https://api.lasso.ai/v1/tables/tbl_abc123/enhance/bulk" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "row_id": "row_xyz789",
+    "columns": [
+      {
+        "key": "description",
+        "prompt": "Write a product description."
+      },
+      {
+        "key": "seo_title",
+        "prompt": "Generate an SEO-optimized title.",
+        "web_search": true
+      },
+      {
+        "key": "description_de",
+        "prompt": "Translate the description to German.",
+        "target_language": "de"
+      }
+    ]
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "id": "enhance_abc123",
+  "status": "queued",
+  "estimated_credits": 1.5,
+  "rows_queued": 1
+}
+```
+</ResponseExample>

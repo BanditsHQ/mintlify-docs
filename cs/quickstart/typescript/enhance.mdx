@@ -1,0 +1,61 @@
+---
+title: 'Obohacení pomocí AI'
+description: 'Použijte AI ke generování obsahu, překladu textu a obohacení extrahovaných dat.'
+---
+
+## Obohacení sloupce
+
+Použijte AI ke generování nebo obohacení hodnot pro konkrétní sloupec ve vybraných řádcích.
+
+```typescript
+const rows = await client.tables.rows("tbl_abc123", { limit: 100 });
+
+const job = await client.enhance.cells("tbl_abc123", {
+  row_ids: rows.data.map((r) => r.id),
+  column_key: "description",
+  prompt: "Write a compelling product description based on the product name and specifications.",
+  web_search: true,
+});
+
+console.log(job.id);                // "enhance_..."
+console.log(job.status);            // "queued"
+console.log(job.estimated_credits); // 84
+```
+
+## Kontrola průběhu obohacení
+
+```typescript
+const status = await client.enhance.status("tbl_abc123");
+
+for (const [column, stats] of Object.entries(status.columns)) {
+  console.log(`${column}: ${stats.completed}/${stats.total} done`);
+}
+```
+
+## Obohacení více sloupců najednou
+
+Obohaťte několik sloupců jednoho řádku v jednom požadavku:
+
+```typescript
+await client.enhance.bulk("tbl_abc123", {
+  row_id: "row_xyz789",
+  columns: [
+    { key: "description", prompt: "Write a product description." },
+    { key: "seo_title", prompt: "Generate an SEO-optimized title." },
+    { key: "description_de", prompt: "Translate the description to German." },
+  ],
+});
+```
+
+## Zrušení obohacení
+
+```typescript
+const result = await client.enhance.cancel("tbl_abc123");
+console.log(result.cancelled_count);
+```
+
+## Další
+
+<Card title="Export dat" icon="arrow-right" href="/cs/quickstart/typescript/export">
+  Exportujte svá data jako JSON, CSV, XLSX nebo obrázky.
+</Card>

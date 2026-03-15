@@ -1,0 +1,74 @@
+---
+title: 'Vygenerovat schéma'
+api: "POST /v1/schemas/generate"
+description: 'Použití AI k vygenerování schématu ze vzorových dat.'
+---
+
+## Tělo požadavku
+
+<ParamField body="sample_data" type="string" required>
+  Vzorek dat, která chcete extrahovat. Může to být surový text, řádky CSV nebo jakýkoli strukturovaný formát. AI je analyzuje a určí vhodné sloupce a typy. Zkráceno na 5 000 znaků.
+</ParamField>
+
+<ParamField body="name" type="string">
+  Název pro vygenerované schéma. Pokud je vynechán, AI vygeneruje název na základě dat.
+</ParamField>
+
+## Odpověď
+
+Vrací nově vytvořený objekt schématu s AI-generovanými definicemi sloupců (stejný tvar jako [Získat schéma](/cs/api-reference/schemas/get)).
+
+<RequestExample>
+```typescript TypeScript
+const schema = await client.schemas.generate({
+  sample_data: "Product: iPhone 15 Pro, Price: $999, Storage: 128GB...",
+  name: "Smartphones",
+});
+
+console.log(schema.name);    // "Smartphones"
+console.log(schema.columns); // AI-generated columns
+```
+
+```python Python
+schema = client.schemas.generate(
+    sample_data="Product: iPhone 15 Pro, Price: $999, Storage: 128GB...",
+    name="Smartphones",
+)
+
+print(schema["name"])     # "Smartphones"
+print(schema["columns"])  # AI-generated columns
+```
+
+```bash cURL
+curl -X POST "https://api.lasso.ai/v1/schemas/generate" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "sample_data": "Product: iPhone 15 Pro, Price: $999, Storage: 128GB, Color: Natural Titanium, Weight: 187g\nProduct: Galaxy S24 Ultra, Price: $1299, Storage: 256GB, Color: Titanium Gray, Weight: 232g",
+    "name": "Smartphones"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "id": "schema_gen123",
+  "name": "Smartphones",
+  "description": null,
+  "is_default": false,
+  "columns": [
+    { "key": "product_name", "label": "Product Name", "type": "text", "required": true },
+    { "key": "price", "label": "Price", "type": "number" },
+    { "key": "storage", "label": "Storage", "type": "text" },
+    { "key": "color", "label": "Color", "type": "text" }
+  ],
+  "created_at": "2025-03-01T10:00:00.000Z",
+  "updated_at": "2025-03-01T10:00:00.000Z"
+}
+```
+</ResponseExample>
+
+<Tip>
+  AI automaticky rozpoznává typy sloupců. Například detekuje cenová pole jako `number`, URL adresy jako `url` a seznamy hodnot jako `tags` nebo `enum`.
+</Tip>

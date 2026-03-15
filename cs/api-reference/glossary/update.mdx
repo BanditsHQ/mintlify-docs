@@ -1,0 +1,96 @@
+---
+title: 'Aktualizovat pojem ve slovníku'
+api: "PUT /v1/glossary/{term_id}"
+description: 'Aktualizace existujícího pojmu ve slovníku a jeho překladů.'
+---
+
+## Parametry cesty
+
+<ParamField path="term_id" type="string" required>
+  Jedinečný identifikátor pojmu ve slovníku.
+</ParamField>
+
+## Tělo požadavku
+
+Všechna pole jsou volitelná. Aktualizují se pouze zadaná pole.
+
+<ParamField body="term" type="string">
+  Aktualizovaný původní pojem.
+</ParamField>
+
+<ParamField body="type" type="string">
+  Aktualizovaný typ: `do_not_translate`, `specific_translation` nebo `context_dependent`.
+</ParamField>
+
+<ParamField body="case_sensitive" type="boolean">
+  Aktualizovaná citlivost na velikost písmen.
+</ParamField>
+
+<ParamField body="category" type="string">
+  Aktualizovaná kategorie.
+</ParamField>
+
+<ParamField body="translations" type="object">
+  Aktualizovaná mapa překladů. Nahradí všechny existující překlady.
+</ParamField>
+
+## Odpověď
+
+Vrací úplný aktualizovaný objekt pojmu ve slovníku (stejný tvar jako objekt v [Seznam pojmů ve slovníku](/cs/api-reference/glossary/list)).
+
+<RequestExample>
+```typescript TypeScript
+const updated = await client.glossary.update("term_abc123", {
+  type: "specific_translation",
+  translations: {
+    de: "Datenextraktion",
+    fr: "extraction de données",
+  },
+});
+```
+
+```python Python
+updated = client.glossary.update(
+    "term_abc123",
+    type="specific_translation",
+    translations={
+        "de": "Datenextraktion",
+        "fr": "extraction de données",
+    },
+)
+```
+
+```bash cURL
+curl -X PUT "https://api.lasso.ai/v1/glossary/term_abc123" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "specific_translation",
+    "translations": {
+      "de": "Datenextraktion",
+      "fr": "extraction de données"
+    }
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "id": "term_abc123",
+  "term": "data extraction",
+  "type": "specific_translation",
+  "case_sensitive": false,
+  "category": "custom",
+  "translations": {
+    "de": "Datenextraktion",
+    "fr": "extraction de données"
+  },
+  "created_at": "2025-03-01T10:00:00.000Z"
+}
+```
+</ResponseExample>
+
+<Warning>
+  Aktualizace `translations` nahradí všechny existující překlady. Zahrňte všechny jazykové páry, které chcete zachovat.
+</Warning>

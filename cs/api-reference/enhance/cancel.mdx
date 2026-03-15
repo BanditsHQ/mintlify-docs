@@ -1,0 +1,69 @@
+---
+title: 'Zrušit obohacení'
+description: 'Zrušení čekajících nebo probíhajících operací obohacení.'
+api: "POST /v1/tables/{table_id}/enhance/cancel"
+---
+
+## Parametry cesty
+
+<ParamField path="table_id" type="string" required>
+  Jedinečný identifikátor tabulky.
+</ParamField>
+
+## Tělo požadavku
+
+<ParamField body="column_key" type="string">
+  Zrušení obohacení pouze pro konkrétní sloupec. Vynechte pro zrušení všech čekajících obohacení.
+</ParamField>
+
+## Odpověď
+
+<ResponseField name="cancelled_count" type="integer">Počet zrušených operací obohacení.</ResponseField>
+
+<Note>
+  Zrušit lze pouze obohacení se stavem `pending` nebo `processing`. Již dokončená obohacení nejsou ovlivněna.
+</Note>
+
+<RequestExample>
+```typescript TypeScript
+// Cancel all pending enhancements
+const result = await client.enhance.cancel("tbl_abc123");
+console.log(result.cancelled_count);
+
+// Cancel for a specific column
+const result2 = await client.enhance.cancel("tbl_abc123", "description");
+console.log(result2.cancelled_count);
+```
+
+```python Python
+# Cancel all pending enhancements
+result = client.enhance.cancel("tbl_abc123")
+print(result["cancelled_count"])
+
+# Cancel for a specific column
+result = client.enhance.cancel("tbl_abc123", column_key="description")
+print(result["cancelled_count"])
+```
+
+```bash cURL
+# Cancel all pending enhancements
+curl -X POST "https://api.lasso.ai/v1/tables/tbl_abc123/enhance/cancel" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{}'
+
+# Cancel enhancements for a specific column
+curl -X POST "https://api.lasso.ai/v1/tables/tbl_abc123/enhance/cancel" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{"column_key": "description"}'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "cancelled_count": 12
+}
+```
+</ResponseExample>

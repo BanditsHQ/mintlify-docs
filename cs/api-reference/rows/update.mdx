@@ -1,0 +1,78 @@
+---
+title: 'Aktualizovat řádek'
+description: 'Aktualizace extrahovaných dat jednoho řádku.'
+api: "PUT /v1/tables/{table_id}/rows/{row_id}"
+---
+
+## Parametry cesty
+
+<ParamField path="table_id" type="string" required>
+  Jedinečný identifikátor tabulky.
+</ParamField>
+
+<ParamField path="row_id" type="string" required>
+  Jedinečný identifikátor řádku.
+</ParamField>
+
+## Tělo požadavku
+
+<ParamField body="data" type="object" required>
+  Objekt párů klíč-hodnota sloupců k aktualizaci. Zadaná pole se sloučí s existujícími daty; vynechaná pole zůstanou zachována.
+</ParamField>
+
+## Odpověď
+
+Vrací úplný aktualizovaný objekt řádku (stejný tvar jako [Získat řádek](/cs/api-reference/rows/get)).
+
+<RequestExample>
+```typescript TypeScript
+const updated = await client.tables.updateRow("tbl_abc123", "row_xyz789", {
+  price: 39.99,
+  description: "Updated product description",
+});
+
+console.log(updated.data.price);   // 39.99
+console.log(updated.is_edited);    // true
+```
+
+```python Python
+updated = client.tables.update_row("tbl_abc123", "row_xyz789", {
+    "price": 39.99,
+    "description": "Updated product description",
+})
+
+print(updated["data"]["price"])   # 39.99
+print(updated["is_edited"])       # True
+```
+
+```bash cURL
+curl -X PUT "https://api.lasso.ai/v1/tables/tbl_abc123/rows/row_xyz789" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "data": {
+      "price": 39.99,
+      "description": "Updated product description"
+    }
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "id": "row_abc123",
+  "row_index": 0,
+  "data": {
+    "product_name": "iPhone 15 Pro",
+    "price": 39.99,
+    "description": "Updated product description"
+  },
+  "validation_status": null,
+  "validation_errors": null,
+  "enhancement_status": null,
+  "is_edited": true,
+  "created_at": "2025-03-10T14:30:00.000Z"
+}
+```
+</ResponseExample>

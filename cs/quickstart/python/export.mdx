@@ -1,0 +1,65 @@
+---
+title: 'Export dat'
+description: 'Exportujte extrahovaná a obohacená data v různých formátech.'
+---
+
+## Export jako JSON
+
+```python
+data = client.export.json("tbl_abc123")
+print(data)  # [{"product_name": "...", "price": 29.99}, ...]
+```
+
+## Export jako CSV
+
+```python
+csv_data = client.export.csv("tbl_abc123")
+```
+
+## Export jako XLSX
+
+```python
+client.export.xlsx("tbl_abc123", path="export.xlsx")
+```
+
+## Export obrázků
+
+Stáhněte všechny obrázky ze sloupců s obrázky jako ZIP:
+
+```python
+client.export.images("tbl_abc123", path="images.zip")
+```
+
+## Výběr konkrétních sloupců
+
+```python
+data = client.export.json("tbl_abc123", columns="product_name,price,image_url")
+```
+
+## Integrace s Pandas
+
+Načtěte všechny řádky jako pandas DataFrame pro analýzu:
+
+```python
+df = client.tables.results_as_dataframe("tbl_abc123")
+
+expensive = df[df["price"] > 100]
+df.to_csv("products.csv", index=False)
+```
+
+## Další kroky
+
+<CardGroup cols={2}>
+  <Card title="API Reference" icon="code" href="/cs/api-reference/introduction">
+    Prozkoumejte všechny dostupné endpointy.
+  </Card>
+  <Card title="Webhooks" icon="bell" href="/cs/api-reference/webhooks">
+    Nechte se upozornit, když extrakce skončí.
+  </Card>
+  <Card title="Naučte se: Schémata" icon="diagram-project" href="/cs/learn/schemas">
+    Pochopte typy sloupců a návrh schémat.
+  </Card>
+  <Card title="Naučte se: Obohacení" icon="wand-magic-sparkles" href="/cs/learn/enhancement">
+    Podrobný pohled na funkce AI obohacení.
+  </Card>
+</CardGroup>

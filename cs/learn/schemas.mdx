@@ -1,0 +1,71 @@
+---
+title: 'Schémata'
+description: 'Definujte strukturu extrahovaných dat pomocí definic sloupců.'
+---
+
+Schéma definuje sloupce, které Lasso extrahuje z vašich zdrojových dat. Představte si ho jako šablonu pro vaši tabulku.
+
+## Definice sloupců
+
+Každý sloupec má klíč, popisek a typ:
+
+```json
+{
+  "key": "product_name",
+  "label": "Product Name",
+  "type": "text",
+  "required": true
+}
+```
+
+- **key** -- Strojově čitelný identifikátor (snake_case). Používá se pro přístup k datům v řádcích.
+- **label** -- Lidsky čitelný název zobrazený v exportech a na dashboardu.
+- **type** -- Datový typ, který má Lasso extrahovat. Viz níže.
+- **required** -- Zda musí mít tento sloupec hodnotu v každém řádku.
+
+## Typy sloupců
+
+| Typ | Popis | Příklad hodnoty |
+|---|---|---|
+| `text` | Prostý text | `"iPhone 15 Pro"` |
+| `number` | Celé číslo nebo desetinné číslo | `999.99` |
+| `url` | Platná URL adresa | `"https://example.com"` |
+| `email` | E-mailová adresa | `"info@example.com"` |
+| `date` | Datum nebo datum a čas | `"2025-03-10"` |
+| `boolean` | Pravda nebo nepravda | `true` |
+| `richtext` | HTML nebo markdown | `"<p>Description</p>"` |
+| `enum` | Jedna z předdefinovaných hodnot | `"electronics"` |
+| `tags` | Pole řetězců | `["wireless", "bluetooth"]` |
+| `image` | URL jednoho obrázku | `"https://cdn.example.com/img.jpg"` |
+| `images` | Pole URL obrázků | `["https://...1.jpg", "https://...2.jpg"]` |
+| `json` | Libovolný JSON | `{"specs": {"weight": "187g"}}` |
+
+## Automaticky generovaná schémata
+
+Pokud si nejste jistí, jaké sloupce definovat, můžete nechat AI vygenerovat schéma ze vzorových dat:
+
+<CodeGroup>
+```typescript TypeScript
+const schema = await client.schemas.generate({
+  sample_data: "Product: iPhone 15 Pro, Price: $999, Color: Titanium",
+  name: "Smartphones",
+});
+
+console.log(schema.columns);
+```
+
+```python Python
+schema = client.schemas.generate(
+    sample_data="Product: iPhone 15 Pro, Price: $999, Color: Titanium",
+    name="Smartphones",
+)
+
+print(schema["columns"])
+```
+</CodeGroup>
+
+AI analyzuje váš vzorek a odvodí vhodné klíče sloupců, popisky a typy.
+
+## Opětovné použití schémat
+
+Schémata lze opakovaně používat ve více tabulkách. Vytvořte schéma jednou a pak na něj odkazujte pomocí ID při vytváření nových tabulek. Schéma můžete kdykoliv aktualizovat -- existující tabulky si zachovají své původní definice sloupců.

@@ -1,0 +1,56 @@
+---
+title: 'Export dat'
+description: 'Exportujte extrahovaná a obohacená data v různých formátech.'
+---
+
+## Export jako JSON
+
+```typescript
+const data = await client.export.json("tbl_abc123");
+console.log(data); // [{ product_name: "...", price: 29.99 }, ...]
+```
+
+## Export jako CSV
+
+```typescript
+const csv = await client.export.csv("tbl_abc123");
+```
+
+## Export jako XLSX
+
+```typescript
+const xlsx = await client.export.xlsx("tbl_abc123");
+```
+
+## Export obrázků
+
+Stáhněte všechny obrázky ze sloupců s obrázky jako ZIP:
+
+```typescript
+const images = await client.export.images("tbl_abc123");
+```
+
+## Výběr konkrétních sloupců
+
+```typescript
+const data = await client.export.json("tbl_abc123", {
+  columns: "product_name,price,image_url",
+});
+```
+
+## Další kroky
+
+<CardGroup cols={2}>
+  <Card title="API Reference" icon="code" href="/cs/api-reference/introduction">
+    Prozkoumejte všechny dostupné endpointy.
+  </Card>
+  <Card title="Webhooks" icon="bell" href="/cs/api-reference/webhooks">
+    Nechte se upozornit, když extrakce skončí.
+  </Card>
+  <Card title="Naučte se: Schémata" icon="diagram-project" href="/cs/learn/schemas">
+    Pochopte typy sloupců a návrh schémat.
+  </Card>
+  <Card title="Naučte se: Obohacení" icon="wand-magic-sparkles" href="/cs/learn/enhancement">
+    Podrobný pohled na funkce AI obohacení.
+  </Card>
+</CardGroup>

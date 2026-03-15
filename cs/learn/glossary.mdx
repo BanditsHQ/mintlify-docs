@@ -1,0 +1,86 @@
+---
+title: 'Slovník a překlad'
+description: 'Kontrolujte, jak jsou konkrétní termíny zpracovány při AI obohacení a překladu.'
+---
+
+Slovník vám umožňuje definovat, jak mají být konkrétní termíny zpracovány, když AI obohacuje nebo překládá vaše data. Tím zajistíte konzistentní zacházení s názvy značek, technickými termíny a oborovou terminologií.
+
+## Typy termínů
+
+| Typ | Chování |
+|---|---|
+| `do_not_translate` | Zachovat termín přesně tak, jak je, ve všech jazycích. Ideální pro názvy značek. |
+| `specific_translation` | Použít vámi zadané překlady místo AI-generovaných. |
+| `context_dependent` | Nechat AI rozhodnout na základě kontextu. |
+
+## Příklad: termíny značek
+
+Zabránění překladu "Lasso AI":
+
+<CodeGroup>
+```typescript TypeScript
+await client.glossary.create({
+  term: "Lasso AI",
+  type: "do_not_translate",
+  case_sensitive: true,
+  category: "brand",
+});
+```
+
+```python Python
+client.glossary.create(
+    term="Lasso AI",
+    type="do_not_translate",
+    case_sensitive=True,
+    category="brand",
+)
+```
+</CodeGroup>
+
+## Příklad: konkrétní překlady
+
+Zadejte přesné překlady pro technické termíny:
+
+<CodeGroup>
+```typescript TypeScript
+await client.glossary.create({
+  term: "data extraction",
+  type: "specific_translation",
+  translations: {
+    de: "Datenextraktion",
+    fr: "extraction de données",
+    es: "extracción de datos",
+  },
+});
+```
+
+```python Python
+client.glossary.create(
+    term="data extraction",
+    type="specific_translation",
+    translations={
+        "de": "Datenextraktion",
+        "fr": "extraction de données",
+        "es": "extracción de datos",
+    },
+)
+```
+</CodeGroup>
+
+## Použití slovníku
+
+Pro aplikaci slovníku během obohacení nastavte `use_glossary: true`:
+
+```typescript
+await client.enhance.cells("tbl_abc123", {
+  row_ids: ["row_1", "row_2"],
+  column_key: "description_de",
+  prompt: "Translate the description to German.",
+  target_language: "de",
+  use_glossary: true,
+});
+```
+
+## Správa termínů
+
+Termíny slovníku lze zobrazit, aktualizovat a mazat prostřednictvím [Glossary API](/cs/api-reference/glossary/list). Aktualizace překladů nahradí všechny existující překlady daného termínu.

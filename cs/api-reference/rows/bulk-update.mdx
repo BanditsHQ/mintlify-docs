@@ -1,0 +1,71 @@
+---
+title: 'Hromadná aktualizace řádků'
+description: 'Aktualizace hodnoty konkrétního sloupce napříč více řádky najednou.'
+api: "POST /v1/tables/{table_id}/rows/bulk-update"
+---
+
+## Parametry cesty
+
+<ParamField path="table_id" type="string" required>
+  Jedinečný identifikátor tabulky.
+</ParamField>
+
+## Tělo požadavku
+
+<ParamField body="row_ids" type="string[]" required>
+  Pole ID řádků k aktualizaci.
+</ParamField>
+
+<ParamField body="column_key" type="string" required>
+  Klíč sloupce k aktualizaci.
+</ParamField>
+
+<ParamField body="value" type="any" required>
+  Nová hodnota, která se nastaví pro zadaný sloupec ve všech cílových řádcích.
+</ParamField>
+
+## Odpověď
+
+<ResponseField name="updated_count" type="integer">Počet úspěšně aktualizovaných řádků.</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const result = await client.tables.bulkUpdate("tbl_abc123", {
+  row_ids: ["row_1", "row_2", "row_3"],
+  column_key: "status",
+  value: "approved",
+});
+
+console.log(result.updated_count); // 3
+```
+
+```python Python
+result = client.tables.bulk_update(
+    "tbl_abc123",
+    row_ids=["row_1", "row_2", "row_3"],
+    column_key="status",
+    value="approved",
+)
+
+print(result["updated_count"])  # 3
+```
+
+```bash cURL
+curl -X POST "https://api.lasso.ai/v1/tables/tbl_abc123/rows/bulk-update" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "row_ids": ["row_1", "row_2", "row_3"],
+    "column_key": "status",
+    "value": "approved"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "updated_count": 3
+}
+```
+</ResponseExample>

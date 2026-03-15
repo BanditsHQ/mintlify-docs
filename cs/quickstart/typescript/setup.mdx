@@ -1,0 +1,45 @@
+---
+title: 'Instalace a nastavení'
+description: 'Nainstalujte Lasso TypeScript SDK a vytvořte svého prvního klienta.'
+---
+
+## Předpoklady
+
+- [Vytvořte API key](https://app.lasso.ai) v Lasso dashboardu
+- Node.js 18 nebo novější
+
+## Instalace SDK
+
+<CodeGroup>
+```bash npm
+npm install @lasso-ai/sdk
+```
+
+```bash yarn
+yarn add @lasso-ai/sdk
+```
+
+```bash pnpm
+pnpm add @lasso-ai/sdk
+```
+</CodeGroup>
+
+## Inicializace klienta
+
+```typescript
+import LassoClient from "@lasso-ai/sdk";
+
+const client = new LassoClient({
+  apiKey: process.env.LASSO_API_KEY,
+});
+```
+
+<Warning>
+  Uložte svůj API key do proměnné prostředí. Nikdy ho nezapisujte přímo do zdrojového kódu.
+</Warning>
+
+## Další
+
+<Card title="Extrakce dat" icon="arrow-right" href="/cs/quickstart/typescript/extract">
+  Vytvořte schéma, nahrajte soubory a spusťte svou první extrakci.
+</Card>

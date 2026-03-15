@@ -1,0 +1,109 @@
+---
+title: 'Získat trasování řádku'
+description: 'Načtení trasování AI extrakce a obohacení pro řádek.'
+api: "GET /v1/tables/{table_id}/rows/{row_id}/traces"
+---
+
+Trasování poskytuje plnou transparentnost toho, jak AI vygenerovalo nebo obohatilo každou hodnotu sloupce, včetně promptů, použitého modelu, skóre spolehlivosti a odkazů na zdroje.
+
+## Parametry cesty
+
+<ParamField path="table_id" type="string" required>
+  Jedinečný identifikátor tabulky.
+</ParamField>
+
+<ParamField path="row_id" type="string" required>
+  Jedinečný identifikátor řádku.
+</ParamField>
+
+## Query parametry
+
+<ParamField query="column_key" type="string">
+  Filtrování trasování pro konkrétní sloupec. Vynechte pro získání trasování všech sloupců.
+</ParamField>
+
+## Odpověď
+
+<ResponseField name="data" type="array">
+  <Expandable title="Objekt trasování">
+    <ResponseField name="column_key" type="string">Sloupec, ke kterému toto trasování patří.</ResponseField>
+    <ResponseField name="model" type="string | null">Použitý AI model.</ResponseField>
+    <ResponseField name="confidence" type="number | null">Skóre spolehlivosti (0-1).</ResponseField>
+    <ResponseField name="request" type="object">
+      <Expandable title="Podrobnosti požadavku">
+        <ResponseField name="system_prompt" type="string | null">Systémový prompt odeslaný modelu.</ResponseField>
+        <ResponseField name="user_content" type="string | null">Uživatelský obsah odeslaný modelu.</ResponseField>
+        <ResponseField name="tools" type="array">Nástroje dostupné modelu.</ResponseField>
+      </Expandable>
+    </ResponseField>
+    <ResponseField name="response" type="object">
+      <Expandable title="Podrobnosti odpovědi">
+        <ResponseField name="text" type="string | null">Surová odpověď modelu.</ResponseField>
+        <ResponseField name="iterations" type="integer | null">Počet iterací uvažování.</ResponseField>
+        <ResponseField name="tool_calls" type="array">Nástroje volané modelem.</ResponseField>
+        <ResponseField name="thought_summary" type="string | null">Shrnutí uvažování modelu.</ResponseField>
+        <ResponseField name="sources" type="array">Webové zdroje použité pro podložení.</ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const traces = await client.enhance.traces(
+  "tbl_abc123",
+  "row_xyz789",
+  "description"
+);
+
+for (const trace of traces.data) {
+  console.log(trace.column_key);
+  console.log(trace.model);
+  console.log(trace.confidence);
+}
+```
+
+```python Python
+traces = client.enhance.traces(
+    "tbl_abc123",
+    "row_xyz789",
+    column_key="description",
+)
+
+for trace in traces["data"]:
+    print(trace["column_key"])
+    print(trace["model"])
+    print(trace["confidence"])
+```
+
+```bash cURL
+curl -X GET "https://api.lasso.ai/v1/tables/tbl_abc123/rows/row_xyz789/traces?column_key=description" \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "data": [
+    {
+      "column_key": "description",
+      "model": "gemini-pro",
+      "confidence": 0.92,
+      "request": {
+        "system_prompt": "You are a product data expert...",
+        "user_content": "Generate a description for: iPhone 15 Pro",
+        "tools": []
+      },
+      "response": {
+        "text": "The iPhone 15 Pro features...",
+        "iterations": 1,
+        "tool_calls": [],
+        "thought_summary": "Used product name and specs to generate description",
+        "sources": []
+      }
+    }
+  ]
+}
+```
+</ResponseExample>

@@ -1,0 +1,40 @@
+---
+title: 'Získat zůstatek kreditů'
+api: "GET /v1/credits/balance"
+description: 'Kontrola aktuálního zůstatku kreditů.'
+---
+
+## Odpověď
+
+<ResponseField name="balance" type="number">Váš aktuální zůstatek kreditů.</ResponseField>
+<ResponseField name="currency" type="string">Vždy `credits`.</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const balance = await client.credits.balance();
+
+console.log(balance.balance);  // 4250
+console.log(balance.currency); // "credits"
+```
+
+```python Python
+balance = client.credits.balance()
+
+print(balance["balance"])   # 4250
+print(balance["currency"])  # "credits"
+```
+
+```bash cURL
+curl -X GET "https://api.lasso.ai/v1/credits/balance" \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "balance": 4250,
+  "currency": "credits"
+}
+```
+</ResponseExample>

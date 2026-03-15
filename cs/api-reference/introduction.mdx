@@ -1,0 +1,96 @@
+---
+title: 'Úvod'
+description: 'Seznamte se s obecnými koncepty, stavovými kódy a strategiemi autentizace.'
+---
+
+Lasso API je postaveno na principech REST. Všechny požadavky používají HTTPS a vrací odpovědi ve formátu JSON.
+
+## Základní URL
+
+Všechny požadavky obsahují následující základní URL:
+
+```
+https://api.lasso.ai/v1
+```
+
+## Autentizace
+
+Pro autentizaci je potřeba přidat hlavičku `Authorization` s obsahem `Bearer lasso_xxxxxxxxx`, kde `lasso_xxxxxxxxx` je váš [API klíč](https://app.lasso.ai).
+
+```
+Authorization: Bearer lasso_xxxxxxxxx
+```
+
+API klíče jsou vázané na jednu společnost. Všechny zdroje přístupné přes klíč patří dané společnosti. Více informací o správě klíčů a bezpečnostních doporučeních najdete na stránce [Autentizace](/cs/api-reference/authentication).
+
+## SDK
+
+Oficiální SDK jsou k dispozici pro TypeScript a Python.
+
+<CodeGroup>
+```bash npm
+npm install @lasso-ai/sdk
+```
+
+```bash pip
+pip install lasso-ai
+```
+</CodeGroup>
+
+<CodeGroup>
+```typescript TypeScript
+import LassoClient from "@lasso-ai/sdk";
+
+const client = new LassoClient({ apiKey: "lasso_..." });
+```
+
+```python Python
+from lasso import LassoClient
+
+client = LassoClient(api_key="lasso_...")
+```
+</CodeGroup>
+
+## Stavové kódy
+
+Lasso používá standardní HTTP kódy k indikaci úspěchu nebo selhání vašich požadavků.
+
+| Stav | Typ | Popis |
+|---|---|---|
+| `200` | Success | Úspěšný požadavek. |
+| `201` | Created | Zdroj byl úspěšně vytvořen. |
+| `204` | No Content | Úspěšné smazání. |
+| `400` | `invalid_request` | Požadavek je chybně formulovaný nebo používá nepodporovanou HTTP metodu. |
+| `401` | `unauthenticated` | Chybějící, neplatný nebo deaktivovaný API klíč. |
+| `402` | `insufficient_credits` | Váš účet nemá dostatek kreditů. |
+| `403` | `forbidden` | API klíč nemá oprávnění k této akci. |
+| `404` | `not_found` | Zdroj neexistuje nebo nepatří vaší společnosti. |
+| `409` | `conflict` | Požadavek je v konfliktu s aktuálním stavem zdroje. |
+| `422` | `validation_error` | Chybějící povinná pole nebo neplatné hodnoty. |
+| `429` | `rate_limited` | Příliš mnoho požadavků. Snižte frekvenci a zkuste to znovu. |
+| `500` | `internal_error` | Na serveru došlo k neočekávané chybě. |
+
+Úplný formát chybových odpovědí najdete v sekci [Chyby](/cs/api-reference/errors).
+
+## Stránkování
+
+Endpointy pro výpis seznamů podporují stránkování pomocí query parametrů `page` a `limit`. Výchozí velikost stránky je 25, maximum je 100.
+
+```json
+{
+  "data": [...],
+  "pagination": {
+    "page": 1,
+    "limit": 25,
+    "total": 143
+  }
+}
+```
+
+Podrobnosti a příklady iterace najdete v sekci [Stránkování](/cs/api-reference/pagination).
+
+## Webhooky
+
+Při vytváření tabulky můžete nastavit `webhook_url` pro příjem HTTP POST notifikací po dokončení zpracování. Payloady webhooků jsou podepsány pomocí HMAC-SHA256 a v případě selhání se opakují až 3krát s exponenciálním prodlužováním intervalů.
+
+Formát doručení, ověření podpisu a pravidla opakování najdete v sekci [Webhooky](/cs/api-reference/webhooks).

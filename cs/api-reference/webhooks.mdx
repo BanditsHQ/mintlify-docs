@@ -1,0 +1,100 @@
+---
+title: 'Webhooky'
+description: 'Přijímejte notifikace v reálném čase po dokončení asynchronních operací.'
+---
+
+Místo opakovaného dotazování na změny stavu můžete při vytváření tabulky nastavit webhook URL. API odešle HTTP POST požadavky na váš endpoint, když dojde k událostem.
+
+## Konfigurace webhooku
+
+Při vytváření tabulky předejte `webhook_url`.
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://api.lasso.ai/v1/tables" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "schema_id": "schema_abc123",
+    "name": "Product catalog",
+    "file_ids": ["file_xyz"],
+    "webhook_url": "https://your-server.com/webhooks/lasso"
+  }'
+```
+
+```typescript TypeScript
+await client.tables.create({
+  schema_id: "schema_abc123",
+  name: "Product catalog",
+  file_ids: ["file_xyz"],
+  webhook_url: "https://your-server.com/webhooks/lasso",
+});
+```
+
+```python Python
+client.tables.create(
+    schema_id="schema_abc123",
+    name="Product catalog",
+    file_ids=["file_xyz"],
+    webhook_url="https://your-server.com/webhooks/lasso",
+)
+```
+</CodeGroup>
+
+## Payload webhooku
+
+Každé doručení je JSON POST požadavek s následující strukturou.
+
+```json
+{
+  "event": "table.completed",
+  "timestamp": "2025-03-12T14:30:00.000Z",
+  "data": {
+    "table_id": "tbl_abc123",
+    "status": "completed",
+    "total_rows": 42
+  }
+}
+```
+
+## Hlavičky
+
+Každý webhook požadavek obsahuje tyto hlavičky:
+
+| Hlavička | Popis |
+|---|---|
+| `Content-Type` | Vždy `application/json`. |
+| `X-Lasso-Event` | Typ události (např. `table.completed`). |
+| `X-Lasso-Delivery-Id` | Unikátní identifikátor tohoto pokusu o doručení. |
+| `X-Lasso-Signature` | HMAC-SHA256 podpis těla požadavku (pokud je nakonfigurován secret). |
+
+## Ověření podpisu
+
+Pokud zadáte webhook secret, API podepíše každý payload pomocí HMAC-SHA256. Podpis je odeslán v hlavičce `X-Lasso-Signature` s prefixem `sha256=`.
+
+```python
+import hmac
+import hashlib
+
+def verify_signature(payload: bytes, signature: str, secret: str) -> bool:
+    expected = "sha256=" + hmac.new(
+        secret.encode(), payload, hashlib.sha256
+    ).hexdigest()
+    return hmac.compare_digest(expected, signature)
+```
+
+## Pravidla opakování
+
+Pokud váš endpoint neodpoví stavovým kódem `2xx` do 10 sekund, API zopakuje požadavek s exponenciálním prodlužováním intervalů:
+
+| Pokus | Prodleva |
+|---|---|
+| 1. opakování | 30 sekund |
+| 2. opakování | 5 minut |
+| 3. opakování | 30 minut |
+
+Po 3 neúspěšných pokusech je doručení ukončeno. Stav tabulky můžete kdykoli zkontrolovat přes API.
+
+## Vlastní autentizační hlavičky
+
+Při vytváření tabulky můžete nastavit vlastní autentizační hlavičku pro doručování webhooků pomocí parametrů `webhook_auth_header_name` a `webhook_auth_header_value` ve vstupních datech.

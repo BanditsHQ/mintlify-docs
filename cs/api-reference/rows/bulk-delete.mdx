@@ -1,0 +1,57 @@
+---
+title: 'Hromadné smazání řádků'
+description: 'Smazání více řádků z tabulky najednou.'
+api: "POST /v1/tables/{table_id}/rows/bulk-delete"
+---
+
+## Parametry cesty
+
+<ParamField path="table_id" type="string" required>
+  Jedinečný identifikátor tabulky.
+</ParamField>
+
+## Tělo požadavku
+
+<ParamField body="row_ids" type="string[]" required>
+  Pole ID řádků ke smazání. Nesmí být prázdné.
+</ParamField>
+
+## Odpověď
+
+<ResponseField name="deleted_count" type="integer">Počet úspěšně smazaných řádků.</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const result = await client.tables.bulkDelete("tbl_abc123", {
+  row_ids: ["row_1", "row_2", "row_3"],
+});
+
+console.log(result.deleted_count); // 3
+```
+
+```python Python
+result = client.tables.bulk_delete(
+    "tbl_abc123",
+    row_ids=["row_1", "row_2", "row_3"],
+)
+
+print(result["deleted_count"])  # 3
+```
+
+```bash cURL
+curl -X POST "https://api.lasso.ai/v1/tables/tbl_abc123/rows/bulk-delete" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "row_ids": ["row_1", "row_2", "row_3"]
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "deleted_count": 3
+}
+```
+</ResponseExample>

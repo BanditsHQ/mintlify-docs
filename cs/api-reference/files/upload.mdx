@@ -1,0 +1,62 @@
+---
+title: 'Nahrát soubor'
+api: "POST /v1/files"
+description: 'Nahrání souboru pro použití v extrakci tabulky.'
+---
+
+## Tělo požadavku
+
+Odešlete soubor jako `multipart/form-data` s polem `file`.
+
+<ParamField body="file" type="file" required>
+  Soubor k nahrání. Maximální velikost je 1 GB. Podporované formáty zahrnují PDF, CSV, XLSX, obrázky a další.
+</ParamField>
+
+## Odpověď
+
+<ResponseField name="id" type="string">Jedinečný identifikátor souboru. Použijte ho při vytváření tabulek.</ResponseField>
+<ResponseField name="filename" type="string">Původní název souboru.</ResponseField>
+<ResponseField name="size" type="integer">Velikost souboru v bajtech.</ResponseField>
+<ResponseField name="content_type" type="string">MIME typ souboru.</ResponseField>
+<ResponseField name="created_at" type="string">Časové razítko ISO 8601.</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const file = new File([buffer], "catalog.pdf", { type: "application/pdf" });
+const uploaded = await client.files.upload(file, "catalog.pdf");
+
+console.log(uploaded.id);       // "file_abc123"
+console.log(uploaded.filename); // "catalog.pdf"
+console.log(uploaded.size);     // 1048576
+```
+
+```python Python
+uploaded = client.files.upload("/path/to/catalog.pdf")
+
+print(uploaded["id"])        # "file_abc123"
+print(uploaded["filename"])  # "catalog.pdf"
+print(uploaded["size"])      # 1048576
+```
+
+```bash cURL
+curl -X POST "https://api.lasso.ai/v1/files" \
+  -H "Authorization: Bearer lasso_..." \
+  -F "file=@/path/to/catalog.pdf"
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "id": "file_abc123",
+  "filename": "catalog.pdf",
+  "size": 1048576,
+  "content_type": "application/pdf",
+  "created_at": "2025-03-10T14:30:00.000Z"
+}
+```
+</ResponseExample>
+
+<Note>
+  TypeScript SDK přijímá objekty `File` nebo `Blob`. Python SDK přijímá řetězec s cestou k souboru a multipart nahrávání zpracuje automaticky.
+</Note>

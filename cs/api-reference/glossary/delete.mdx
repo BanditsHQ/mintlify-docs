@@ -1,0 +1,30 @@
+---
+title: 'Smazat pojem ve slovníku'
+api: "DELETE /v1/glossary/{term_id}"
+description: 'Smazání pojmu ve slovníku a všech jeho překladů.'
+---
+
+## Parametry cesty
+
+<ParamField path="term_id" type="string" required>
+  Jedinečný identifikátor pojmu ve slovníku ke smazání.
+</ParamField>
+
+## Odpověď
+
+Při úspěchu vrací `204 No Content`. Pojem a všechny jeho překlady jsou trvale odstraněny.
+
+<RequestExample>
+```typescript TypeScript
+await client.glossary.delete("term_abc123");
+```
+
+```python Python
+client.glossary.delete("term_abc123")
+```
+
+```bash cURL
+curl -X DELETE "https://api.lasso.ai/v1/glossary/term_abc123" \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>

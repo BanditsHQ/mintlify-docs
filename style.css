@@ -19,3 +19,125 @@
 .nav-tabs-item.dark\:text-gray-200 {
   font-weight: 600 !important;
 }
+
+/* ===== LIGHT MODE ===== */
+
+/* Gray sidebar and top bar, no borders */
+#sidebar,
+#sidebar-content,
+[class*="sidebar"]:not(svg) {
+  background-color: #F1F3F3 !important;
+  border: none !important;
+  border-right: none !important;
+}
+
+.sidebar-group-icon {
+  background-color: currentColor !important;
+}
+
+.lg\:flex.fixed.top-0.left-\[19rem\] {
+  background-color: #F1F3F3 !important;
+  border: none !important;
+  border-bottom: none !important;
+}
+
+#navbar {
+  background-color: #F1F3F3 !important;
+  border: none !important;
+  border-bottom: none !important;
+}
+
+/* Main content area: white bg, top-left radius */
+.relative.w-full.lg\:ml-\[19rem\] {
+  margin-top: 64px !important;
+  border-top-left-radius: 1.5rem !important;
+  background-color: #ffffff !important;
+}
+
+/* ===== DARK MODE ===== */
+
+/* Fix primary-light variable for dark mode visibility */
+.dark {
+  --primary-light: 200 210 210 !important;
+}
+
+.dark #sidebar,
+.dark #sidebar-content,
+.dark [class*="sidebar"]:not(svg) {
+  background-color: #161A1A !important;
+  border: none !important;
+  border-right: none !important;
+}
+
+.dark .sidebar-group-icon {
+  background-color: #B0B8B8 !important;
+}
+
+.dark .lg\:flex.fixed.top-0.left-\[19rem\] {
+  background-color: #161A1A !important;
+  border: none !important;
+  border-bottom: none !important;
+}
+
+.dark #navbar {
+  background-color: #161A1A !important;
+  border: none !important;
+  border-bottom: none !important;
+}
+
+.dark .relative.w-full.lg\:ml-\[19rem\] {
+  background-color: #1E2323 !important;
+}
+
+/* Sidebar text */
+.dark #sidebar a,
+.dark #sidebar span,
+.dark #sidebar p,
+.dark #sidebar li,
+.dark #sidebar-content a,
+.dark #sidebar-content span,
+.dark #sidebar-content p,
+.dark #sidebar-content li {
+  color: #B0B8B8 !important;
+}
+
+.dark #sidebar a:hover,
+.dark #sidebar-content a:hover,
+.dark [class*="sidebar"] a:hover,
+.dark #sidebar a:hover span,
+.dark #sidebar-content a:hover span,
+.dark [class*="sidebar"] a:hover span {
+  color: #ffffff !important;
+}
+
+/* Active sidebar item */
+.dark #sidebar a[aria-current="page"],
+.dark #sidebar a[aria-current="page"] *,
+.dark #sidebar-content a[aria-current="page"],
+.dark #sidebar-content a[aria-current="page"] * {
+  color: #ffffff !important;
+}
+
+/* Navbar & tab text */
+.dark #navbar *,
+.dark .nav-tabs-item,
+.dark .nav-tabs-item * {
+  color: #C8CDCD !important;
+}
+
+.dark .nav-tabs-item.text-gray-800,
+.dark .nav-tabs-item.dark\:text-gray-200 {
+  color: #ffffff !important;
+}
+
+/* Sidebar group headings */
+.dark #sidebar h5,
+.dark #sidebar-content h5,
+.dark [class*="sidebar"] h5 {
+  color: #8A9494 !important;
+}
+
+/* Card and content icons using mask technique (fallback) */
+.dark svg.bg-primary {
+  background-color: #C8D2D2 !important;
+}

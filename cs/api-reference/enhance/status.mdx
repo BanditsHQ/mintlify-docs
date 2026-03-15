@@ -1,0 +1,69 @@
+---
+title: 'Stav obohacení'
+description: 'Kontrola průběhu operací obohacení na tabulce.'
+api: "GET /v1/tables/{table_id}/enhance/status"
+---
+
+## Parametry cesty
+
+<ParamField path="table_id" type="string" required>
+  Jedinečný identifikátor tabulky.
+</ParamField>
+
+## Odpověď
+
+<ResponseField name="columns" type="object">
+  Mapa klíčů sloupců na jejich průběh obohacení napříč všemi řádky.
+  <Expandable title="Objekt stavu sloupce">
+    <ResponseField name="total" type="integer">Celkový počet řádků s obohacením pro tento sloupec.</ResponseField>
+    <ResponseField name="completed" type="integer">Úspěšně obohacené řádky.</ResponseField>
+    <ResponseField name="failed" type="integer">Řádky, u kterých obohacení selhalo.</ResponseField>
+    <ResponseField name="pending" type="integer">Řádky čekající na zpracování.</ResponseField>
+    <ResponseField name="processing" type="integer">Řádky aktuálně zpracovávané.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const status = await client.enhance.status("tbl_abc123");
+
+for (const [column, stats] of Object.entries(status.columns)) {
+  console.log(`${column}: ${stats.completed}/${stats.total} done`);
+}
+```
+
+```python Python
+status = client.enhance.status("tbl_abc123")
+
+for column, stats in status["columns"].items():
+    print(f"{column}: {stats['completed']}/{stats['total']} done")
+```
+
+```bash cURL
+curl -X GET "https://api.lasso.ai/v1/tables/tbl_abc123/enhance/status" \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "columns": {
+    "description": {
+      "total": 42,
+      "completed": 38,
+      "failed": 1,
+      "pending": 0,
+      "processing": 3
+    },
+    "seo_title": {
+      "total": 42,
+      "completed": 42,
+      "failed": 0,
+      "pending": 0,
+      "processing": 0
+    }
+  }
+}
+```
+</ResponseExample>

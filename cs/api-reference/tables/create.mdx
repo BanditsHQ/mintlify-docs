@@ -1,0 +1,144 @@
+---
+title: 'Vytvořit tabulku'
+api: 'POST /v1/tables'
+description: 'Vytvoření nové extrakční tabulky a spuštění zpracování.'
+---
+
+## Tělo požadavku
+
+<ParamField body="schema_id" type="string" required>
+  ID schématu, které se použije pro extrakci.
+</ParamField>
+
+<ParamField body="name" type="string" required>
+  Název tabulky.
+</ParamField>
+
+<ParamField body="file_ids" type="string[]">
+  Pole ID souborů (z Files API), ze kterých se mají extrahovat data. Zadejte přesně jedno z `file_ids`, `file_urls` nebo `source_text`.
+</ParamField>
+
+<ParamField body="file_urls" type="string[]">
+  Pole veřejně přístupných URL adres, ze kterých se mají extrahovat data.
+</ParamField>
+
+<ParamField body="source_text" type="string">
+  Surový textový obsah, ze kterého se mají extrahovat data.
+</ParamField>
+
+<ParamField body="additional_context" type="string">
+  Dodatečný kontext pro řízení procesu extrakce.
+</ParamField>
+
+<ParamField body="enhancement_context" type="string">
+  Kontext pro AI obohacení extrahovaných dat.
+</ParamField>
+
+<ParamField body="webhook_url" type="string">
+  URL pro příjem webhook notifikací po dokončení zpracování.
+</ParamField>
+
+## Odpověď
+
+Vrací vytvořený objekt tabulky se stavem `processing`.
+
+<ResponseField name="id" type="string">Jedinečný identifikátor tabulky.</ResponseField>
+<ResponseField name="name" type="string">Název tabulky.</ResponseField>
+<ResponseField name="schema_id" type="string">Schéma použité pro extrakci.</ResponseField>
+<ResponseField name="status" type="string">Pro novou tabulku vždy `processing`.</ResponseField>
+<ResponseField name="progress" type="integer">Průběh extrakce (0-100).</ResponseField>
+<ResponseField name="total_rows" type="integer">Počet dosud extrahovaných řádků (zpočátku 0).</ResponseField>
+<ResponseField name="source_type" type="string">`files` nebo `text`.</ResponseField>
+<ResponseField name="additional_context" type="string | null">Kontext extrakce.</ResponseField>
+<ResponseField name="enhancement_context" type="string | null">Kontext obohacení.</ResponseField>
+<ResponseField name="error_message" type="string | null">Chybová zpráva, pokud zpracování selhalo.</ResponseField>
+<ResponseField name="files" type="array">Metadata nahraných souborů.</ResponseField>
+<ResponseField name="created_at" type="string">Časové razítko ISO 8601.</ResponseField>
+<ResponseField name="updated_at" type="string">Časové razítko ISO 8601.</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const table = await client.tables.create({
+  schema_id: "schema_abc123",
+  name: "Q1 Product Catalog",
+  file_ids: ["file_xyz789"],
+  webhook_url: "https://your-server.com/webhooks",
+});
+
+console.log(table.id);     // "tbl_..."
+console.log(table.status); // "processing"
+```
+
+```python Python
+table = client.tables.create(
+    schema_id="schema_abc123",
+    name="Q1 Product Catalog",
+    file_ids=["file_xyz789"],
+    webhook_url="https://your-server.com/webhooks",
+)
+
+print(table["id"])      # "tbl_..."
+print(table["status"])  # "processing"
+```
+
+```bash cURL
+curl -X POST "https://api.lasso.ai/v1/tables" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "schema_id": "schema_abc123",
+    "name": "Q1 Product Catalog",
+    "file_ids": ["file_xyz789"],
+    "webhook_url": "https://your-server.com/webhooks"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "id": "tbl_abc123",
+  "name": "Q1 Product Catalog",
+  "schema_id": "schema_xyz789",
+  "status": "processing",
+  "progress": 0,
+  "total_rows": 0,
+  "source_type": "files",
+  "additional_context": null,
+  "enhancement_context": null,
+  "error_message": null,
+  "files": [
+    { "name": "catalog.pdf", "path": "company_123/file_xyz/catalog.pdf", "size": 1048576 }
+  ],
+  "created_at": "2025-03-10T14:30:00.000Z",
+  "updated_at": "2025-03-10T14:30:00.000Z"
+}
+```
+</ResponseExample>
+
+## Čekání na dokončení
+
+Tabulky se zpracovávají asynchronně. Použijte vestavěný polling helper SDK nebo nakonfigurujte webhook.
+
+<CodeGroup>
+```typescript TypeScript
+const completed = await client.tables.waitForCompletion(table.id, {
+  intervalMs: 3000,
+  timeoutMs: 300000,
+});
+
+console.log(completed.status);     // "completed"
+console.log(completed.total_rows); // 42
+```
+
+```python Python
+completed = client.tables.wait_for_completion(
+    table["id"],
+    interval_s=3,
+    timeout_s=300,
+)
+
+print(completed["status"])      # "completed"
+print(completed["total_rows"])  # 42
+```
+</CodeGroup>

@@ -1,0 +1,75 @@
+---
+title: 'AI obohacení'
+description: 'Obohaťte extrahovaná data o AI-generovaný obsah, překlady a webový výzkum.'
+---
+
+Obohacení vám umožňuje pomocí AI doplnit, zlepšit nebo transformovat hodnoty sloupců po extrakci. To je užitečné pro generování popisků, překládání obsahu nebo obohacování dat informacemi z webu.
+
+## Jak obohacení funguje
+
+1. **Vyberte řádky a sloupec** -- Zvolte, které řádky chcete obohatit a který sloupec vyplnit.
+2. **Napište prompt** -- Popište, co má AI vygenerovat, s využitím kontextu z ostatních sloupců.
+3. **AI zpracuje každý řádek** -- Model přečte existující data řádku a vygeneruje hodnotu.
+4. **Výsledky se zapíší zpět** -- Obohacené hodnoty nahradí nebo vyplní cílový sloupec.
+
+## Typy obohacení
+
+### Generování obsahu
+
+Generujte nový obsah na základě existujících dat:
+
+```
+"Write a compelling product description based on the product name and specifications."
+```
+
+### Překlad
+
+Přeložte obsah do jiného jazyka, volitelně s využitím vašeho slovníku:
+
+```
+"Translate the description to German."
+```
+
+Nastavte `target_language` a `use_glossary: true` pro aplikaci vašich termínů ze slovníku během překladu.
+
+### Webový výzkum
+
+Povolte `web_search: true`, aby AI mohla vyhledávat na webu další informace:
+
+```
+"Find the current retail price for this product from major retailers."
+```
+
+## Jeden sloupec vs hromadné obohacení
+
+- **Jeden sloupec** -- Obohaťte jeden sloupec napříč více řádky. Použijte [`POST /v1/tables/{id}/enhance`](/cs/api-reference/enhance/run).
+- **Hromadné** -- Obohaťte více sloupců jednoho řádku najednou. Použijte [`POST /v1/tables/{id}/enhance/bulk`](/cs/api-reference/enhance/bulk).
+
+## Sledování průběhu
+
+Obohacení běží asynchronně. Kontrolujte průběh pomocí:
+
+<CodeGroup>
+```typescript TypeScript
+const status = await client.enhance.status("tbl_abc123");
+
+for (const [column, stats] of Object.entries(status.columns)) {
+  console.log(`${column}: ${stats.completed}/${stats.total} done`);
+}
+```
+
+```python Python
+status = client.enhance.status("tbl_abc123")
+
+for column, stats in status["columns"].items():
+    print(f"{column}: {stats['completed']}/{stats['total']} done")
+```
+</CodeGroup>
+
+## Kredity
+
+Každé obohacení spotřebuje kredity. Odhadovaná cena se vrátí při spuštění úlohy obohacení. Svůj zůstatek můžete kdykoliv zkontrolovat prostřednictvím [Credits API](/cs/api-reference/credits/balance).
+
+## Trasování
+
+Každá AI-generovaná hodnota má trasování zobrazující prompt, použitý model, skóre spolehlivosti a zdroje. Podrobnosti najdete v [Row traces](/cs/api-reference/rows/traces).

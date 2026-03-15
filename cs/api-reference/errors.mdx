@@ -1,0 +1,82 @@
+---
+title: 'Chyby'
+description: 'Pochopte, jak Lasso API komunikuje chyby.'
+---
+
+API používá standardní HTTP stavové kódy a pro všechny chybové odpovědi vrací konzistentní JSON tělo.
+
+## Formát chybové odpovědi
+
+```json
+{
+  "status_code": 422,
+  "error_type": "validation_error",
+  "message": "Missing required field: name",
+  "request_id": "550e8400-e29b-41d4-a716-446655440000"
+}
+```
+
+<ResponseField name="status_code" type="integer">
+  HTTP stavový kód.
+</ResponseField>
+
+<ResponseField name="error_type" type="string">
+  Strojově čitelný typ chyby. Viz tabulka níže.
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Lidsky čitelné vysvětlení toho, co se pokazilo.
+</ResponseField>
+
+<ResponseField name="request_id" type="string">
+  Unikátní identifikátor požadavku. Uveďte ho při kontaktování podpory.
+</ResponseField>
+
+## Typy chyb
+
+| Typ chyby | Stavový kód | Popis |
+|---|---|---|
+| `invalid_request` | 400 | Požadavek je chybně formulovaný nebo používá nepodporovanou HTTP metodu. |
+| `unauthenticated` | 401 | Chybějící, neplatný nebo deaktivovaný API klíč. |
+| `insufficient_credits` | 402 | Váš účet nemá dostatek kreditů pro tuto operaci. |
+| `forbidden` | 403 | API klíč nemá oprávnění k této akci. |
+| `not_found` | 404 | Požadovaný zdroj neexistuje nebo nepatří vaší společnosti. |
+| `conflict` | 409 | Požadavek je v konfliktu s aktuálním stavem zdroje. |
+| `validation_error` | 422 | V těle požadavku chybí povinná pole nebo obsahuje neplatné hodnoty. |
+| `rate_limited` | 429 | Příliš mnoho požadavků. Snižte frekvenci a zkuste to znovu po chvíli. |
+| `internal_error` | 500 | Na serveru došlo k neočekávané chybě. |
+
+## Zpracování chyb pomocí SDK
+
+<CodeGroup>
+```typescript TypeScript
+import LassoClient, { LassoError } from "@lasso-ai/sdk";
+
+const client = new LassoClient({ apiKey: "lasso_..." });
+
+try {
+  await client.tables.get("nonexistent_id");
+} catch (err) {
+  if (err instanceof LassoError) {
+    console.log(err.statusCode);  // 404
+    console.log(err.errorType);   // "not_found"
+    console.log(err.message);     // "Table not found"
+    console.log(err.requestId);   // "550e8400-..."
+  }
+}
+```
+
+```python Python
+from lasso import LassoClient, LassoError
+
+client = LassoClient(api_key="lasso_...")
+
+try:
+    client.tables.get("nonexistent_id")
+except LassoError as err:
+    print(err.status_code)   # 404
+    print(err.error_type)    # "not_found"
+    print(err.args[0])       # "Table not found"
+    print(err.request_id)    # "550e8400-..."
+```
+</CodeGroup>

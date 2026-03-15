@@ -1,0 +1,62 @@
+---
+title: 'Obohacení pomocí AI'
+description: 'Použijte AI ke generování obsahu, překladu textu a obohacení extrahovaných dat.'
+---
+
+## Obohacení sloupce
+
+Použijte AI ke generování nebo obohacení hodnot pro konkrétní sloupec ve vybraných řádcích.
+
+```python
+rows = client.tables.rows("tbl_abc123", limit=100)
+
+job = client.enhance.cells(
+    "tbl_abc123",
+    row_ids=[r["id"] for r in rows["data"]],
+    column_key="description",
+    prompt="Write a compelling product description based on the product name and specifications.",
+    web_search=True,
+)
+
+print(job["id"])                 # "enhance_..."
+print(job["status"])             # "queued"
+print(job["estimated_credits"])  # 84
+```
+
+## Kontrola průběhu obohacení
+
+```python
+status = client.enhance.status("tbl_abc123")
+
+for column, stats in status["columns"].items():
+    print(f"{column}: {stats['completed']}/{stats['total']} done")
+```
+
+## Obohacení více sloupců najednou
+
+Obohaťte několik sloupců jednoho řádku v jednom požadavku:
+
+```python
+client.enhance.bulk(
+    "tbl_abc123",
+    row_id="row_xyz789",
+    columns=[
+        {"key": "description", "prompt": "Write a product description."},
+        {"key": "seo_title", "prompt": "Generate an SEO-optimized title."},
+        {"key": "description_de", "prompt": "Translate the description to German."},
+    ],
+)
+```
+
+## Zrušení obohacení
+
+```python
+result = client.enhance.cancel("tbl_abc123")
+print(result["cancelled_count"])
+```
+
+## Další
+
+<Card title="Export dat" icon="arrow-right" href="/cs/quickstart/python/export">
+  Exportujte svá data jako JSON, CSV, XLSX nebo obrázky.
+</Card>

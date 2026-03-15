@@ -5,12 +5,12 @@
   "colors": {
     "primary": "#1B1F1F",
     "light": "#1B1F1F",
-    "dark": "#1B1F1F"
+    "dark": "#7ECBC0"
   },
   "background": {
     "color": {
       "light": "#F1F3F3",
-      "dark": "#1B1F1F"
+      "dark": "#161A1A"
     }
   },
   "favicon": "/favicon.png",
@@ -33,131 +33,269 @@
     }
   },
   "navigation": {
-    "tabs": [
+    "languages": [
       {
-        "tab": "Documentation",
-        "icon": "book",
-        "groups": [
+        "language": "en",
+        "tabs": [
           {
-            "group": "Getting started",
-            "pages": [
-              "quickstart/introduction"
+            "tab": "Documentation",
+            "icon": "book",
+            "groups": [
+              {
+                "group": "Getting started",
+                "pages": [
+                  "quickstart/introduction"
+                ]
+              },
+              {
+                "group": "TypeScript",
+                "icon": "js",
+                "pages": [
+                  "quickstart/typescript/setup",
+                  "quickstart/typescript/extract",
+                  "quickstart/typescript/enhance",
+                  "quickstart/typescript/export"
+                ]
+              },
+              {
+                "group": "Python",
+                "icon": "python",
+                "pages": [
+                  "quickstart/python/setup",
+                  "quickstart/python/extract",
+                  "quickstart/python/enhance",
+                  "quickstart/python/export"
+                ]
+              },
+              {
+                "group": "Learn",
+                "pages": [
+                  "learn/tables",
+                  "learn/schemas",
+                  "learn/enhancement",
+                  "learn/files",
+                  "learn/exports",
+                  "learn/glossary",
+                  "learn/credits"
+                ]
+              }
             ]
           },
           {
-            "group": "TypeScript",
-            "icon": "js",
-            "pages": [
-              "quickstart/typescript/setup",
-              "quickstart/typescript/extract",
-              "quickstart/typescript/enhance",
-              "quickstart/typescript/export"
-            ]
-          },
-          {
-            "group": "Python",
-            "icon": "python",
-            "pages": [
-              "quickstart/python/setup",
-              "quickstart/python/extract",
-              "quickstart/python/enhance",
-              "quickstart/python/export"
-            ]
-          },
-          {
-            "group": "Learn",
-            "pages": [
-              "learn/tables",
-              "learn/schemas",
-              "learn/enhancement",
-              "learn/files",
-              "learn/exports",
-              "learn/glossary",
-              "learn/credits"
+            "tab": "API Reference",
+            "icon": "rectangle-terminal",
+            "groups": [
+              {
+                "group": "Overview",
+                "pages": [
+                  "api-reference/introduction",
+                  "api-reference/authentication",
+                  "api-reference/errors",
+                  "api-reference/pagination",
+                  "api-reference/webhooks"
+                ]
+              },
+              {
+                "group": "Tables",
+                "pages": [
+                  "api-reference/tables/list",
+                  "api-reference/tables/create",
+                  "api-reference/tables/get",
+                  "api-reference/tables/update",
+                  "api-reference/tables/delete",
+                  "api-reference/tables/columns",
+                  "api-reference/tables/export"
+                ]
+              },
+              {
+                "group": "Rows",
+                "pages": [
+                  "api-reference/rows/list",
+                  "api-reference/rows/get",
+                  "api-reference/rows/update",
+                  "api-reference/rows/delete",
+                  "api-reference/rows/bulk-update",
+                  "api-reference/rows/bulk-delete",
+                  "api-reference/rows/traces"
+                ]
+              },
+              {
+                "group": "Enhance",
+                "pages": [
+                  "api-reference/enhance/run",
+                  "api-reference/enhance/bulk",
+                  "api-reference/enhance/status",
+                  "api-reference/enhance/cancel"
+                ]
+              },
+              {
+                "group": "Schemas",
+                "pages": [
+                  "api-reference/schemas/list",
+                  "api-reference/schemas/create",
+                  "api-reference/schemas/get",
+                  "api-reference/schemas/update",
+                  "api-reference/schemas/delete",
+                  "api-reference/schemas/generate"
+                ]
+              },
+              {
+                "group": "Files",
+                "pages": [
+                  "api-reference/files/list",
+                  "api-reference/files/upload",
+                  "api-reference/files/delete"
+                ]
+              },
+              {
+                "group": "Glossary",
+                "pages": [
+                  "api-reference/glossary/list",
+                  "api-reference/glossary/create",
+                  "api-reference/glossary/update",
+                  "api-reference/glossary/delete"
+                ]
+              },
+              {
+                "group": "Credits",
+                "pages": [
+                  "api-reference/credits/balance",
+                  "api-reference/credits/usage"
+                ]
+              }
             ]
           }
         ]
       },
       {
-        "tab": "API Reference",
-        "icon": "rectangle-terminal",
-        "groups": [
+        "language": "cs",
+        "tabs": [
           {
-            "group": "Overview",
-            "pages": [
-              "api-reference/introduction",
-              "api-reference/authentication",
-              "api-reference/errors",
-              "api-reference/pagination",
-              "api-reference/webhooks"
+            "tab": "Dokumentace",
+            "icon": "book",
+            "groups": [
+              {
+                "group": "Začínáme",
+                "pages": [
+                  "cs/quickstart/introduction"
+                ]
+              },
+              {
+                "group": "TypeScript",
+                "icon": "js",
+                "pages": [
+                  "cs/quickstart/typescript/setup",
+                  "cs/quickstart/typescript/extract",
+                  "cs/quickstart/typescript/enhance",
+                  "cs/quickstart/typescript/export"
+                ]
+              },
+              {
+                "group": "Python",
+                "icon": "python",
+                "pages": [
+                  "cs/quickstart/python/setup",
+                  "cs/quickstart/python/extract",
+                  "cs/quickstart/python/enhance",
+                  "cs/quickstart/python/export"
+                ]
+              },
+              {
+                "group": "Naučte se",
+                "pages": [
+                  "cs/learn/tables",
+                  "cs/learn/schemas",
+                  "cs/learn/enhancement",
+                  "cs/learn/files",
+                  "cs/learn/exports",
+                  "cs/learn/glossary",
+                  "cs/learn/credits"
+                ]
+              }
             ]
           },
           {
-            "group": "Tables",
-            "pages": [
-              "api-reference/tables/list",
-              "api-reference/tables/create",
-              "api-reference/tables/get",
-              "api-reference/tables/update",
-              "api-reference/tables/delete",
-              "api-reference/tables/columns",
-              "api-reference/tables/export"
-            ]
-          },
-          {
-            "group": "Rows",
-            "pages": [
-              "api-reference/rows/list",
-              "api-reference/rows/get",
-              "api-reference/rows/update",
-              "api-reference/rows/delete",
-              "api-reference/rows/bulk-update",
-              "api-reference/rows/bulk-delete",
-              "api-reference/rows/traces"
-            ]
-          },
-          {
-            "group": "Enhance",
-            "pages": [
-              "api-reference/enhance/run",
-              "api-reference/enhance/bulk",
-              "api-reference/enhance/status",
-              "api-reference/enhance/cancel"
-            ]
-          },
-          {
-            "group": "Schemas",
-            "pages": [
-              "api-reference/schemas/list",
-              "api-reference/schemas/create",
-              "api-reference/schemas/get",
-              "api-reference/schemas/update",
-              "api-reference/schemas/delete",
-              "api-reference/schemas/generate"
-            ]
-          },
-          {
-            "group": "Files",
-            "pages": [
-              "api-reference/files/list",
-              "api-reference/files/upload",
-              "api-reference/files/delete"
-            ]
-          },
-          {
-            "group": "Glossary",
-            "pages": [
-              "api-reference/glossary/list",
-              "api-reference/glossary/create",
-              "api-reference/glossary/update",
-              "api-reference/glossary/delete"
-            ]
-          },
-          {
-            "group": "Credits",
-            "pages": [
-              "api-reference/credits/balance",
-              "api-reference/credits/usage"
+            "tab": "API Reference",
+            "icon": "rectangle-terminal",
+            "groups": [
+              {
+                "group": "Přehled",
+                "pages": [
+                  "cs/api-reference/introduction",
+                  "cs/api-reference/authentication",
+                  "cs/api-reference/errors",
+                  "cs/api-reference/pagination",
+                  "cs/api-reference/webhooks"
+                ]
+              },
+              {
+                "group": "Tabulky",
+                "pages": [
+                  "cs/api-reference/tables/list",
+                  "cs/api-reference/tables/create",
+                  "cs/api-reference/tables/get",
+                  "cs/api-reference/tables/update",
+                  "cs/api-reference/tables/delete",
+                  "cs/api-reference/tables/columns",
+                  "cs/api-reference/tables/export"
+                ]
+              },
+              {
+                "group": "Řádky",
+                "pages": [
+                  "cs/api-reference/rows/list",
+                  "cs/api-reference/rows/get",
+                  "cs/api-reference/rows/update",
+                  "cs/api-reference/rows/delete",
+                  "cs/api-reference/rows/bulk-update",
+                  "cs/api-reference/rows/bulk-delete",
+                  "cs/api-reference/rows/traces"
+                ]
+              },
+              {
+                "group": "Obohacení",
+                "pages": [
+                  "cs/api-reference/enhance/run",
+                  "cs/api-reference/enhance/bulk",
+                  "cs/api-reference/enhance/status",
+                  "cs/api-reference/enhance/cancel"
+                ]
+              },
+              {
+                "group": "Schémata",
+                "pages": [
+                  "cs/api-reference/schemas/list",
+                  "cs/api-reference/schemas/create",
+                  "cs/api-reference/schemas/get",
+                  "cs/api-reference/schemas/update",
+                  "cs/api-reference/schemas/delete",
+                  "cs/api-reference/schemas/generate"
+                ]
+              },
+              {
+                "group": "Soubory",
+                "pages": [
+                  "cs/api-reference/files/list",
+                  "cs/api-reference/files/upload",
+                  "cs/api-reference/files/delete"
+                ]
+              },
+              {
+                "group": "Slovník",
+                "pages": [
+                  "cs/api-reference/glossary/list",
+                  "cs/api-reference/glossary/create",
+                  "cs/api-reference/glossary/update",
+                  "cs/api-reference/glossary/delete"
+                ]
+              },
+              {
+                "group": "Kredity",
+                "pages": [
+                  "cs/api-reference/credits/balance",
+                  "cs/api-reference/credits/usage"
+                ]
+              }
             ]
           }
         ]
@@ -174,13 +312,13 @@
     "links": [
       {
         "label": "Sign In",
-        "href": "https://app.lasso.ai/login"
+        "href": "https://hub.banditshq.com/login"
       }
     ],
     "primary": {
       "type": "button",
       "label": "Get Started",
-      "href": "https://app.lasso.ai/register"
+      "href": "https://hub.banditshq.com/onboarding/product_extraction"
     }
   },
   "contextual": {

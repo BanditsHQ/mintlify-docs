@@ -1,0 +1,34 @@
+---
+title: 'Smazat soubor'
+api: "DELETE /v1/files/{file_id}"
+description: 'Smazání nahraného souboru.'
+---
+
+## Parametry cesty
+
+<ParamField path="file_id" type="string" required>
+  Jedinečný identifikátor souboru ke smazání.
+</ParamField>
+
+## Odpověď
+
+Při úspěchu vrací `204 No Content`. Soubor je odstraněn z úložiště a jeho metadata jsou smazána.
+
+<Warning>
+  Pokud byla s tímto souborem vytvořena tabulka, tabulka a její extrahovaná data nejsou ovlivněna. Smazán je pouze původní zdrojový soubor.
+</Warning>
+
+<RequestExample>
+```typescript TypeScript
+await client.files.delete("file_abc123");
+```
+
+```python Python
+client.files.delete("file_abc123")
+```
+
+```bash cURL
+curl -X DELETE "https://api.lasso.ai/v1/files/file_abc123" \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>

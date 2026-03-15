@@ -1,0 +1,34 @@
+---
+title: 'Instalace a nastavení'
+description: 'Nainstalujte Lasso Python SDK a vytvořte svého prvního klienta.'
+---
+
+## Předpoklady
+
+- [Vytvořte API key](https://app.lasso.ai) v Lasso dashboardu
+- Python 3.8 nebo novější
+
+## Instalace SDK
+
+```bash
+pip install lasso-ai
+```
+
+## Inicializace klienta
+
+```python
+from lasso import LassoClient
+import os
+
+client = LassoClient(api_key=os.environ["LASSO_API_KEY"])
+```
+
+<Warning>
+  Uložte svůj API key do proměnné prostředí. Nikdy ho nezapisujte přímo do zdrojového kódu.
+</Warning>
+
+## Další
+
+<Card title="Extrakce dat" icon="arrow-right" href="/cs/quickstart/python/extract">
+  Vytvořte schéma, nahrajte soubory a spusťte svou první extrakci.
+</Card>

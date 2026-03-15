@@ -1,0 +1,78 @@
+---
+title: 'Seznam pojmů ve slovníku'
+api: "GET /v1/glossary"
+description: 'Načtení stránkovaného seznamu vašich pojmů ve slovníku.'
+---
+
+## Query parametry
+
+<ParamField query="page" type="integer" default="1">
+  Číslo stránky pro stránkování.
+</ParamField>
+
+<ParamField query="limit" type="integer" default="25">
+  Počet položek na stránku (max 100).
+</ParamField>
+
+## Odpověď
+
+<ResponseField name="data" type="array">
+  <Expandable title="Objekt pojmu ve slovníku">
+    <ResponseField name="id" type="string">Jedinečný identifikátor pojmu.</ResponseField>
+    <ResponseField name="term" type="string">Původní pojem.</ResponseField>
+    <ResponseField name="type" type="string">`do_not_translate`, `specific_translation` nebo `context_dependent`.</ResponseField>
+    <ResponseField name="case_sensitive" type="boolean">Zda je porovnávání citlivé na velikost písmen.</ResponseField>
+    <ResponseField name="category" type="string">Kategorie pojmu.</ResponseField>
+    <ResponseField name="translations" type="object">Mapa kódu jazyka na přeložený pojem.</ResponseField>
+    <ResponseField name="created_at" type="string">Časové razítko ISO 8601.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  <Expandable title="Metadata stránkování">
+    <ResponseField name="page" type="integer">Aktuální stránka.</ResponseField>
+    <ResponseField name="limit" type="integer">Položek na stránku.</ResponseField>
+    <ResponseField name="total" type="integer">Celkový počet pojmů.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const result = await client.glossary.list({ page: 1, limit: 25 });
+
+for (const term of result.data) {
+  console.log(`${term.term} (${term.type})`);
+}
+```
+
+```python Python
+result = client.glossary.list(page=1, limit=25)
+
+for term in result["data"]:
+    print(f"{term['term']} ({term['type']})")
+```
+
+```bash cURL
+curl -X GET "https://api.lasso.ai/v1/glossary?page=1&limit=25" \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "data": [
+    {
+      "id": "term_abc123",
+      "term": "Lasso AI",
+      "type": "do_not_translate",
+      "case_sensitive": true,
+      "category": "brand",
+      "translations": {},
+      "created_at": "2025-03-01T10:00:00.000Z"
+    }
+  ],
+  "pagination": { "page": 1, "limit": 25, "total": 12 }
+}
+```
+</ResponseExample>

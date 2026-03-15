@@ -1,0 +1,34 @@
+---
+title: 'Smazat schéma'
+api: "DELETE /v1/schemas/{schema_id}"
+description: 'Trvalé smazání schématu.'
+---
+
+## Parametry cesty
+
+<ParamField path="schema_id" type="string" required>
+  Jedinečný identifikátor schématu ke smazání.
+</ParamField>
+
+## Odpověď
+
+Při úspěchu vrací `204 No Content`.
+
+<Warning>
+  Smazání schématu nesmaže tabulky, které s ním byly vytvořeny. Tyto tabulky si zachovají své definice sloupců.
+</Warning>
+
+<RequestExample>
+```typescript TypeScript
+await client.schemas.delete("schema_abc123");
+```
+
+```python Python
+client.schemas.delete("schema_abc123")
+```
+
+```bash cURL
+curl -X DELETE "https://api.lasso.ai/v1/schemas/schema_abc123" \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>

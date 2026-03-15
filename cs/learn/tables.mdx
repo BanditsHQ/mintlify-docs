@@ -1,0 +1,57 @@
+---
+title: 'Tabulky a extrakce'
+description: 'Zjistěte, jak Lasso extrahuje strukturovaná data z vašich zdrojových souborů.'
+---
+
+Tabulky jsou hlavním zdrojem v Lasso. Tabulka představuje extrakční úlohu, která přebírá nestrukturovaná zdrojová data a vytváří strukturované řádky s informacemi o produktech.
+
+## Jak funguje extrakce
+
+Když vytvoříte tabulku, Lasso zpracuje vaše zdrojové soubory prostřednictvím AI pipeline:
+
+1. **Parsování dokumentu** -- PDF, tabulky a obrázky jsou parsovány pro získání surového textu a vizuálních prvků.
+2. **Mapování schématu** -- AI namapuje surový obsah na definice sloupců vašeho schématu.
+3. **Generování řádků** -- Každý detekovaný produkt nebo položka se stane řádkem s hodnotami pro každý sloupec.
+4. **Validace** -- Extrahované hodnoty jsou validovány oproti typům sloupců (čísla, URL, e-maily atd.).
+
+## Typy zdrojů
+
+Data k extrakci můžete poskytnout třemi způsoby:
+
+| Zdroj | Popis |
+|---|---|
+| **Soubory** | Nahrajte PDF, tabulky, obrázky nebo dokumenty přes [Files API](/cs/api-reference/files/upload). |
+| **URL** | Při vytváření tabulky předejte veřejně přístupné URL adresy. |
+| **Text** | Poskytněte surový textový obsah k extrakci. |
+
+## Životní cyklus tabulky
+
+Tabulka prochází těmito stavy:
+
+```
+queued → processing → completed
+                    → failed
+```
+
+- **queued** -- Úloha čeká na zpracování.
+- **processing** -- Extrakce aktivně běží. Pole `progress` (0-100) sleduje průběh.
+- **completed** -- Všechny řádky byly extrahovány a jsou připraveny k dotazování.
+- **failed** -- Něco se pokazilo. Podrobnosti najdete v `error_message`.
+
+## Polling vs webhooky
+
+Máte dvě možnosti, jak zjistit, kdy extrakce skončí:
+
+- **Polling** -- Použijte `client.tables.waitForCompletion()` (SDK) nebo opakovaně dotazujte `GET /v1/tables/{id}`, dokud stav nebude `completed`.
+- **Webhooky** -- Při vytváření tabulky předejte `webhook_url`. Lasso odešle HTTP POST po dokončení zpracování.
+
+## Práce s řádky
+
+Jakmile je tabulka dokončena, každá extrahovaná položka je řádek. Řádky obsahují:
+
+- **data** -- Objekt klíč-hodnota odpovídající sloupcům vašeho schématu.
+- **validation_status** -- Zda řádek prošel typovou validací.
+- **enhancement_status** -- Stav AI obohacení pro jednotlivé sloupce.
+- **is_edited** -- Zda byl řádek ručně upraven prostřednictvím API.
+
+Řádky lze aktualizovat jednotlivě, hromadně nebo mazat. Podrobnosti najdete v [Rows API](/cs/api-reference/rows/list).

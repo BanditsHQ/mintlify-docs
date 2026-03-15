@@ -1,0 +1,92 @@
+---
+title: 'Stránkování'
+description: 'Procházejte rozsáhlé sady výsledků pomocí stránkování.'
+---
+
+Všechny endpointy pro výpis seznamů vrací stránkované výsledky. Stránkování řídíte pomocí query parametrů `page` a `limit`.
+
+## Parametry
+
+<ParamField query="page" type="integer" default="1">
+  Číslo stránky k načtení. Musí být 1 nebo více.
+</ParamField>
+
+<ParamField query="limit" type="integer" default="25">
+  Počet položek na stránku. Minimum 1, maximum 100.
+</ParamField>
+
+## Formát odpovědi
+
+Každá stránkovaná odpověď obsahuje objekt `pagination` společně s polem `data`.
+
+```json
+{
+  "data": [...],
+  "pagination": {
+    "page": 1,
+    "limit": 25,
+    "total": 143
+  }
+}
+```
+
+<ResponseField name="pagination" type="object">
+  <Expandable title="Vlastnosti">
+    <ResponseField name="page" type="integer">
+      Aktuální číslo stránky.
+    </ResponseField>
+    <ResponseField name="limit" type="integer">
+      Počet položek na stránku.
+    </ResponseField>
+    <ResponseField name="total" type="integer">
+      Celkový počet položek napříč všemi stránkami.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Příklad
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://api.lasso.ai/v1/tables?page=2&limit=10" \
+  -H "Authorization: Bearer lasso_..."
+```
+
+```typescript TypeScript
+const result = await client.tables.list({ page: 2, limit: 10 });
+console.log(result.pagination.total); // 143
+```
+
+```python Python
+result = client.tables.list(page=2, limit=10)
+print(result["pagination"]["total"])  # 143
+```
+</CodeGroup>
+
+## Iterace přes všechny stránky
+
+<CodeGroup>
+```typescript TypeScript
+let page = 1;
+const allTables = [];
+
+while (true) {
+  const result = await client.tables.list({ page, limit: 100 });
+  allTables.push(...result.data);
+  if (page * 100 >= result.pagination.total) break;
+  page++;
+}
+```
+
+```python Python
+all_tables = []
+page = 1
+
+while True:
+    result = client.tables.list(page=page, limit=100)
+    all_tables.extend(result["data"])
+    if page * 100 >= result["pagination"]["total"]:
+        break
+    page += 1
+```
+</CodeGroup>

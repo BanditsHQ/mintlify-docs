@@ -1,0 +1,65 @@
+---
+title: 'Nahrávání souborů'
+description: 'Nahrajte zdrojové soubory pro extrakci dat.'
+---
+
+Lasso přijímá řadu formátů souborů jako zdrojová data pro extrakci. Nejprve nahrajte soubory a poté na ně odkazujte pomocí ID při vytváření tabulky.
+
+## Podporované formáty
+
+| Formát | Přípony | Poznámky |
+|---|---|---|
+| PDF | `.pdf` | Podporovány jsou jak skenované, tak textové PDF soubory. |
+| Tabulky | `.xlsx`, `.xls`, `.csv` | Každý list nebo soubor je parsován pro data o produktech. |
+| Obrázky | `.jpg`, `.png`, `.webp` | OCR extrahuje text z obrázků. |
+| Dokumenty | `.docx`, `.doc` | Word dokumenty jsou parsovány pro obsah. |
+
+## Postup nahrávání
+
+<Steps>
+  <Step title="Nahrajte soubor">
+    Odešlete soubor jako `multipart/form-data` na `POST /v1/files`. Maximální velikost je 1 GB.
+  </Step>
+  <Step title="Získejte ID souboru">
+    Odpověď obsahuje pole `id`. Uložte si ho pro další krok.
+  </Step>
+  <Step title="Vytvořte tabulku">
+    Předejte ID souboru v poli `file_ids` při vytváření tabulky.
+  </Step>
+</Steps>
+
+## Příklad
+
+<CodeGroup>
+```typescript TypeScript
+const file = new File([buffer], "catalog.pdf", { type: "application/pdf" });
+const uploaded = await client.files.upload(file, "catalog.pdf");
+
+const table = await client.tables.create({
+  schema_id: "schema_abc",
+  name: "My Catalog",
+  file_ids: [uploaded.id],
+});
+```
+
+```python Python
+uploaded = client.files.upload("/path/to/catalog.pdf")
+
+table = client.tables.create(
+    schema_id="schema_abc",
+    name="My Catalog",
+    file_ids=[uploaded["id"]],
+)
+```
+</CodeGroup>
+
+## Alternativní zdroje
+
+Pokud nechcete nahrávat soubory, můžete také poskytnout:
+
+- **URL** -- Předejte `file_urls` s veřejně přístupnými URL adresami. Lasso je stáhne a zpracuje na straně serveru.
+- **Text** -- Předejte `source_text` se surovým textovým obsahem k extrakci.
+
+## Správa souborů
+
+Soubory lze zobrazit a smazat prostřednictvím [Files API](/cs/api-reference/files/list). Smazání souboru neovlivní tabulky, které z něj již byly vytvořeny.
