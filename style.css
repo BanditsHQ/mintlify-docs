@@ -54,6 +54,12 @@
   background-color: #ffffff !important;
 }
 
+/* Copy page button and dropdown: white bg to match content area (light only) */
+html:not(.dark) button.bg-background-light,
+html:not(.dark) [role="menu"].bg-background-light {
+  background-color: #ffffff !important;
+}
+
 /* ===== DARK MODE ===== */
 
 /* Fix primary-light variable for dark mode visibility */
