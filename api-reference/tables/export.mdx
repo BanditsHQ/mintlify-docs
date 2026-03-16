@@ -66,11 +66,11 @@ client.export.images("tbl_abc123", path="images.zip")
 
 ```bash cURL
 # Export as JSON
-curl -X GET "https://api.lasso.ai/v1/tables/tbl_abc123/export?format=json" \
+curl -X GET "https://hub.banditshq.com/api/v1/tables/tbl_abc123/export?format=json" \
   -H "Authorization: Bearer lasso_..."
 
 # Export specific columns as CSV
-curl -X GET "https://api.lasso.ai/v1/tables/tbl_abc123/export?format=csv&columns=name,price,url" \
+curl -X GET "https://hub.banditshq.com/api/v1/tables/tbl_abc123/export?format=csv&columns=name,price,url" \
   -H "Authorization: Bearer lasso_..." \
   -o export.csv
 ```

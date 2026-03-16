@@ -27,7 +27,7 @@
     }
   },
   "api": {
-    "baseUrl": "https://api.lasso.ai/v1",
+    "baseUrl": "https://hub.banditshq.com/api/v1",
     "auth": {
       "method": "bearer"
     }

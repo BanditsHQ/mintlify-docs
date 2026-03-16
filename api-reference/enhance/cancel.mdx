@@ -47,13 +47,13 @@ print(result["cancelled_count"])
 
 ```bash cURL
 # Cancel all pending enhancements
-curl -X POST "https://api.lasso.ai/v1/tables/tbl_abc123/enhance/cancel" \
+curl -X POST "https://hub.banditshq.com/api/v1/tables/tbl_abc123/enhance/cancel" \
   -H "Authorization: Bearer lasso_..." \
   -H "Content-Type: application/json" \
   -d '{}'
 
 # Cancel enhancements for a specific column
-curl -X POST "https://api.lasso.ai/v1/tables/tbl_abc123/enhance/cancel" \
+curl -X POST "https://hub.banditshq.com/api/v1/tables/tbl_abc123/enhance/cancel" \
   -H "Authorization: Bearer lasso_..." \
   -H "Content-Type: application/json" \
   -d '{"column_key": "description"}'
