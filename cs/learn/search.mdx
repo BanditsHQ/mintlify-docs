@@ -1,0 +1,29 @@
+---
+title: 'Vyhledávání produktů'
+description: 'Najděte produkty v databázi Lasso pomocí dotazů v přirozeném jazyce.'
+---
+
+Lasso Vyhledávání umožňuje najít produkty pomocí přirozeného jazyka. Popište, co hledáte, a Lasso vrátí strukturovaná, typovaná produktová data odpovídající vašemu schématu.
+
+## Jak to funguje
+
+1. **Popište, co potřebujete** -- Napište dotaz v přirozeném jazyce, např. "Sony sluchátka s potlačením hluku do 5000 Kč".
+2. **Lasso prohledá svou databázi** -- Produkty odpovídající vašemu dotazu jsou nalezeny a seřazeny.
+3. **Výsledky jsou strukturovány** -- Každý produkt je extrahován do vašeho schématu s typovanými poli, zdrojovými URL a skóre spolehlivosti.
+
+## Možnosti schématu
+
+Výstupní tvar ovládáte třemi způsoby:
+
+- **Použijte existující schéma** -- Předejte `schema_id` ze schématu vytvořeného přes `POST /v1/schemas`.
+- **Definujte sloupce inline** -- Předejte pole `columns` přímo v požadavku.
+- **Použijte výchozí** -- Vynechte obojí a Lasso použije standardní produktové schéma.
+
+## Kredity
+
+Každé vyhledávání stojí **5 kreditů**.
+
+## Další kroky
+
+- [API reference pro vyhledávání](/cs/api-reference/search) -- Kompletní dokumentace parametrů a odpovědí.
+- [Obohacení](/cs/learn/enrich) -- Vezměte výsledky vyhledávání a obohaťte je o další data.

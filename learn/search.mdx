@@ -1,0 +1,73 @@
+---
+title: 'Product search'
+description: 'Find products in Lasso's database using natural language queries.'
+---
+
+Lasso Search lets you find products using natural language. Describe what you're looking for and Lasso returns structured, typed product data matching your schema.
+
+## How it works
+
+1. **Describe what you need** -- Write a natural language query like "Sony noise cancelling headphones under $200".
+2. **Lasso searches its database** -- Products matching your query are discovered and ranked.
+3. **Results are structured** -- Each product is extracted into your schema with typed fields, source URLs, and confidence scores.
+
+## Schema options
+
+You control the output shape with three options:
+
+- **Use an existing schema** -- Pass a `schema_id` from a schema you've already created via `POST /v1/schemas`.
+- **Define columns inline** -- Pass a `columns` array directly in the request.
+- **Use the default** -- Omit both and Lasso uses a standard product schema (name, brand, price, description, category, image_url, url, features).
+
+## Sync vs async
+
+By default, search is synchronous — you send a request and get results back in the same call. For large or slow queries, pass a `webhook_url` to switch to async mode: Lasso returns `202` immediately and delivers results via webhook when ready.
+
+## Example
+
+<CodeGroup>
+```typescript TypeScript
+const results = await client.search({
+  query: "organic protein powder chocolate flavor",
+  columns: [
+    { key: "name", label: "Product Name", type: "text" },
+    { key: "brand", label: "Brand", type: "text" },
+    { key: "price", label: "Price", type: "number" },
+    { key: "protein_per_serving", label: "Protein (g)", type: "number" },
+  ],
+  max_results: 10,
+});
+
+console.log(`Found ${results.total_results} products`);
+for (const p of results.results) {
+  console.log(`${p.data.name} by ${p.data.brand} — $${p.data.price}`);
+}
+```
+
+```python Python
+results = client.search(
+    query="organic protein powder chocolate flavor",
+    columns=[
+        {"key": "name", "label": "Product Name", "type": "text"},
+        {"key": "brand", "label": "Brand", "type": "text"},
+        {"key": "price", "label": "Price", "type": "number"},
+        {"key": "protein_per_serving", "label": "Protein (g)", "type": "number"},
+    ],
+    max_results=10,
+)
+
+print(f"Found {results['total_results']} products")
+for p in results["results"]:
+    print(f"{p['data']['name']} by {p['data']['brand']} — ${p['data']['price']}")
+```
+</CodeGroup>
+
+## Credits
+
+Each search costs **5 credits**, regardless of how many results are returned.
+
+## Next steps
+
+- [Search API reference](/api-reference/search) -- Full parameter and response documentation.
+- [Enrich](/learn/enrich) -- Take search results and enrich them with additional data.
+- [Schemas](/learn/schemas) -- Create reusable schemas for consistent output.

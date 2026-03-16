@@ -1,0 +1,182 @@
+---
+title: 'Enrich products'
+description: 'Take partial product data and get back enriched records with missing fields filled in, sourced and cited.'
+api: "POST /v1/enrich"
+---
+
+Enrich takes partial product records and fills in missing fields using Lasso's product intelligence. Each enriched field comes with a **basis** — citations, reasoning, and confidence — so you know exactly where the data came from.
+
+No tables or files needed. Pass in what you have, get back complete product records.
+
+## Request body
+
+<ParamField body="items" type="object[]" required>
+  Array of partial product records to enrich (max 50).
+  <Expandable>
+    <ParamField body="items[].data" type="object" required>
+      Key-value pairs of known product data, e.g. `{ "name": "Sony WF-1000XM5", "sku": "WF1000XM5/B" }`.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="schema_id" type="string">
+  Reference an existing schema created via `POST /v1/schemas`. Mutually exclusive with `columns`.
+</ParamField>
+
+<ParamField body="columns" type="object[]">
+  Inline column definitions for the target schema. Mutually exclusive with `schema_id`. If neither is provided, Lasso uses a default product schema.
+  <Expandable>
+    <ParamField body="columns[].key" type="string" required>Unique column key.</ParamField>
+    <ParamField body="columns[].label" type="string" required>Display label.</ParamField>
+    <ParamField body="columns[].type" type="string" required>Column type (`text`, `number`, `url`, `tags`, etc.).</ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="context" type="string">
+  Additional context for the AI, e.g. `"These are consumer electronics for a European e-commerce catalog"`.
+</ParamField>
+
+<ParamField body="model" type="string" default="auto">
+  AI model to use.
+</ParamField>
+
+<ParamField body="use_glossary" type="boolean" default="false">
+  Apply your company glossary terms during enrichment for consistent terminology.
+</ParamField>
+
+<ParamField body="webhook_url" type="string">
+  If provided, Lasso returns `202` immediately and delivers results via webhook. Also triggered automatically for batches larger than 5 items.
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">Enrichment job identifier.</ResponseField>
+<ResponseField name="status" type="string">`completed` for sync, `processing` for async.</ResponseField>
+<ResponseField name="items" type="object[]">
+  Array of enriched product records.
+  <Expandable>
+    <ResponseField name="items[].data" type="object">Complete product data with all schema columns filled in.</ResponseField>
+    <ResponseField name="items[].basis" type="object[]">
+      Per-field citations and reasoning (inspired by [Parallel's Task API](https://docs.parallel.ai/task-api/task-enrichment)).
+      <Expandable>
+        <ResponseField name="basis[].field" type="string">The column key this basis applies to.</ResponseField>
+        <ResponseField name="basis[].citations" type="object[]">Sources used: `{ url, title, excerpt }`.</ResponseField>
+        <ResponseField name="basis[].reasoning" type="string">AI explanation of how it determined the value.</ResponseField>
+        <ResponseField name="basis[].confidence" type="string">`high` or `low`.</ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+<ResponseField name="credits_used" type="number">Credits consumed (3 per item).</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const result = await client.enrich({
+  items: [
+    { data: { name: "Sony WF-1000XM5", sku: "WF1000XM5/B" } },
+    { data: { name: "AirPods Pro 2", brand: "Apple" } },
+  ],
+  columns: [
+    { key: "name", label: "Product Name", type: "text" },
+    { key: "brand", label: "Brand", type: "text" },
+    { key: "price", label: "Price", type: "number" },
+    { key: "description", label: "Description", type: "text" },
+    { key: "features", label: "Features", type: "tags" },
+  ],
+  context: "Consumer electronics for an e-commerce catalog",
+});
+
+for (const item of result.items) {
+  console.log(item.data.name, "—", item.data.price);
+  for (const b of item.basis) {
+    console.log(`  ${b.field}: ${b.confidence} (${b.citations.length} sources)`);
+  }
+}
+```
+
+```python Python
+result = client.enrich(
+    items=[
+        {"data": {"name": "Sony WF-1000XM5", "sku": "WF1000XM5/B"}},
+        {"data": {"name": "AirPods Pro 2", "brand": "Apple"}},
+    ],
+    columns=[
+        {"key": "name", "label": "Product Name", "type": "text"},
+        {"key": "brand", "label": "Brand", "type": "text"},
+        {"key": "price", "label": "Price", "type": "number"},
+        {"key": "description", "label": "Description", "type": "text"},
+        {"key": "features", "label": "Features", "type": "tags"},
+    ],
+    context="Consumer electronics for an e-commerce catalog",
+)
+
+for item in result["items"]:
+    print(item["data"]["name"], "—", item["data"]["price"])
+    for b in item["basis"]:
+        print(f"  {b['field']}: {b['confidence']} ({len(b['citations'])} sources)")
+```
+
+```bash cURL
+curl -X POST "https://hub.banditshq.com/api/v1/enrich" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "items": [
+      { "data": { "name": "Sony WF-1000XM5", "sku": "WF1000XM5/B" } }
+    ],
+    "columns": [
+      { "key": "name", "label": "Product Name", "type": "text" },
+      { "key": "brand", "label": "Brand", "type": "text" },
+      { "key": "price", "label": "Price", "type": "number" },
+      { "key": "description", "label": "Description", "type": "text" }
+    ]
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "id": "enrich_abc123",
+  "status": "completed",
+  "items": [
+    {
+      "data": {
+        "name": "Sony WF-1000XM5",
+        "brand": "Sony",
+        "price": 179.99,
+        "description": "Premium truly wireless earbuds with industry-leading noise cancellation, LDAC codec support, and 30-hour battery life.",
+        "features": ["noise cancelling", "LDAC", "30h battery", "IPX4"]
+      },
+      "basis": [
+        {
+          "field": "price",
+          "citations": [
+            {
+              "url": "https://www.sony.com/en/headphones/wf-1000xm5",
+              "title": "Sony WF-1000XM5",
+              "excerpt": "Buy WF-1000XM5 Wireless Noise Cancelling Earbuds — $179.99"
+            }
+          ],
+          "reasoning": "Price confirmed across Sony official store and major retailers.",
+          "confidence": "high"
+        },
+        {
+          "field": "features",
+          "citations": [
+            {
+              "url": "https://www.rtings.com/headphones/reviews/sony/wf-1000xm5",
+              "title": "Sony WF-1000XM5 Review - RTINGS",
+              "excerpt": "Features include active noise cancellation, LDAC codec, 30h battery, IPX4 water resistance."
+            }
+          ],
+          "reasoning": "Feature list compiled from manufacturer specs and third-party reviews.",
+          "confidence": "high"
+        }
+      ]
+    }
+  ],
+  "credits_used": 3
+}
+```
+</ResponseExample>

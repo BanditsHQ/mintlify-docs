@@ -70,6 +70,8 @@
               {
                 "group": "Learn",
                 "pages": [
+                  "learn/search",
+                  "learn/enrich",
                   "learn/tables",
                   "learn/schemas",
                   "learn/enhancement",
@@ -93,6 +95,18 @@
                   "api-reference/errors",
                   "api-reference/pagination",
                   "api-reference/webhooks"
+                ]
+              },
+              {
+                "group": "Search",
+                "pages": [
+                  "api-reference/search"
+                ]
+              },
+              {
+                "group": "Enrich",
+                "pages": [
+                  "api-reference/enrich"
                 ]
               },
               {
@@ -203,6 +217,8 @@
               {
                 "group": "Naučte se",
                 "pages": [
+                  "cs/learn/search",
+                  "cs/learn/enrich",
                   "cs/learn/tables",
                   "cs/learn/schemas",
                   "cs/learn/enhancement",
@@ -226,6 +242,18 @@
                   "cs/api-reference/errors",
                   "cs/api-reference/pagination",
                   "cs/api-reference/webhooks"
+                ]
+              },
+              {
+                "group": "Vyhledávání",
+                "pages": [
+                  "cs/api-reference/search"
+                ]
+              },
+              {
+                "group": "Obohacení dat",
+                "pages": [
+                  "cs/api-reference/enrich"
                 ]
               },
               {

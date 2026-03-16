@@ -1,0 +1,66 @@
+---
+title: 'Vyhledávání produktů'
+description: 'Vyhledávejte v databázi Lasso a získejte strukturovaná data odpovídající vašemu schématu.'
+api: "POST /v1/search"
+---
+
+Vyhledávejte v databázi Lasso produkty odpovídající dotazu v přirozeném jazyce. Lasso najde odpovídající produkty a strukturuje výsledky do vašeho schématu — vrací typovaná, normalizovaná data se zdrojovými URL a skóre spolehlivosti.
+
+Není potřeba žádná tabulka ani soubory. Jedno volání, strukturovaná produktová data zpět.
+
+## Tělo požadavku
+
+<ParamField body="query" type="string" required>
+  Vyhledávací dotaz v přirozeném jazyce. Filtry vložte přímo do textu, např. `"Sony bezdrátová sluchátka s potlačením hluku do 5000 Kč"`.
+</ParamField>
+
+<ParamField body="schema_id" type="string">
+  Odkaz na existující schéma vytvořené přes `POST /v1/schemas`. Vzájemně se vylučuje s `columns`.
+</ParamField>
+
+<ParamField body="columns" type="object[]">
+  Inline definice sloupců popisující výstupní tvar. Vzájemně se vylučuje se `schema_id`. Pokud není zadáno ani jedno, Lasso použije výchozí produktové schéma.
+</ParamField>
+
+<ParamField body="max_results" type="integer" default="10">
+  Maximální počet produktů k vrácení (1–50).
+</ParamField>
+
+<ParamField body="model" type="string" default="auto">
+  AI model pro strukturování výsledků.
+</ParamField>
+
+<ParamField body="webhook_url" type="string">
+  Pokud je zadáno, Lasso vrátí `202` okamžitě a výsledky doručí přes webhook.
+</ParamField>
+
+## Odpověď
+
+<ResponseField name="id" type="string">Identifikátor vyhledávací úlohy.</ResponseField>
+<ResponseField name="status" type="string">`completed` pro synchronní, `processing` pro asynchronní režim.</ResponseField>
+<ResponseField name="results" type="object[]">Pole strukturovaných produktových výsledků.</ResponseField>
+<ResponseField name="total_results" type="integer">Počet vrácených produktů.</ResponseField>
+<ResponseField name="credits_used" type="number">Spotřebované kredity (5 za vyhledávání).</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const results = await client.search({
+  query: "Sony bezdrátová sluchátka s potlačením hluku",
+  max_results: 5,
+});
+```
+
+```python Python
+results = client.search(
+    query="Sony bezdrátová sluchátka s potlačením hluku",
+    max_results=5,
+)
+```
+
+```bash cURL
+curl -X POST "https://hub.banditshq.com/api/v1/search" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{ "query": "Sony bezdrátová sluchátka", "max_results": 5 }'
+```
+</RequestExample>

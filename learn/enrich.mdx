@@ -1,0 +1,107 @@
+---
+title: 'Data enrichment'
+description: 'Turn partial product data into complete, sourced records with Lasso Enrich.'
+---
+
+Lasso Enrich takes partial product records — as little as a product name or SKU — and fills in every missing field with sourced, cited data. Each value comes with a **basis** showing exactly where the information came from.
+
+## How it works
+
+1. **Pass in what you have** -- Provide one or more items with whatever data you already know (name, SKU, brand, etc.).
+2. **Define the target schema** -- Tell Lasso what fields you want filled in (or use the default product schema).
+3. **Lasso researches each product** -- The AI searches Lasso's database, finds the product, and extracts structured data.
+4. **Get back complete records** -- Every field is filled in with citations, reasoning, and confidence scores.
+
+## The basis
+
+Every enriched field includes a `basis` — inspired by [Parallel's Task API](https://docs.parallel.ai/task-api/task-enrichment) — that tells you:
+
+- **citations** -- The sources used (URL, title, excerpt)
+- **reasoning** -- How the AI determined the value
+- **confidence** -- `high` or `low`
+
+This transparency is critical for product data quality. You can verify values, filter by confidence, or show sources to your users.
+
+## Schema options
+
+Same as Search — use `schema_id`, inline `columns`, or omit both for the default product schema.
+
+## Sync vs async
+
+- **Sync** (default): For up to 5 items, Lasso processes and returns results in the same request.
+- **Async**: For larger batches (>5 items) or when you pass `webhook_url`, Lasso returns `202` immediately and delivers results via webhook.
+
+## Example: Search then Enrich
+
+A common pattern is to search for products first, then enrich the results with additional detail.
+
+<CodeGroup>
+```typescript TypeScript
+// 1. Search for products
+const search = await client.search({
+  query: "best wireless mice for gaming 2025",
+  columns: [
+    { key: "name", label: "Name", type: "text" },
+    { key: "brand", label: "Brand", type: "text" },
+  ],
+  max_results: 5,
+});
+
+// 2. Enrich with full detail
+const enriched = await client.enrich({
+  items: search.results.map(r => ({ data: r.data })),
+  columns: [
+    { key: "name", label: "Name", type: "text" },
+    { key: "brand", label: "Brand", type: "text" },
+    { key: "price", label: "Price", type: "number" },
+    { key: "dpi", label: "Max DPI", type: "number" },
+    { key: "weight", label: "Weight (g)", type: "number" },
+    { key: "features", label: "Features", type: "tags" },
+    { key: "description", label: "Description", type: "text" },
+  ],
+});
+
+for (const item of enriched.items) {
+  console.log(`${item.data.name} — ${item.data.price}g, ${item.data.dpi} DPI`);
+}
+```
+
+```python Python
+# 1. Search for products
+search = client.search(
+    query="best wireless mice for gaming 2025",
+    columns=[
+        {"key": "name", "label": "Name", "type": "text"},
+        {"key": "brand", "label": "Brand", "type": "text"},
+    ],
+    max_results=5,
+)
+
+# 2. Enrich with full detail
+enriched = client.enrich(
+    items=[{"data": r["data"]} for r in search["results"]],
+    columns=[
+        {"key": "name", "label": "Name", "type": "text"},
+        {"key": "brand", "label": "Brand", "type": "text"},
+        {"key": "price", "label": "Price", "type": "number"},
+        {"key": "dpi", "label": "Max DPI", "type": "number"},
+        {"key": "weight", "label": "Weight (g)", "type": "number"},
+        {"key": "features", "label": "Features", "type": "tags"},
+        {"key": "description", "label": "Description", "type": "text"},
+    ],
+)
+
+for item in enriched["items"]:
+    print(f"{item['data']['name']} — {item['data']['price']}g, {item['data']['dpi']} DPI")
+```
+</CodeGroup>
+
+## Credits
+
+Each item costs **3 credits** to enrich.
+
+## Next steps
+
+- [Enrich API reference](/api-reference/enrich) -- Full parameter and response documentation.
+- [Search](/learn/search) -- Discover products to enrich.
+- [Glossary](/learn/glossary) -- Control terminology during enrichment with `use_glossary: true`.

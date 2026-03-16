@@ -1,0 +1,118 @@
+---
+title: 'Search products'
+description: 'Search Lasso's product database and get back structured data matching your schema.'
+api: "POST /v1/search"
+---
+
+Search Lasso's product database for products matching a natural language query. Lasso finds matching products and structures the results into your schema — returning typed, normalized data with source URLs and confidence scores.
+
+No tables or files needed. One call in, structured product data out.
+
+## Request body
+
+<ParamField body="query" type="string" required>
+  Natural language search query. Embed any filters directly in the text, e.g. `"Sony wireless earbuds noise cancelling under $200"`.
+</ParamField>
+
+<ParamField body="schema_id" type="string">
+  Reference an existing schema created via `POST /v1/schemas`. The endpoint loads the schema's column definitions. Mutually exclusive with `columns`.
+</ParamField>
+
+<ParamField body="columns" type="object[]">
+  Inline column definitions describing the output shape. Mutually exclusive with `schema_id`. If neither is provided, Lasso uses a default product schema (name, brand, price, description, category, image_url, url, features).
+  <Expandable>
+    <ParamField body="columns[].key" type="string" required>Unique column key.</ParamField>
+    <ParamField body="columns[].label" type="string" required>Display label.</ParamField>
+    <ParamField body="columns[].type" type="string" required>Column type (`text`, `number`, `url`, `tags`, etc.).</ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="max_results" type="integer" default="10">
+  Maximum number of products to return (1–50).
+</ParamField>
+
+<ParamField body="model" type="string" default="auto">
+  AI model to use for structuring results.
+</ParamField>
+
+<ParamField body="webhook_url" type="string">
+  If provided, Lasso returns `202` immediately and delivers results via webhook when ready.
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">Search job identifier.</ResponseField>
+<ResponseField name="status" type="string">`completed` for sync, `processing` for async.</ResponseField>
+<ResponseField name="query" type="string">The original search query.</ResponseField>
+<ResponseField name="results" type="object[]">
+  Array of structured product results.
+  <Expandable>
+    <ResponseField name="results[].data" type="object">Product data matching your schema columns.</ResponseField>
+    <ResponseField name="results[].source_url" type="string">URL where the product was found.</ResponseField>
+    <ResponseField name="results[].source_title" type="string">Title of the source page.</ResponseField>
+    <ResponseField name="results[].confidence" type="number">AI confidence score (0–1).</ResponseField>
+  </Expandable>
+</ResponseField>
+<ResponseField name="total_results" type="integer">Number of products returned.</ResponseField>
+<ResponseField name="credits_used" type="number">Credits consumed (5 per search).</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const results = await client.search({
+  query: "Sony wireless earbuds noise cancelling under $200",
+  max_results: 5,
+});
+
+for (const product of results.results) {
+  console.log(product.data.name, product.data.price);
+  console.log("  Source:", product.source_url);
+}
+```
+
+```python Python
+results = client.search(
+    query="Sony wireless earbuds noise cancelling under $200",
+    max_results=5,
+)
+
+for product in results["results"]:
+    print(product["data"]["name"], product["data"]["price"])
+    print("  Source:", product["source_url"])
+```
+
+```bash cURL
+curl -X POST "https://hub.banditshq.com/api/v1/search" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "Sony wireless earbuds noise cancelling under $200",
+    "max_results": 5
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "id": "search_abc123",
+  "status": "completed",
+  "query": "Sony wireless earbuds noise cancelling under $200",
+  "results": [
+    {
+      "data": {
+        "name": "Sony WF-1000XM5",
+        "brand": "Sony",
+        "price": 179.99,
+        "description": "Premium truly wireless earbuds with industry-leading noise cancellation.",
+        "features": ["noise cancelling", "LDAC", "30h battery"]
+      },
+      "source_url": "https://www.sony.com/en/headphones/wf-1000xm5",
+      "source_title": "Sony WF-1000XM5 | Wireless Earbuds",
+      "confidence": 0.95
+    }
+  ],
+  "total_results": 5,
+  "credits_used": 5
+}
+```
+</ResponseExample>

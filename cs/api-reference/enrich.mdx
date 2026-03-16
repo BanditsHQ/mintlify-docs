@@ -1,0 +1,88 @@
+---
+title: 'Obohacení produktů'
+description: 'Předejte částečná produktová data a získejte zpět obohacené záznamy s vyplněnými chybějícími poli.'
+api: "POST /v1/enrich"
+---
+
+Obohacení vezme částečné produktové záznamy a vyplní chybějící pole pomocí produktové inteligence Lasso. Každé obohacené pole obsahuje **basis** — citace, zdůvodnění a úroveň spolehlivosti.
+
+Není potřeba žádná tabulka ani soubory. Předejte co máte, získejte kompletní produktové záznamy.
+
+## Tělo požadavku
+
+<ParamField body="items" type="object[]" required>
+  Pole částečných produktových záznamů k obohacení (max 50).
+  <Expandable>
+    <ParamField body="items[].data" type="object" required>
+      Páry klíč-hodnota známých produktových dat.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="schema_id" type="string">
+  Odkaz na existující schéma. Vzájemně se vylučuje s `columns`.
+</ParamField>
+
+<ParamField body="columns" type="object[]">
+  Inline definice sloupců. Vzájemně se vylučuje se `schema_id`. Pokud není zadáno ani jedno, Lasso použije výchozí produktové schéma.
+</ParamField>
+
+<ParamField body="context" type="string">
+  Dodatečný kontext pro AI obohacení.
+</ParamField>
+
+<ParamField body="model" type="string" default="auto">
+  AI model k použití.
+</ParamField>
+
+<ParamField body="use_glossary" type="boolean" default="false">
+  Použít firemní glosář pro konzistentní terminologii.
+</ParamField>
+
+<ParamField body="webhook_url" type="string">
+  Pokud je zadáno, Lasso vrátí `202` okamžitě a výsledky doručí přes webhook.
+</ParamField>
+
+## Odpověď
+
+<ResponseField name="id" type="string">Identifikátor úlohy obohacení.</ResponseField>
+<ResponseField name="status" type="string">`completed` pro synchronní, `processing` pro asynchronní režim.</ResponseField>
+<ResponseField name="items" type="object[]">Pole obohacených produktových záznamů s `data` a `basis`.</ResponseField>
+<ResponseField name="credits_used" type="number">Spotřebované kredity (3 za položku).</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const result = await client.enrich({
+  items: [
+    { data: { name: "Sony WF-1000XM5", sku: "WF1000XM5/B" } },
+  ],
+  columns: [
+    { key: "name", label: "Název produktu", type: "text" },
+    { key: "brand", label: "Značka", type: "text" },
+    { key: "price", label: "Cena", type: "number" },
+  ],
+});
+```
+
+```python Python
+result = client.enrich(
+    items=[
+        {"data": {"name": "Sony WF-1000XM5", "sku": "WF1000XM5/B"}},
+    ],
+    columns=[
+        {"key": "name", "label": "Název produktu", "type": "text"},
+        {"key": "brand", "label": "Značka", "type": "text"},
+        {"key": "price", "label": "Cena", "type": "number"},
+    ],
+)
+```
+
+```bash cURL
+curl -X POST "https://hub.banditshq.com/api/v1/enrich" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "items": [{ "data": { "name": "Sony WF-1000XM5" } }]
+  }'
+```
+</RequestExample>

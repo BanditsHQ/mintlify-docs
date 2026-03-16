@@ -5,6 +5,8 @@ description: 'Understand general concepts, response codes, and authentication st
 
 The Lasso API is built on REST principles. All requests use HTTPS and return JSON responses.
 
+Use Lasso to **search** for products, **enrich** partial data into complete records, **extract** structured data from files, and **enhance** it with AI — all through a single API.
+
 ## Base URL
 
 All requests contain the following base URL:
@@ -12,6 +14,26 @@ All requests contain the following base URL:
 ```
 https://hub.banditshq.com/api/v1
 ```
+
+## Quick examples
+
+The fastest way to use Lasso — no setup required:
+
+<CodeGroup>
+```bash Search for products
+curl -X POST "https://hub.banditshq.com/api/v1/search" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{ "query": "Sony wireless earbuds under $200" }'
+```
+
+```bash Enrich product data
+curl -X POST "https://hub.banditshq.com/api/v1/enrich" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{ "items": [{ "data": { "name": "Sony WF-1000XM5" } }] }'
+```
+</CodeGroup>
 
 ## Authentication
 
@@ -42,12 +64,26 @@ pip install lasso-ai
 import LassoClient from "@lasso-ai/sdk";
 
 const client = new LassoClient({ apiKey: "lasso_..." });
+
+// Search
+const results = await client.search({ query: "wireless earbuds" });
+
+// Enrich
+const enriched = await client.enrich({
+  items: [{ data: { name: "Sony WF-1000XM5" } }],
+});
 ```
 
 ```python Python
 from lasso import LassoClient
 
 client = LassoClient(api_key="lasso_...")
+
+# Search
+results = client.search(query="wireless earbuds")
+
+# Enrich
+enriched = client.enrich(items=[{"data": {"name": "Sony WF-1000XM5"}}])
 ```
 </CodeGroup>
 
@@ -59,6 +95,7 @@ Lasso uses standard HTTP codes to indicate the success or failure of your reques
 |---|---|---|
 | `200` | Success | Successful request. |
 | `201` | Created | Resource successfully created. |
+| `202` | Accepted | Async job queued (search, enrich, enhance). |
 | `204` | No Content | Successful deletion. |
 | `400` | `invalid_request` | The request is malformed or uses an unsupported HTTP method. |
 | `401` | `unauthenticated` | Missing, invalid, or deactivated API key. |
@@ -91,6 +128,6 @@ See [Pagination](/api-reference/pagination) for details and iteration examples.
 
 ## Webhooks
 
-Configure a `webhook_url` when creating a table to receive HTTP POST notifications when processing completes. Webhook payloads are signed with HMAC-SHA256 and retried up to 3 times with exponential backoff.
+Configure a `webhook_url` on search, enrich, or table creation to receive HTTP POST notifications when processing completes. Webhook payloads are signed with HMAC-SHA256 and retried up to 3 times with exponential backoff.
 
 See [Webhooks](/api-reference/webhooks) for delivery format, signature verification, and retry policy.

@@ -1,0 +1,31 @@
+---
+title: 'Obohacení dat'
+description: 'Přeměňte částečná produktová data na kompletní, zdrojované záznamy pomocí Lasso Enrich.'
+---
+
+Lasso Enrich vezme částečné produktové záznamy — stačí i jen název produktu nebo SKU — a vyplní každé chybějící pole zdrojovanými, citovanými daty. Každá hodnota je doplněna **basis** ukazujícím přesně, odkud informace pochází.
+
+## Jak to funguje
+
+1. **Předejte, co máte** -- Poskytněte jednu nebo více položek s jakýmikoli daty, která už znáte.
+2. **Definujte cílové schéma** -- Řekněte Lassu, jaká pole chcete vyplnit (nebo použijte výchozí schéma).
+3. **Lasso prozkoumá každý produkt** -- AI prohledá databázi Lasso, najde produkt a extrahuje strukturovaná data.
+4. **Získejte kompletní záznamy** -- Každé pole je vyplněno s citacemi, zdůvodněním a skóre spolehlivosti.
+
+## Basis
+
+Každé obohacené pole obsahuje `basis`, který vám říká:
+
+- **citations** -- Použité zdroje (URL, název, úryvek)
+- **reasoning** -- Jak AI určila hodnotu
+- **confidence** -- `high` nebo `low`
+
+## Kredity
+
+Každá položka stojí **3 kredity** k obohacení.
+
+## Další kroky
+
+- [API reference pro obohacení](/cs/api-reference/enrich) -- Kompletní dokumentace parametrů a odpovědí.
+- [Vyhledávání](/cs/learn/search) -- Objevte produkty k obohacení.
+- [Glosář](/cs/learn/glossary) -- Kontrolujte terminologii při obohacení pomocí `use_glossary: true`.
