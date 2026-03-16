@@ -57,7 +57,7 @@ No tables or files needed. Pass in what you have, get back complete product reco
   <Expandable>
     <ResponseField name="items[].data" type="object">Complete product data with all schema columns filled in.</ResponseField>
     <ResponseField name="items[].basis" type="object[]">
-      Per-field citations and reasoning (inspired by [Parallel's Task API](https://docs.parallel.ai/task-api/task-enrichment)).
+      Per-field citations and reasoning for each enriched value.
       <Expandable>
         <ResponseField name="basis[].field" type="string">The column key this basis applies to.</ResponseField>
         <ResponseField name="basis[].citations" type="object[]">Sources used: `{ url, title, excerpt }`.</ResponseField>
