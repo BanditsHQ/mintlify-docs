@@ -28,7 +28,7 @@
   },
   "api": {
     "mdx": {
-      "server": "https://hub.banditshq.com/api/v1",
+      "server": "https://hub.banditshq.com/api",
       "auth": {
         "method": "bearer"
       }
