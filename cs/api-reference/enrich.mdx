@@ -1,7 +1,7 @@
 ---
 title: 'Obohacení produktů'
 description: 'Předejte částečná produktová data a získejte zpět obohacené záznamy s vyplněnými chybějícími poli.'
-api: "POST /enrich"
+api: "POST /v1/enrich"
 ---
 
 Obohacení vezme částečné produktové záznamy a vyplní chybějící pole pomocí produktové inteligence Lasso. Každé obohacené pole obsahuje **basis** — citace, zdůvodnění a úroveň spolehlivosti.
@@ -39,6 +39,18 @@ Není potřeba žádná tabulka ani soubory. Předejte co máte, získejte kompl
   Použít firemní glosář pro konzistentní terminologii.
 </ParamField>
 
+<ParamField body="web_search" type="boolean" default="true">
+  Zda použít webové vyhledávání při obohacení. Když `false`, AI vyplní pole ze svých vlastních znalostí a **v odpovědi se nevrací basis/citace**. Vhodné pro rychlé, levnější obohacení bez nutnosti zdrojování.
+</ParamField>
+
+<ParamField body="thinking" type="string" default="medium">
+  Ovládá hloubku AI uvažování. Ovlivňuje kvalitu i cenu kreditů za položku.
+
+  - `hard` — Nejschopnější model, nejlepší pro složité nebo nejednoznačné produkty. **4 kredity/položku.**
+  - `medium` — Vyvážená rychlost a kvalita. **2 kredity/položku.** *(výchozí)*
+  - `low` — Nejrychlejší, vhodný pro jednoduché vyhledání. **1 kredit/položku.**
+</ParamField>
+
 <ParamField body="webhook_url" type="string">
   Pokud je zadáno, Lasso vrátí `202` okamžitě a výsledky doručí přes webhook.
 </ParamField>
@@ -47,8 +59,8 @@ Není potřeba žádná tabulka ani soubory. Předejte co máte, získejte kompl
 
 <ResponseField name="id" type="string">Identifikátor úlohy obohacení.</ResponseField>
 <ResponseField name="status" type="string">`completed` pro synchronní, `processing` pro asynchronní režim.</ResponseField>
-<ResponseField name="items" type="object[]">Pole obohacených produktových záznamů s `data` a `basis`.</ResponseField>
-<ResponseField name="credits_used" type="number">Spotřebované kredity (3 za položku).</ResponseField>
+<ResponseField name="items" type="object[]">Pole obohacených produktových záznamů s `data` a `basis` (basis pouze pokud `web_search` je `true`).</ResponseField>
+<ResponseField name="credits_used" type="number">Spotřebované kredity. Cena za položku závisí na `thinking`: `hard` = 4, `medium` = 2, `low` = 1.</ResponseField>
 
 <RequestExample>
 ```typescript TypeScript

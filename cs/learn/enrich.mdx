@@ -22,7 +22,17 @@ Každé obohacené pole obsahuje `basis`, který vám říká:
 
 ## Kredity
 
-Každá položka stojí **3 kredity** k obohacení.
+Cena kreditů závisí na úrovni **thinking**:
+
+| Thinking | Model | Kredity/položku | Vhodné pro |
+|----------|-------|----------------|-----------|
+| `hard` | Gemini 3.1 Pro | **4** | Složité nebo nejednoznačné produkty |
+| `medium` | Gemini 3.1 Lite | **2** | Obecné obohacení *(výchozí)* |
+| `low` | Gemini 2.0 | **1** | Rychlé, jednoduché vyhledání |
+
+## Webové vyhledávání
+
+Ve výchozím nastavení Lasso používá webové vyhledávání k prozkoumání každého produktu a poskytuje `basis` s citacemi pro každé obohacené pole. Toto můžete vypnout pomocí `web_search: false` — AI vyplní pole ze svých vlastních znalostí bez citací, což je rychlejší a stále přesné pro známé produkty.
 
 ## Další kroky
 

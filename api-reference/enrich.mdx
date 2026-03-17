@@ -1,7 +1,7 @@
 ---
 title: 'Enrich products'
 description: 'Take partial product data and get back enriched records with missing fields filled in, sourced and cited.'
-api: "POST /enrich"
+api: "POST /v1/enrich"
 ---
 
 Enrich takes partial product records and fills in missing fields using Lasso's product intelligence. Each enriched field comes with a **basis** — citations, reasoning, and confidence — so you know exactly where the data came from.
@@ -44,6 +44,18 @@ No tables or files needed. Pass in what you have, get back complete product reco
   Apply your company glossary terms during enrichment for consistent terminology.
 </ParamField>
 
+<ParamField body="web_search" type="boolean" default="true">
+  Whether to use web search for enrichment. When `false`, the AI fills fields from its own knowledge and **no basis/citations are returned** in the response. Useful for fast, low-cost enrichment when sourcing isn't needed.
+</ParamField>
+
+<ParamField body="thinking" type="string" default="medium">
+  Controls the depth of AI reasoning. Affects both quality and credit cost per item.
+
+  - `hard` — Most capable model, best for complex or ambiguous products. **4 credits/item.**
+  - `medium` — Balanced speed and quality. **2 credits/item.** *(default)*
+  - `low` — Fastest, suitable for straightforward lookups. **1 credit/item.**
+</ParamField>
+
 <ParamField body="webhook_url" type="string">
   If provided, Lasso returns `202` immediately and delivers results via webhook. Also triggered automatically for batches larger than 5 items.
 </ParamField>
@@ -57,17 +69,17 @@ No tables or files needed. Pass in what you have, get back complete product reco
   <Expandable>
     <ResponseField name="items[].data" type="object">Complete product data with all schema columns filled in.</ResponseField>
     <ResponseField name="items[].basis" type="object[]">
-      Per-field citations and reasoning for each enriched value.
+      Per-field citations and reasoning for each enriched value. **Only present when `web_search` is `true`.**
       <Expandable>
         <ResponseField name="basis[].field" type="string">The column key this basis applies to.</ResponseField>
         <ResponseField name="basis[].citations" type="object[]">Sources used: `{ url, title, excerpt }`.</ResponseField>
         <ResponseField name="basis[].reasoning" type="string">AI explanation of how it determined the value.</ResponseField>
-        <ResponseField name="basis[].confidence" type="string">`high` or `low`.</ResponseField>
+        <ResponseField name="basis[].confidence" type="string">`high`, `medium`, or `low`.</ResponseField>
       </Expandable>
     </ResponseField>
   </Expandable>
 </ResponseField>
-<ResponseField name="credits_used" type="number">Credits consumed (3 per item).</ResponseField>
+<ResponseField name="credits_used" type="number">Credits consumed. Cost per item depends on `thinking`: `hard` = 4, `medium` = 2, `low` = 1.</ResponseField>
 
 <RequestExample>
 ```typescript TypeScript
@@ -144,39 +156,39 @@ curl -X POST "https://hub.banditshq.com/api/v1/enrich" \
       "data": {
         "name": "Sony WF-1000XM5",
         "brand": "Sony",
-        "price": 249.99,
-        "description": "Premium truly wireless noise cancelling earbuds with Dynamic Driver X, LDAC and LC3 codec support, Bluetooth 5.3, and up to 24 hours total battery life with charging case.",
-        "features": ["active noise cancelling", "LDAC", "Bluetooth 5.3", "IPX4", "multipoint", "Qi wireless charging"]
+        "price": 179.99,
+        "description": "Premium truly wireless earbuds with industry-leading noise cancellation, LDAC codec support, and 30-hour battery life.",
+        "features": ["noise cancelling", "LDAC", "30h battery", "IPX4"]
       },
       "basis": [
         {
           "field": "price",
           "citations": [
             {
-              "url": "https://electronics.sony.com/audio/headphones/all-headphones/p/wf1000xm5-s",
-              "title": "Sony WF-1000XM5 Wireless Noise Cancelling Earbuds",
-              "excerpt": "WF-1000XM5 Noise Cancelling Truly Wireless Earbuds — $249.99"
+              "url": "https://www.sony.com/en/headphones/wf-1000xm5",
+              "title": "Sony WF-1000XM5",
+              "excerpt": "Buy WF-1000XM5 Wireless Noise Cancelling Earbuds — $179.99"
             }
           ],
-          "reasoning": "Price confirmed from Sony's official electronics store product page.",
+          "reasoning": "Price confirmed across Sony official store and major retailers.",
           "confidence": "high"
         },
         {
           "field": "features",
           "citations": [
             {
-              "url": "https://www.rtings.com/headphones/reviews/sony/wf-1000xm5-truly-wireless",
-              "title": "Sony WF-1000XM5 Truly Wireless Review - RTINGS.com",
-              "excerpt": "The Sony WF-1000XM5 feature active noise cancellation, LDAC codec, Bluetooth 5.3, IPX4 water resistance, and multipoint connection."
+              "url": "https://www.rtings.com/headphones/reviews/sony/wf-1000xm5",
+              "title": "Sony WF-1000XM5 Review - RTINGS",
+              "excerpt": "Features include active noise cancellation, LDAC codec, 30h battery, IPX4 water resistance."
             }
           ],
-          "reasoning": "Feature list compiled from manufacturer specs and RTINGS third-party review.",
+          "reasoning": "Feature list compiled from manufacturer specs and third-party reviews.",
           "confidence": "high"
         }
       ]
     }
   ],
-  "credits_used": 3
+  "credits_used": 2
 }
 ```
 </ResponseExample>

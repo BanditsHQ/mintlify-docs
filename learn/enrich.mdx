@@ -98,7 +98,17 @@ for item in enriched["items"]:
 
 ## Credits
 
-Each item costs **3 credits** to enrich.
+Credit cost depends on the **thinking** level you choose:
+
+| Thinking | Model | Credits/item | Best for |
+|----------|-------|-------------|----------|
+| `hard` | Gemini 3.1 Pro | **4** | Complex or ambiguous products |
+| `medium` | Gemini 3.1 Lite | **2** | General-purpose enrichment *(default)* |
+| `low` | Gemini 2.0 | **1** | Fast, straightforward lookups |
+
+## Web search
+
+By default, Lasso uses web search to research each product and provides a `basis` with citations for every enriched field. You can disable this with `web_search: false` — the AI will fill fields from its own knowledge without citations, which is faster and still accurate for well-known products.
 
 ## Next steps
 
