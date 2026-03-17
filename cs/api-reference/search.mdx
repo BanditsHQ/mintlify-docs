@@ -22,8 +22,8 @@ Není potřeba žádná tabulka ani soubory. Jedno volání, strukturovaná prod
   Inline definice sloupců popisující výstupní tvar. Vzájemně se vylučuje se `schema_id`. Pokud není zadáno ani jedno, Lasso použije výchozí produktové schéma.
 </ParamField>
 
-<ParamField body="max_results" type="integer" default="10">
-  Maximální počet produktů k vrácení (1–50).
+<ParamField body="max_results" type="integer" default="7">
+  Maximální počet produktů k vrácení (1–7).
 </ParamField>
 
 <ParamField body="model" type="string" default="auto">
@@ -46,14 +46,14 @@ Není potřeba žádná tabulka ani soubory. Jedno volání, strukturovaná prod
 ```typescript TypeScript
 const results = await client.search({
   query: "Sony bezdrátová sluchátka s potlačením hluku",
-  max_results: 5,
+  max_results: 3,
 });
 ```
 
 ```python Python
 results = client.search(
     query="Sony bezdrátová sluchátka s potlačením hluku",
-    max_results=5,
+    max_results=3,
 )
 ```
 
@@ -61,6 +61,6 @@ results = client.search(
 curl -X POST "https://hub.banditshq.com/api/v1/search" \
   -H "Authorization: Bearer lasso_..." \
   -H "Content-Type: application/json" \
-  -d '{ "query": "Sony bezdrátová sluchátka", "max_results": 5 }'
+  -d '{ "query": "Sony bezdrátová sluchátka s potlačením hluku", "max_results": 3 }'
 ```
 </RequestExample>

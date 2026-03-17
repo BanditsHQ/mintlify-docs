@@ -11,7 +11,7 @@ No tables or files needed. One call in, structured product data out.
 ## Request body
 
 <ParamField body="query" type="string" required>
-  Natural language search query. Embed any filters directly in the text, e.g. `"Sony wireless earbuds noise cancelling under $200"`.
+  Natural language search query. Embed any filters directly in the text, e.g. `"Sony noise cancelling wireless earbuds"`.
 </ParamField>
 
 <ParamField body="schema_id" type="string">
@@ -27,8 +27,8 @@ No tables or files needed. One call in, structured product data out.
   </Expandable>
 </ParamField>
 
-<ParamField body="max_results" type="integer" default="10">
-  Maximum number of products to return (1–50).
+<ParamField body="max_results" type="integer" default="7">
+  Maximum number of products to return (1–7).
 </ParamField>
 
 <ParamField body="model" type="string" default="auto">
@@ -59,8 +59,8 @@ No tables or files needed. One call in, structured product data out.
 <RequestExample>
 ```typescript TypeScript
 const results = await client.search({
-  query: "Sony wireless earbuds noise cancelling under $200",
-  max_results: 5,
+  query: "Sony noise cancelling wireless earbuds",
+  max_results: 3,
 });
 
 for (const product of results.results) {
@@ -71,8 +71,8 @@ for (const product of results.results) {
 
 ```python Python
 results = client.search(
-    query="Sony wireless earbuds noise cancelling under $200",
-    max_results=5,
+    query="Sony noise cancelling wireless earbuds",
+    max_results=3,
 )
 
 for product in results["results"]:
@@ -85,8 +85,8 @@ curl -X POST "https://hub.banditshq.com/api/v1/search" \
   -H "Authorization: Bearer lasso_..." \
   -H "Content-Type: application/json" \
   -d '{
-    "query": "Sony wireless earbuds noise cancelling under $200",
-    "max_results": 5
+    "query": "Sony noise cancelling wireless earbuds",
+    "max_results": 3
   }'
 ```
 </RequestExample>
@@ -96,70 +96,46 @@ curl -X POST "https://hub.banditshq.com/api/v1/search" \
 {
   "id": "search_abc123",
   "status": "completed",
-  "query": "Sony wireless earbuds noise cancelling under $200",
+  "query": "Sony noise cancelling wireless earbuds",
   "results": [
     {
       "data": {
         "name": "Sony WF-1000XM5",
         "brand": "Sony",
-        "price": 179.99,
-        "description": "Premium truly wireless earbuds with industry-leading noise cancellation.",
-        "features": ["noise cancelling", "LDAC", "30h battery"]
+        "price": 249.99,
+        "description": "Premium truly wireless noise cancelling earbuds with Dynamic Driver X, LDAC codec support, and up to 24 hours total battery life with charging case.",
+        "features": ["active noise cancelling", "LDAC", "Bluetooth 5.3", "IPX4", "multipoint"]
       },
-      "source_url": "https://www.sony.com/en/headphones/wf-1000xm5",
-      "source_title": "Sony WF-1000XM5 | Wireless Earbuds",
-      "confidence": 0.95
+      "source_url": "https://electronics.sony.com/audio/headphones/all-headphones/p/wf1000xm5-s",
+      "source_title": "Sony WF-1000XM5 Wireless Noise Cancelling Earbuds",
+      "confidence": 0.96
     },
     {
       "data": {
         "name": "Sony WF-1000XM4",
         "brand": "Sony",
-        "price": 129.99,
-        "description": "Truly wireless earbuds with exceptional noise cancellation and LDAC support.",
-        "features": ["noise cancelling", "LDAC", "24h battery", "IPX4"]
+        "price": 179.99,
+        "description": "Truly wireless earbuds with integrated noise cancelling processor V1, LDAC support, and up to 24 hours total battery life.",
+        "features": ["active noise cancelling", "LDAC", "Bluetooth 5.2", "IPX4", "speak-to-chat"]
       },
-      "source_url": "https://www.sony.com/en/headphones/wf-1000xm4",
-      "source_title": "Sony WF-1000XM4 | Wireless Earbuds",
+      "source_url": "https://electronics.sony.com/audio/headphones/truly-wireless-earbuds/p/wf1000m4-Black",
+      "source_title": "Sony WF-1000XM4 Noise Cancelling In-Ear Headphones",
       "confidence": 0.93
     },
     {
       "data": {
         "name": "Sony WF-C700N",
         "brand": "Sony",
-        "price": 89.99,
-        "description": "Compact wireless earbuds with noise cancellation at an affordable price.",
-        "features": ["noise cancelling", "20h battery", "multipoint"]
+        "price": 119.99,
+        "description": "Noise cancelling truly wireless earbuds with ergonomic design, ambient sound mode, and up to 10 hours battery life.",
+        "features": ["noise cancelling", "Bluetooth 5.2", "IPX4", "multipoint", "ambient sound"]
       },
-      "source_url": "https://www.sony.com/en/headphones/wf-c700n",
-      "source_title": "Sony WF-C700N | Wireless Earbuds",
+      "source_url": "https://electronics.sony.com/audio/headphones/truly-wireless-earbuds/p/wfc700n-b",
+      "source_title": "Sony WF-C700N Noise Canceling Truly Wireless Earbuds",
       "confidence": 0.91
-    },
-    {
-      "data": {
-        "name": "Sony LinkBuds S",
-        "brand": "Sony",
-        "price": 128.00,
-        "description": "Lightweight noise cancelling earbuds with adaptive sound control.",
-        "features": ["noise cancelling", "LDAC", "20h battery", "speak-to-chat"]
-      },
-      "source_url": "https://www.sony.com/en/headphones/linkbuds-s",
-      "source_title": "Sony LinkBuds S | Wireless Earbuds",
-      "confidence": 0.88
-    },
-    {
-      "data": {
-        "name": "Sony WF-C510",
-        "brand": "Sony",
-        "price": 59.99,
-        "description": "Budget-friendly wireless earbuds with long battery life.",
-        "features": ["22h battery", "IPX4", "multipoint"]
-      },
-      "source_url": "https://www.sony.com/en/headphones/wf-c510",
-      "source_title": "Sony WF-C510 | Wireless Earbuds",
-      "confidence": 0.85
     }
   ],
-  "total_results": 5,
+  "total_results": 3,
   "credits_used": 5
 }
 ```
