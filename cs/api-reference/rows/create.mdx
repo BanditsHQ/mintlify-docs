@@ -1,0 +1,110 @@
+---
+title: 'Vytvořit řádky'
+description: 'Přidání jednoho nebo více řádků s daty do existující tabulky.'
+api: "POST /tables/{table_id}/rows"
+---
+
+## Parametry cesty
+
+<ParamField path="table_id" type="string" required>
+  Jedinečný identifikátor tabulky.
+</ParamField>
+
+## Tělo požadavku
+
+<ParamField body="rows" type="object[]" required>
+  Pole objektů řádků k vložení. Každý objekt mapuje klíče sloupců na hodnoty. Všechny klíče musí odpovídat sloupcům definovaným ve schématu tabulky. Maximálně 1000 řádků na požadavek.
+
+  <Expandable title="Objekt řádku">
+    Každá dvojice klíč-hodnota odpovídá sloupci ve schématu tabulky. Například pokud schéma obsahuje sloupce `name` (text) a `price` (number), platný řádek by byl `{ "name": "Widget", "price": 9.99 }`.
+  </Expandable>
+</ParamField>
+
+<Warning>
+  Klíče sloupců jsou přísně validovány vůči schématu tabulky. Pokud jakýkoli řádek obsahuje klíč, který neodpovídá sloupci schématu, celý požadavek je odmítnut s chybou `422` a seznamem neznámých klíčů.
+</Warning>
+
+## Odpověď
+
+<ResponseField name="data" type="array">
+  <Expandable title="Objekt řádku">
+    <ResponseField name="id" type="string">Jedinečný identifikátor řádku.</ResponseField>
+    <ResponseField name="row_index" type="integer">Pozice řádku v tabulce.</ResponseField>
+    <ResponseField name="data" type="object">Vložená data klíčovaná podle klíče sloupce.</ResponseField>
+    <ResponseField name="created_at" type="string">Časové razítko ISO 8601.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="inserted_count" type="integer">Počet úspěšně vložených řádků.</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const result = await client.tables.createRows("tbl_abc123", {
+  rows: [
+    { name: "Widget A", price: 9.99, brand: "Acme" },
+    { name: "Widget B", price: 14.99, brand: "Acme" },
+  ],
+});
+
+console.log(result.inserted_count); // 2
+for (const row of result.data) {
+  console.log(row.id, row.data.name);
+}
+```
+
+```python Python
+result = client.tables.create_rows(
+    "tbl_abc123",
+    rows=[
+        {"name": "Widget A", "price": 9.99, "brand": "Acme"},
+        {"name": "Widget B", "price": 14.99, "brand": "Acme"},
+    ],
+)
+
+print(result["inserted_count"])  # 2
+for row in result["data"]:
+    print(row["id"], row["data"]["name"])
+```
+
+```bash cURL
+curl -X POST "https://hub.banditshq.com/api/v1/tables/tbl_abc123/rows" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "rows": [
+      { "name": "Widget A", "price": 9.99, "brand": "Acme" },
+      { "name": "Widget B", "price": 14.99, "brand": "Acme" }
+    ]
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "data": [
+    {
+      "id": "row_def456",
+      "row_index": 5,
+      "data": {
+        "name": "Widget A",
+        "price": 9.99,
+        "brand": "Acme"
+      },
+      "created_at": "2025-03-10T14:30:00.000Z"
+    },
+    {
+      "id": "row_ghi789",
+      "row_index": 6,
+      "data": {
+        "name": "Widget B",
+        "price": 14.99,
+        "brand": "Acme"
+      },
+      "created_at": "2025-03-10T14:30:00.000Z"
+    }
+  ],
+  "inserted_count": 2
+}
+```
+</ResponseExample>

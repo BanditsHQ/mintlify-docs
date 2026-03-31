@@ -127,6 +127,7 @@
                 "group": "Rows",
                 "pages": [
                   "api-reference/rows/list",
+                  "api-reference/rows/create",
                   "api-reference/rows/get",
                   "api-reference/rows/update",
                   "api-reference/rows/delete",
@@ -274,6 +275,7 @@
                 "group": "Řádky",
                 "pages": [
                   "cs/api-reference/rows/list",
+                  "cs/api-reference/rows/create",
                   "cs/api-reference/rows/get",
                   "cs/api-reference/rows/update",
                   "cs/api-reference/rows/delete",
