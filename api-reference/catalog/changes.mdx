@@ -1,0 +1,125 @@
+---
+title: 'Get Changes'
+api: 'GET /catalog/changes'
+description: 'Retrieve products that changed since a given timestamp for incremental sync'
+---
+
+Returns products ordered by `updated_at` ascending, filtered to only include products updated after the specified timestamp. Designed for incremental sync patterns — call periodically with the `sync_timestamp` from the previous response to get only new changes.
+
+<ParamField query="since" type="string" required>
+  ISO 8601 timestamp. Only products updated after this time are returned.
+</ParamField>
+
+<ParamField query="page_size" type="integer" default="100">
+  Number of products per page (1-200).
+</ParamField>
+
+<ParamField query="cursor" type="string">
+  Cursor for pagination. Use `next_cursor` from the previous response.
+</ParamField>
+
+<ParamField query="schema_id" type="string">
+  Optional filter to a specific catalog schema.
+</ParamField>
+
+<ParamField query="status" type="string">
+  Optional filter by product status (`draft`, `active`, `archived`).
+</ParamField>
+
+<ResponseField name="products" type="array">
+  Array of products updated after the `since` timestamp, ordered oldest-first.
+  <Expandable title="Product object">
+    <ResponseField name="id" type="string">Unique product ID.</ResponseField>
+    <ResponseField name="schema_id" type="string">Catalog schema ID.</ResponseField>
+    <ResponseField name="source" type="string">Product source.</ResponseField>
+    <ResponseField name="status" type="string">Product status.</ResponseField>
+    <ResponseField name="attributes" type="object">Product attributes (including enriched content).</ResponseField>
+    <ResponseField name="created_at" type="string">ISO 8601 timestamp.</ResponseField>
+    <ResponseField name="updated_at" type="string">ISO 8601 timestamp of last change.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="next_cursor" type="string">
+  Cursor for the next page. `null` when no more results.
+</ResponseField>
+
+<ResponseField name="has_more" type="boolean">
+  Whether there are more pages to fetch.
+</ResponseField>
+
+<ResponseField name="sync_timestamp" type="string">
+  Server timestamp at query start. Store this and pass it as `since` on your next sync cycle to ensure no changes are missed.
+</ResponseField>
+
+<Warning>
+  Always store the `sync_timestamp` from the **first page** of a sync cycle and use it for the next cycle. Do not use timestamps from subsequent pages, as new changes may occur between pages.
+</Warning>
+
+<RequestExample>
+```typescript TypeScript
+const lasso = new LassoClient({ apiKey: 'lasso_...' });
+
+// Initial sync
+let result = await lasso.catalog.changes({ since: '2026-05-01T00:00:00Z' });
+let allProducts = result.products;
+
+// Paginate through all changes
+while (result.has_more) {
+  result = await lasso.catalog.changes({
+    since: '2026-05-01T00:00:00Z',
+    cursor: result.next_cursor,
+  });
+  allProducts.push(...result.products);
+}
+
+// Store sync_timestamp for next cycle
+const nextSince = result.sync_timestamp;
+```
+
+```python Python
+from lasso import LassoClient
+
+client = LassoClient(api_key="lasso_...")
+
+# Get changes since last sync
+result = client.catalog.changes(since="2026-05-01T00:00:00Z")
+
+for product in result["products"]:
+    # Update your e-shop with enriched data
+    update_eshop_product(product["attributes"])
+
+# Store for next cycle
+next_since = result["sync_timestamp"]
+```
+
+```bash cURL
+curl -X GET "https://hub.banditshq.com/api/v1/catalog/changes?since=2026-05-01T00:00:00Z&page_size=100" \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "products": [
+    {
+      "id": "a1b2c3d4-...",
+      "schema_id": "e5f6a7b8-...",
+      "source": "manual",
+      "status": "active",
+      "attributes": {
+        "title": "Premium Widget",
+        "sku": "WDG-001",
+        "description": "A beautifully crafted premium widget...",
+        "price": 29.99
+      },
+      "created_at": "2026-05-01T12:00:00Z",
+      "updated_at": "2026-05-27T09:15:00Z"
+    }
+  ],
+  "next_cursor": "eyJ1cGRhdGVkX2F0IjoiMjAyNi0wNS0yN1QwOToxNTowMFoiLCJpZCI6ImExYjJjM2Q0LSJ9",
+  "has_more": true,
+  "sync_timestamp": "2026-05-27T12:00:00Z"
+}
+```
+</ResponseExample>

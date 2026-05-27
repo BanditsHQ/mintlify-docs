@@ -193,7 +193,8 @@
                   "api-reference/catalog/get",
                   "api-reference/catalog/update",
                   "api-reference/catalog/delete",
-                  "api-reference/catalog/lookup"
+                  "api-reference/catalog/lookup",
+                  "api-reference/catalog/changes"
                 ]
               },
               {
