@@ -1,0 +1,65 @@
+---
+title: 'Update Webhook'
+api: 'PATCH /catalog/webhooks/{id}'
+description: 'Update a webhook subscription'
+---
+
+Update an existing webhook subscription's URL, events, or enabled status.
+
+<ParamField path="id" type="string" required>
+  The webhook subscription ID.
+</ParamField>
+
+<ParamField body="url" type="string">
+  Updated endpoint URL.
+</ParamField>
+
+<ParamField body="events" type="array">
+  Updated list of events. Valid values: `product.created`, `product.updated`, `product.deleted`.
+</ParamField>
+
+<ParamField body="enabled" type="boolean">
+  Enable or disable the webhook without deleting it.
+</ParamField>
+
+<ParamField body="description" type="string">
+  Updated description.
+</ParamField>
+
+<RequestExample>
+```typescript TypeScript
+const updated = await lasso.catalog.webhooks.update('wh_abc123...', {
+  events: ['product.created', 'product.updated', 'product.deleted'],
+  enabled: false,
+});
+```
+
+```python Python
+updated = client.catalog.webhooks.update(
+    "wh_abc123...",
+    events=["product.created", "product.updated", "product.deleted"],
+    enabled=False,
+)
+```
+
+```bash cURL
+curl -X PATCH "https://hub.banditshq.com/api/v1/catalog/webhooks/wh_abc123..." \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{"enabled": false}'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "id": "wh_abc123...",
+  "url": "https://example.com/webhook",
+  "events": ["product.created", "product.updated", "product.deleted"],
+  "enabled": false,
+  "description": "Sync to ERP",
+  "created_at": "2026-05-20T08:00:00Z",
+  "updated_at": "2026-05-27T10:30:00Z"
+}
+```
+</ResponseExample>

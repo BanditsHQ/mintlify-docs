@@ -1,0 +1,106 @@
+---
+title: 'List Products'
+api: 'GET /catalog'
+description: 'List catalog products with pagination and filtering'
+---
+
+Retrieve a paginated list of products from your catalog. Products are returned in reverse chronological order by default.
+
+<ParamField query="page_size" type="integer" default="50">
+  Number of products to return per page (1-200).
+</ParamField>
+
+<ParamField query="cursor" type="string">
+  Cursor for pagination. Use the `next_cursor` value from the previous response to fetch the next page.
+</ParamField>
+
+<ParamField query="status" type="string">
+  Filter by product status. One of: `draft`, `active`, `archived`.
+</ParamField>
+
+<ParamField query="source" type="string">
+  Filter by product source. One of: `shopify`, `product_extraction`, `manual`.
+</ParamField>
+
+<ParamField query="search" type="string">
+  Full-text search across text-like attribute values.
+</ParamField>
+
+<ParamField query="schema_id" type="string">
+  Filter products by their catalog schema ID.
+</ParamField>
+
+<ParamField query="sort_field" type="string" default="updated_at">
+  Field to sort by. Use `updated_at`, `created_at`, or `attr:<key>` for attribute sorting.
+</ParamField>
+
+<ParamField query="sort_dir" type="string" default="desc">
+  Sort direction: `asc` or `desc`.
+</ParamField>
+
+<ParamField query="attribute_filters" type="string">
+  JSON-encoded attribute filters. Example: `{"color":"red","price":{"op":"gt","value":10}}`
+</ParamField>
+
+<ResponseField name="products" type="array">
+  Array of product objects.
+  <Expandable title="Product object">
+    <ResponseField name="id" type="string">Unique product ID (UUID).</ResponseField>
+    <ResponseField name="schema_id" type="string">Catalog schema this product belongs to.</ResponseField>
+    <ResponseField name="source" type="string">Product source (`shopify`, `product_extraction`, `manual`).</ResponseField>
+    <ResponseField name="status" type="string">Product status (`draft`, `active`, `archived`).</ResponseField>
+    <ResponseField name="attributes" type="object">Product attributes as key-value pairs.</ResponseField>
+    <ResponseField name="created_at" type="string">ISO 8601 timestamp.</ResponseField>
+    <ResponseField name="updated_at" type="string">ISO 8601 timestamp.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="next_cursor" type="string">
+  Cursor for fetching the next page. `null` when there are no more results.
+</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const lasso = new LassoClient({ apiKey: 'lasso_...' });
+
+const { products, next_cursor } = await lasso.catalog.list({
+  page_size: '25',
+  status: 'active',
+});
+```
+
+```python Python
+from lasso import LassoClient
+
+client = LassoClient(api_key="lasso_...")
+result = client.catalog.list(page_size=25, status="active")
+```
+
+```bash cURL
+curl -X GET "https://hub.banditshq.com/api/v1/catalog?page_size=25&status=active" \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "products": [
+    {
+      "id": "a1b2c3d4-...",
+      "schema_id": "e5f6a7b8-...",
+      "source": "manual",
+      "status": "active",
+      "attributes": {
+        "title": "Premium Widget",
+        "sku": "WDG-001",
+        "price": 29.99
+      },
+      "created_at": "2026-05-01T12:00:00Z",
+      "updated_at": "2026-05-15T09:30:00Z"
+    }
+  ],
+  "next_cursor": "eyJpZCI6ImExYjJjM2Q0Li4uIn0="
+}
+```
+</ResponseExample>

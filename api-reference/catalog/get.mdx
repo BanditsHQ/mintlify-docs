@@ -1,0 +1,54 @@
+---
+title: 'Get Product'
+api: 'GET /catalog/{id}'
+description: 'Retrieve a single product by its ID'
+---
+
+Fetch a single product from your catalog by its unique ID.
+
+<ParamField path="id" type="string" required>
+  The unique product ID (UUID).
+</ParamField>
+
+<ResponseField name="id" type="string">Unique product ID.</ResponseField>
+<ResponseField name="schema_id" type="string">Catalog schema this product belongs to.</ResponseField>
+<ResponseField name="source" type="string">Product source.</ResponseField>
+<ResponseField name="status" type="string">Product status.</ResponseField>
+<ResponseField name="external_id" type="string">External identifier (e.g., Shopify product ID).</ResponseField>
+<ResponseField name="attributes" type="object">Product attributes as key-value pairs.</ResponseField>
+<ResponseField name="created_at" type="string">ISO 8601 timestamp.</ResponseField>
+<ResponseField name="updated_at" type="string">ISO 8601 timestamp.</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const product = await lasso.catalog.get('a1b2c3d4-...');
+```
+
+```python Python
+product = client.catalog.get("a1b2c3d4-...")
+```
+
+```bash cURL
+curl -X GET "https://hub.banditshq.com/api/v1/catalog/a1b2c3d4-..." \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "id": "a1b2c3d4-...",
+  "schema_id": "e5f6a7b8-...",
+  "source": "manual",
+  "status": "active",
+  "external_id": null,
+  "attributes": {
+    "title": "Premium Widget",
+    "sku": "WDG-001",
+    "price": 29.99
+  },
+  "created_at": "2026-05-01T12:00:00Z",
+  "updated_at": "2026-05-15T09:30:00Z"
+}
+```
+</ResponseExample>

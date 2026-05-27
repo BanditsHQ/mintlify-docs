@@ -1,0 +1,53 @@
+---
+title: 'List Webhooks'
+api: 'GET /catalog/webhooks'
+description: 'List all webhook subscriptions for your catalog'
+---
+
+Retrieve all webhook endpoint subscriptions configured for your company's catalog events.
+
+<ResponseField name="webhooks" type="array">
+  Array of webhook subscription objects.
+  <Expandable title="Webhook object">
+    <ResponseField name="id" type="string">Unique webhook ID.</ResponseField>
+    <ResponseField name="url" type="string">The endpoint URL receiving events.</ResponseField>
+    <ResponseField name="events" type="array">Events this webhook is subscribed to.</ResponseField>
+    <ResponseField name="enabled" type="boolean">Whether the webhook is active.</ResponseField>
+    <ResponseField name="description" type="string">Optional description.</ResponseField>
+    <ResponseField name="created_at" type="string">ISO 8601 timestamp.</ResponseField>
+    <ResponseField name="updated_at" type="string">ISO 8601 timestamp.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const { webhooks } = await lasso.catalog.webhooks.list();
+```
+
+```python Python
+result = client.catalog.webhooks.list()
+```
+
+```bash cURL
+curl -X GET "https://hub.banditshq.com/api/v1/catalog/webhooks" \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "webhooks": [
+    {
+      "id": "wh_abc123...",
+      "url": "https://example.com/webhook",
+      "events": ["product.created", "product.updated"],
+      "enabled": true,
+      "description": "Sync to ERP",
+      "created_at": "2026-05-20T08:00:00Z",
+      "updated_at": "2026-05-20T08:00:00Z"
+    }
+  ]
+}
+```
+</ResponseExample>

@@ -1,0 +1,56 @@
+---
+title: 'Lookup Product'
+api: 'GET /catalog/lookup'
+description: 'Find a product by any attribute key and value'
+---
+
+Look up a single product by an arbitrary attribute key and value. This is useful for finding products by SKU, barcode, external ID, or any other unique identifier stored in attributes.
+
+<ParamField query="key" type="string" required>
+  The attribute key to search on (e.g., `sku`, `barcode`, `external_id`). Must be alphanumeric with underscores.
+</ParamField>
+
+<ParamField query="value" type="string" required>
+  The exact value to match.
+</ParamField>
+
+<ResponseField name="id" type="string">Unique product ID.</ResponseField>
+<ResponseField name="schema_id" type="string">Catalog schema ID.</ResponseField>
+<ResponseField name="source" type="string">Product source.</ResponseField>
+<ResponseField name="status" type="string">Product status.</ResponseField>
+<ResponseField name="attributes" type="object">Product attributes.</ResponseField>
+<ResponseField name="created_at" type="string">ISO 8601 timestamp.</ResponseField>
+<ResponseField name="updated_at" type="string">ISO 8601 timestamp.</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const product = await lasso.catalog.lookup('sku', 'WDG-001');
+```
+
+```python Python
+product = client.catalog.lookup(key="sku", value="WDG-001")
+```
+
+```bash cURL
+curl -X GET "https://hub.banditshq.com/api/v1/catalog/lookup?key=sku&value=WDG-001" \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "id": "a1b2c3d4-...",
+  "schema_id": "e5f6a7b8-...",
+  "source": "manual",
+  "status": "active",
+  "attributes": {
+    "title": "Premium Widget",
+    "sku": "WDG-001",
+    "price": 29.99
+  },
+  "created_at": "2026-05-01T12:00:00Z",
+  "updated_at": "2026-05-15T09:30:00Z"
+}
+```
+</ResponseExample>

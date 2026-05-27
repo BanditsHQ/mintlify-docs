@@ -1,0 +1,38 @@
+---
+title: 'Delete Product'
+api: 'DELETE /catalog/{id}'
+description: 'Soft-delete a product from the catalog'
+---
+
+Soft-deletes a product by setting its `deleted_at` timestamp. The product will no longer appear in list or lookup results but can be restored later.
+
+<ParamField path="id" type="string" required>
+  The unique product ID (UUID).
+</ParamField>
+
+<ResponseField name="deleted" type="boolean">Always `true` on success.</ResponseField>
+<ResponseField name="id" type="string">The deleted product's ID.</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+await lasso.catalog.delete('a1b2c3d4-...');
+```
+
+```python Python
+client.catalog.delete("a1b2c3d4-...")
+```
+
+```bash cURL
+curl -X DELETE "https://hub.banditshq.com/api/v1/catalog/a1b2c3d4-..." \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "deleted": true,
+  "id": "a1b2c3d4-..."
+}
+```
+</ResponseExample>

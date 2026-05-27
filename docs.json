@@ -184,6 +184,26 @@
                   "api-reference/credits/balance",
                   "api-reference/credits/usage"
                 ]
+              },
+              {
+                "group": "Catalog",
+                "pages": [
+                  "api-reference/catalog/list",
+                  "api-reference/catalog/create",
+                  "api-reference/catalog/get",
+                  "api-reference/catalog/update",
+                  "api-reference/catalog/delete",
+                  "api-reference/catalog/lookup"
+                ]
+              },
+              {
+                "group": "Catalog Webhooks",
+                "pages": [
+                  "api-reference/catalog/webhooks/list",
+                  "api-reference/catalog/webhooks/create",
+                  "api-reference/catalog/webhooks/update",
+                  "api-reference/catalog/webhooks/delete"
+                ]
               }
             ]
           }

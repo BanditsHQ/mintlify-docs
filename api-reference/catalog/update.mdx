@@ -1,0 +1,68 @@
+---
+title: 'Update Product'
+api: 'PATCH /catalog/{id}'
+description: 'Update attributes on an existing product'
+---
+
+Partially update a product's attributes. Only the fields provided in `attributes` are updated; existing fields are preserved.
+
+<ParamField path="id" type="string" required>
+  The unique product ID (UUID).
+</ParamField>
+
+<ParamField body="attributes" type="object" required>
+  Key-value pairs to update. Provide only the fields you want to change.
+</ParamField>
+
+<ParamField body="expected_updated_at" type="string">
+  Optimistic concurrency control. If provided, the update fails with a 409 if the product has been modified since this timestamp.
+</ParamField>
+
+<ResponseField name="id" type="string">Unique product ID.</ResponseField>
+<ResponseField name="attributes" type="object">The full attributes after the update.</ResponseField>
+<ResponseField name="status" type="string">Product status.</ResponseField>
+<ResponseField name="updated_at" type="string">ISO 8601 timestamp of this update.</ResponseField>
+
+<Warning>
+  Setting `expected_updated_at` enables stale-write detection. If the product was modified after the provided timestamp, a `409 Conflict` is returned with `code: "stale_write"`.
+</Warning>
+
+<RequestExample>
+```typescript TypeScript
+const updated = await lasso.catalog.update('a1b2c3d4-...', {
+  attributes: { price: 34.99, status: 'active' },
+});
+```
+
+```python Python
+updated = client.catalog.update(
+    "a1b2c3d4-...",
+    attributes={"price": 34.99, "status": "active"},
+)
+```
+
+```bash cURL
+curl -X PATCH "https://hub.banditshq.com/api/v1/catalog/a1b2c3d4-..." \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{"attributes": {"price": 34.99, "status": "active"}}'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "id": "a1b2c3d4-...",
+  "schema_id": "e5f6a7b8-...",
+  "source": "manual",
+  "status": "active",
+  "attributes": {
+    "title": "Premium Widget",
+    "sku": "WDG-001",
+    "price": 34.99
+  },
+  "created_at": "2026-05-01T12:00:00Z",
+  "updated_at": "2026-05-27T10:15:00Z"
+}
+```
+</ResponseExample>

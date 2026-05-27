@@ -1,0 +1,72 @@
+---
+title: 'Create Webhook'
+api: 'POST /catalog/webhooks'
+description: 'Subscribe to catalog product events'
+---
+
+Create a webhook subscription to receive notifications when products are created, updated, or deleted. A signing secret is generated automatically and returned in the response.
+
+<ParamField body="url" type="string" required>
+  The HTTPS endpoint URL that will receive webhook events.
+</ParamField>
+
+<ParamField body="events" type="array" required>
+  Events to subscribe to. Valid values: `product.created`, `product.updated`, `product.deleted`.
+</ParamField>
+
+<ParamField body="description" type="string">
+  Optional human-readable description for this webhook.
+</ParamField>
+
+<ResponseField name="id" type="string">Unique webhook ID.</ResponseField>
+<ResponseField name="url" type="string">The endpoint URL.</ResponseField>
+<ResponseField name="events" type="array">Subscribed events.</ResponseField>
+<ResponseField name="secret" type="string">HMAC signing secret for verifying payloads. Only returned on creation.</ResponseField>
+<ResponseField name="enabled" type="boolean">Always `true` on creation.</ResponseField>
+<ResponseField name="created_at" type="string">ISO 8601 timestamp.</ResponseField>
+
+<Warning>
+  The `secret` is only returned once at creation time. Store it securely — you'll need it to verify webhook signatures via the `X-Lasso-Signature` header.
+</Warning>
+
+<RequestExample>
+```typescript TypeScript
+const webhook = await lasso.catalog.webhooks.create({
+  url: 'https://example.com/webhook',
+  events: ['product.created', 'product.updated'],
+  description: 'Sync to ERP',
+});
+// Store webhook.secret securely
+```
+
+```python Python
+webhook = client.catalog.webhooks.create(
+    url="https://example.com/webhook",
+    events=["product.created", "product.updated"],
+    description="Sync to ERP",
+)
+# Store webhook["secret"] securely
+```
+
+```bash cURL
+curl -X POST "https://hub.banditshq.com/api/v1/catalog/webhooks" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://example.com/webhook", "events": ["product.created", "product.updated"]}'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "id": "wh_abc123...",
+  "url": "https://example.com/webhook",
+  "events": ["product.created", "product.updated"],
+  "secret": "whsec_a1b2c3d4e5f6...",
+  "enabled": true,
+  "description": "Sync to ERP",
+  "created_at": "2026-05-27T10:00:00Z",
+  "updated_at": "2026-05-27T10:00:00Z"
+}
+```
+</ResponseExample>
