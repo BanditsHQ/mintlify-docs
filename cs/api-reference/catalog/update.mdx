@@ -1,0 +1,68 @@
+---
+title: 'Aktualizovat produkt'
+api: 'PATCH /catalog/{id}'
+description: 'Aktualizace atributů existujícího produktu'
+---
+
+Částečná aktualizace atributů produktu. Aktualizují se pouze poskytnutá pole v `attributes`; existující pole zůstávají zachována.
+
+<ParamField path="id" type="string" required>
+  Jedinečné ID produktu (UUID).
+</ParamField>
+
+<ParamField body="attributes" type="object" required>
+  Páry klíč-hodnota k aktualizaci. Uveďte pouze pole, která chcete změnit.
+</ParamField>
+
+<ParamField body="expected_updated_at" type="string">
+  Optimistické řízení souběžnosti. Pokud je uvedeno, aktualizace selže s kódem 409, pokud byl produkt od tohoto časového razítka změněn.
+</ParamField>
+
+<ResponseField name="id" type="string">Jedinečné ID produktu.</ResponseField>
+<ResponseField name="attributes" type="object">Úplné atributy po aktualizaci.</ResponseField>
+<ResponseField name="status" type="string">Stav produktu.</ResponseField>
+<ResponseField name="updated_at" type="string">Časové razítko ISO 8601 této aktualizace.</ResponseField>
+
+<Warning>
+  Nastavení `expected_updated_at` aktivuje detekci zastaralého zápisu. Pokud byl produkt změněn po uvedeném časovém razítku, je vrácen `409 Conflict` s `code: "stale_write"`.
+</Warning>
+
+<RequestExample>
+```typescript TypeScript
+const updated = await lasso.catalog.update('a1b2c3d4-...', {
+  attributes: { price: 34.99, status: 'active' },
+});
+```
+
+```python Python
+updated = client.catalog.update(
+    "a1b2c3d4-...",
+    attributes={"price": 34.99, "status": "active"},
+)
+```
+
+```bash cURL
+curl -X PATCH "https://hub.banditshq.com/api/v1/catalog/a1b2c3d4-..." \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{"attributes": {"price": 34.99, "status": "active"}}'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "id": "a1b2c3d4-...",
+  "schema_id": "e5f6a7b8-...",
+  "source": "manual",
+  "status": "active",
+  "attributes": {
+    "title": "Premium Widget",
+    "sku": "WDG-001",
+    "price": 34.99
+  },
+  "created_at": "2026-05-01T12:00:00Z",
+  "updated_at": "2026-05-27T10:15:00Z"
+}
+```
+</ResponseExample>

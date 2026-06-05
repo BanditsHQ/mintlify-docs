@@ -1,0 +1,38 @@
+---
+title: 'Smazat produkt'
+api: 'DELETE /catalog/{id}'
+description: 'Měkké smazání produktu z katalogu'
+---
+
+Měkce smaže produkt nastavením časového razítka `deleted_at`. Produkt se přestane zobrazovat ve výpisech a výsledcích vyhledávání, ale lze jej později obnovit.
+
+<ParamField path="id" type="string" required>
+  Jedinečné ID produktu (UUID).
+</ParamField>
+
+<ResponseField name="deleted" type="boolean">Vždy `true` při úspěchu.</ResponseField>
+<ResponseField name="id" type="string">ID smazaného produktu.</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+await lasso.catalog.delete('a1b2c3d4-...');
+```
+
+```python Python
+client.catalog.delete("a1b2c3d4-...")
+```
+
+```bash cURL
+curl -X DELETE "https://hub.banditshq.com/api/v1/catalog/a1b2c3d4-..." \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "deleted": true,
+  "id": "a1b2c3d4-..."
+}
+```
+</ResponseExample>

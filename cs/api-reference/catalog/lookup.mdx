@@ -1,0 +1,56 @@
+---
+title: 'Vyhledat produkt'
+api: 'GET /catalog/lookup'
+description: 'Nalezení produktu podle libovolného klíče a hodnoty atributu'
+---
+
+Vyhledání jednoho produktu podle libovolného klíče a hodnoty atributu. Užitečné pro nalezení produktů podle SKU, čárového kódu, externího ID nebo jakéhokoli jiného unikátního identifikátoru uloženého v atributech.
+
+<ParamField query="key" type="string" required>
+  Klíč atributu pro vyhledávání (např. `sku`, `barcode`, `external_id`). Musí být alfanumerický s podtržítky.
+</ParamField>
+
+<ParamField query="value" type="string" required>
+  Přesná hodnota pro shodu.
+</ParamField>
+
+<ResponseField name="id" type="string">Jedinečné ID produktu.</ResponseField>
+<ResponseField name="schema_id" type="string">ID schématu katalogu.</ResponseField>
+<ResponseField name="source" type="string">Zdroj produktu.</ResponseField>
+<ResponseField name="status" type="string">Stav produktu.</ResponseField>
+<ResponseField name="attributes" type="object">Atributy produktu.</ResponseField>
+<ResponseField name="created_at" type="string">Časové razítko ISO 8601.</ResponseField>
+<ResponseField name="updated_at" type="string">Časové razítko ISO 8601.</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const product = await lasso.catalog.lookup('sku', 'WDG-001');
+```
+
+```python Python
+product = client.catalog.lookup(key="sku", value="WDG-001")
+```
+
+```bash cURL
+curl -X GET "https://hub.banditshq.com/api/v1/catalog/lookup?key=sku&value=WDG-001" \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "id": "a1b2c3d4-...",
+  "schema_id": "e5f6a7b8-...",
+  "source": "manual",
+  "status": "active",
+  "attributes": {
+    "title": "Premium Widget",
+    "sku": "WDG-001",
+    "price": 29.99
+  },
+  "created_at": "2026-05-01T12:00:00Z",
+  "updated_at": "2026-05-15T09:30:00Z"
+}
+```
+</ResponseExample>

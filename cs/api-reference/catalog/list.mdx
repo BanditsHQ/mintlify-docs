@@ -1,0 +1,106 @@
+---
+title: 'Seznam produktů'
+api: 'GET /catalog'
+description: 'Načtení stránkovaného seznamu produktů z katalogu s filtrováním'
+---
+
+Načte stránkovaný seznam produktů z vašeho katalogu. Produkty jsou ve výchozím stavu řazeny od nejnovějšího.
+
+<ParamField query="page_size" type="integer" default="50">
+  Počet produktů na stránku (1-200).
+</ParamField>
+
+<ParamField query="cursor" type="string">
+  Kurzor pro stránkování. Použijte hodnotu `next_cursor` z předchozí odpovědi pro načtení další stránky.
+</ParamField>
+
+<ParamField query="status" type="string">
+  Filtrování podle stavu produktu. Hodnoty: `draft`, `active`, `archived`.
+</ParamField>
+
+<ParamField query="source" type="string">
+  Filtrování podle zdroje produktu. Hodnoty: `shopify`, `product_extraction`, `manual`.
+</ParamField>
+
+<ParamField query="search" type="string">
+  Fulltextové vyhledávání přes textové hodnoty atributů.
+</ParamField>
+
+<ParamField query="schema_id" type="string">
+  Filtrování produktů podle ID schématu katalogu.
+</ParamField>
+
+<ParamField query="sort_field" type="string" default="updated_at">
+  Pole pro řazení. Použijte `updated_at`, `created_at` nebo `attr:<key>` pro řazení podle atributu.
+</ParamField>
+
+<ParamField query="sort_dir" type="string" default="desc">
+  Směr řazení: `asc` nebo `desc`.
+</ParamField>
+
+<ParamField query="attribute_filters" type="string">
+  JSON-kódované filtry atributů. Příklad: `{"color":"red","price":{"op":"gt","value":10}}`
+</ParamField>
+
+<ResponseField name="products" type="array">
+  Pole objektů produktů.
+  <Expandable title="Objekt produktu">
+    <ResponseField name="id" type="string">Jedinečné ID produktu (UUID).</ResponseField>
+    <ResponseField name="schema_id" type="string">Schéma katalogu, ke kterému produkt patří.</ResponseField>
+    <ResponseField name="source" type="string">Zdroj produktu (`shopify`, `product_extraction`, `manual`).</ResponseField>
+    <ResponseField name="status" type="string">Stav produktu (`draft`, `active`, `archived`).</ResponseField>
+    <ResponseField name="attributes" type="object">Atributy produktu jako páry klíč-hodnota.</ResponseField>
+    <ResponseField name="created_at" type="string">Časové razítko ISO 8601.</ResponseField>
+    <ResponseField name="updated_at" type="string">Časové razítko ISO 8601.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="next_cursor" type="string">
+  Kurzor pro načtení další stránky. `null` pokud nejsou další výsledky.
+</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const lasso = new LassoClient({ apiKey: 'lasso_...' });
+
+const { products, next_cursor } = await lasso.catalog.list({
+  page_size: '25',
+  status: 'active',
+});
+```
+
+```python Python
+from lasso import LassoClient
+
+client = LassoClient(api_key="lasso_...")
+result = client.catalog.list(page_size=25, status="active")
+```
+
+```bash cURL
+curl -X GET "https://hub.banditshq.com/api/v1/catalog?page_size=25&status=active" \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "products": [
+    {
+      "id": "a1b2c3d4-...",
+      "schema_id": "e5f6a7b8-...",
+      "source": "manual",
+      "status": "active",
+      "attributes": {
+        "title": "Premium Widget",
+        "sku": "WDG-001",
+        "price": 29.99
+      },
+      "created_at": "2026-05-01T12:00:00Z",
+      "updated_at": "2026-05-15T09:30:00Z"
+    }
+  ],
+  "next_cursor": "eyJpZCI6ImExYjJjM2Q0Li4uIn0="
+}
+```
+</ResponseExample>

@@ -1,0 +1,71 @@
+---
+title: 'Vytvořit produkt'
+api: 'POST /catalog'
+description: 'Vytvoření nového produktu v katalogu'
+---
+
+Vytvoří nový produkt se zadanými atributy. Produkt bude validován oproti definicím sloupců jeho schématu.
+
+<ParamField body="schema_id" type="string" required>
+  ID schématu katalogu, ke kterému produkt patří.
+</ParamField>
+
+<ParamField body="attributes" type="object" required>
+  Atributy produktu jako páry klíč-hodnota odpovídající sloupcům schématu.
+  <Expandable title="Příklad atributů">
+    Klíče musí odpovídat klíčům sloupců definovaných ve schématu. Hodnoty jsou validovány oproti typům sloupců (text, number, boolean, enum atd.).
+  </Expandable>
+</ParamField>
+
+<ResponseField name="id" type="string">Jedinečné ID produktu.</ResponseField>
+<ResponseField name="schema_id" type="string">ID schématu katalogu.</ResponseField>
+<ResponseField name="source" type="string">Vždy `manual` pro produkty vytvořené přes API.</ResponseField>
+<ResponseField name="status" type="string">Výchozí hodnota je `draft`.</ResponseField>
+<ResponseField name="attributes" type="object">Uložené atributy (s aplikovanou typovou konverzí).</ResponseField>
+<ResponseField name="created_at" type="string">Časové razítko ISO 8601.</ResponseField>
+<ResponseField name="updated_at" type="string">Časové razítko ISO 8601.</ResponseField>
+
+<RequestExample>
+```typescript TypeScript
+const product = await lasso.catalog.create({
+  schema_id: 'e5f6a7b8-...',
+  attributes: {
+    title: 'New Widget',
+    sku: 'WDG-002',
+    price: 19.99,
+  },
+});
+```
+
+```python Python
+product = client.catalog.create(
+    schema_id="e5f6a7b8-...",
+    attributes={"title": "New Widget", "sku": "WDG-002", "price": 19.99},
+)
+```
+
+```bash cURL
+curl -X POST "https://hub.banditshq.com/api/v1/catalog" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{"schema_id": "e5f6a7b8-...", "attributes": {"title": "New Widget", "sku": "WDG-002", "price": 19.99}}'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "id": "f9e8d7c6-...",
+  "schema_id": "e5f6a7b8-...",
+  "source": "manual",
+  "status": "draft",
+  "attributes": {
+    "title": "New Widget",
+    "sku": "WDG-002",
+    "price": 19.99
+  },
+  "created_at": "2026-05-27T10:00:00Z",
+  "updated_at": "2026-05-27T10:00:00Z"
+}
+```
+</ResponseExample>

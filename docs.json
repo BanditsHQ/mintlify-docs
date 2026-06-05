@@ -353,6 +353,27 @@
                   "cs/api-reference/credits/balance",
                   "cs/api-reference/credits/usage"
                 ]
+              },
+              {
+                "group": "Katalog",
+                "pages": [
+                  "cs/api-reference/catalog/list",
+                  "cs/api-reference/catalog/create",
+                  "cs/api-reference/catalog/get",
+                  "cs/api-reference/catalog/update",
+                  "cs/api-reference/catalog/delete",
+                  "cs/api-reference/catalog/lookup",
+                  "cs/api-reference/catalog/changes"
+                ]
+              },
+              {
+                "group": "Webhooky katalogu",
+                "pages": [
+                  "cs/api-reference/catalog/webhooks/list",
+                  "cs/api-reference/catalog/webhooks/create",
+                  "cs/api-reference/catalog/webhooks/update",
+                  "cs/api-reference/catalog/webhooks/delete"
+                ]
               }
             ]
           }

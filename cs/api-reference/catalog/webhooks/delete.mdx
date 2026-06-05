@@ -1,0 +1,32 @@
+---
+title: 'Smazat webhook'
+api: 'DELETE /catalog/webhooks/{id}'
+description: 'Smazání webhook odběru'
+---
+
+Trvale smaže webhook odběr. Události již nebudou doručovány na tento endpoint.
+
+<ParamField path="id" type="string" required>
+  ID webhook odběru ke smazání.
+</ParamField>
+
+<RequestExample>
+```typescript TypeScript
+await lasso.catalog.webhooks.delete('wh_abc123...');
+```
+
+```python Python
+client.catalog.webhooks.delete("wh_abc123...")
+```
+
+```bash cURL
+curl -X DELETE "https://hub.banditshq.com/api/v1/catalog/webhooks/wh_abc123..." \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+204 No Content
+```
+</ResponseExample>

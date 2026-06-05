@@ -1,0 +1,125 @@
+---
+title: 'Získat změny'
+api: 'GET /catalog/changes'
+description: 'Načtení produktů změněných od daného časového razítka pro inkrementální synchronizaci'
+---
+
+Vrací produkty seřazené podle `updated_at` vzestupně, filtrované pouze na produkty aktualizované po zadaném časovém razítku. Navrženo pro inkrementální synchronizaci — volejte periodicky s `sync_timestamp` z předchozí odpovědi pro získání pouze nových změn.
+
+<ParamField query="since" type="string" required>
+  Časové razítko ISO 8601. Vráceny budou pouze produkty aktualizované po tomto čase.
+</ParamField>
+
+<ParamField query="page_size" type="integer" default="100">
+  Počet produktů na stránku (1-200).
+</ParamField>
+
+<ParamField query="cursor" type="string">
+  Kurzor pro stránkování. Použijte `next_cursor` z předchozí odpovědi.
+</ParamField>
+
+<ParamField query="schema_id" type="string">
+  Volitelné filtrování podle konkrétního schématu katalogu.
+</ParamField>
+
+<ParamField query="status" type="string">
+  Volitelné filtrování podle stavu produktu (`draft`, `active`, `archived`).
+</ParamField>
+
+<ResponseField name="products" type="array">
+  Pole produktů aktualizovaných po časovém razítku `since`, seřazených od nejstaršího.
+  <Expandable title="Objekt produktu">
+    <ResponseField name="id" type="string">Jedinečné ID produktu.</ResponseField>
+    <ResponseField name="schema_id" type="string">ID schématu katalogu.</ResponseField>
+    <ResponseField name="source" type="string">Zdroj produktu.</ResponseField>
+    <ResponseField name="status" type="string">Stav produktu.</ResponseField>
+    <ResponseField name="attributes" type="object">Atributy produktu (včetně obohaceného obsahu).</ResponseField>
+    <ResponseField name="created_at" type="string">Časové razítko ISO 8601.</ResponseField>
+    <ResponseField name="updated_at" type="string">Časové razítko ISO 8601 poslední změny.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="next_cursor" type="string">
+  Kurzor pro další stránku. `null` pokud nejsou další výsledky.
+</ResponseField>
+
+<ResponseField name="has_more" type="boolean">
+  Zda existují další stránky k načtení.
+</ResponseField>
+
+<ResponseField name="sync_timestamp" type="string">
+  Časové razítko serveru při zahájení dotazu. Uložte jej a předejte jako `since` při dalším synchronizačním cyklu, aby nedošlo k vynechání žádných změn.
+</ResponseField>
+
+<Warning>
+  Vždy ukládejte `sync_timestamp` z **první stránky** synchronizačního cyklu a použijte jej pro další cyklus. Nepoužívejte časová razítka z následujících stránek, protože mezi stránkami mohou nastat nové změny.
+</Warning>
+
+<RequestExample>
+```typescript TypeScript
+const lasso = new LassoClient({ apiKey: 'lasso_...' });
+
+// Počáteční synchronizace
+let result = await lasso.catalog.changes({ since: '2026-05-01T00:00:00Z' });
+let allProducts = result.products;
+
+// Projít všechny změny
+while (result.has_more) {
+  result = await lasso.catalog.changes({
+    since: '2026-05-01T00:00:00Z',
+    cursor: result.next_cursor,
+  });
+  allProducts.push(...result.products);
+}
+
+// Uložit sync_timestamp pro další cyklus
+const nextSince = result.sync_timestamp;
+```
+
+```python Python
+from lasso import LassoClient
+
+client = LassoClient(api_key="lasso_...")
+
+# Získat změny od poslední synchronizace
+result = client.catalog.changes(since="2026-05-01T00:00:00Z")
+
+for product in result["products"]:
+    # Aktualizovat e-shop obohacenými daty
+    update_eshop_product(product["attributes"])
+
+# Uložit pro další cyklus
+next_since = result["sync_timestamp"]
+```
+
+```bash cURL
+curl -X GET "https://hub.banditshq.com/api/v1/catalog/changes?since=2026-05-01T00:00:00Z&page_size=100" \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "products": [
+    {
+      "id": "a1b2c3d4-...",
+      "schema_id": "e5f6a7b8-...",
+      "source": "manual",
+      "status": "active",
+      "attributes": {
+        "title": "Premium Widget",
+        "sku": "WDG-001",
+        "description": "A beautifully crafted premium widget...",
+        "price": 29.99
+      },
+      "created_at": "2026-05-01T12:00:00Z",
+      "updated_at": "2026-05-27T09:15:00Z"
+    }
+  ],
+  "next_cursor": "eyJ1cGRhdGVkX2F0IjoiMjAyNi0wNS0yN1QwOToxNTowMFoiLCJpZCI6ImExYjJjM2Q0LSJ9",
+  "has_more": true,
+  "sync_timestamp": "2026-05-27T12:00:00Z"
+}
+```
+</ResponseExample>
