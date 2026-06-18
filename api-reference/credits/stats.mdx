@@ -1,0 +1,192 @@
+---
+title: 'Get credit stats'
+api: "GET /credits/stats"
+description: 'Retrieve aggregated credit usage statistics for a date range, ready for BI tools like Power BI or Looker.'
+---
+
+Returns spending totals, daily breakdowns, per-module/service/user splits, Lasso table usage, and the company's money-display configuration for the requested period.
+
+## Query parameters
+
+<ParamField query="from" type="string" required>
+  Start date, inclusive (`YYYY-MM-DD`).
+</ParamField>
+
+<ParamField query="to" type="string" required>
+  End date, inclusive (`YYYY-MM-DD`). Must be on or after `from`, and the range may span at most 1830 days (~5 years).
+</ParamField>
+
+## Response
+
+<ResponseField name="period" type="object">
+  <Expandable title="Requested period">
+    <ResponseField name="from" type="string">Echoed start date.</ResponseField>
+    <ResponseField name="to" type="string">Echoed end date.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="summary" type="object">
+  <Expandable title="Summary metrics">
+    <ResponseField name="total_spent" type="number">Total credits spent in the period.</ResponseField>
+    <ResponseField name="previous_period_spent" type="number">Credits spent in the equal-length window immediately before `from`.</ResponseField>
+    <ResponseField name="previous_period_change_pct" type="number | null">Percentage change vs. the previous period. `null` when the prior window had zero spend (no baseline).</ResponseField>
+    <ResponseField name="monthly_allocation" type="number">Monthly credit allocation for the company.</ResponseField>
+    <ResponseField name="period_end" type="string | null">End of the current billing period (ISO 8601), if known.</ResponseField>
+    <ResponseField name="cost_per_credit" type="object | null">
+      <Expandable title="Cost per credit (omitted when no monthly fee is configured)">
+        <ResponseField name="amount" type="number">Money value of one credit.</ResponseField>
+        <ResponseField name="currency" type="string">`CZK` or `EUR`.</ResponseField>
+        <ResponseField name="monthly_fee" type="number">Configured monthly fee used for the conversion.</ResponseField>
+        <ResponseField name="monthly_credits" type="number">Allocation used as the denominator.</ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="daily" type="array">
+  <Expandable title="Daily breakdown">
+    <ResponseField name="date" type="string">Day (`YYYY-MM-DD`).</ResponseField>
+    <ResponseField name="total" type="number">Total credits spent that day.</ResponseField>
+    <ResponseField name="by_module" type="object">Map of `module_key` to credits spent.</ResponseField>
+    <ResponseField name="by_user" type="object">Map of `user_id` to credits spent.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="by_module" type="array">
+  <Expandable title="Per-module totals">
+    <ResponseField name="module_key" type="string">Module (e.g. `lasso`, `saddle`, `scout`).</ResponseField>
+    <ResponseField name="total" type="number">Credits spent by the module.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="by_service" type="array">
+  <Expandable title="Per-service totals">
+    <ResponseField name="service_type" type="string">Service (e.g. `ai_field`, `product_import`, `subtitles`).</ResponseField>
+    <ResponseField name="total" type="number">Credits spent by the service.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="by_user" type="array">
+  <Expandable title="Per-user totals">
+    <ResponseField name="user_id" type="string">User identifier, or `system` for non-user activity.</ResponseField>
+    <ResponseField name="total" type="number">Credits spent by the user.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="lasso" type="object">
+  <Expandable title="Lasso (product extraction) usage">
+    <ResponseField name="credits_spent" type="number">Total Lasso credits spent in the period.</ResponseField>
+    <ResponseField name="products_enhanced" type="number">Sum of the current `total_products` across tables that had Lasso usage in the period — a snapshot of table sizes, not a count of products enhanced during the period.</ResponseField>
+    <ResponseField name="credits_per_product" type="number | null">`credits_spent / products_enhanced` using those snapshot counts.</ResponseField>
+    <ResponseField name="by_table" type="array">
+      <Expandable title="Per-table usage">
+        <ResponseField name="table_id" type="string | null">Extraction job id, or `null` for tables that were deleted after the spend.</ResponseField>
+        <ResponseField name="name" type="string">Table name.</ResponseField>
+        <ResponseField name="total" type="number">Credits spent on the table.</ResponseField>
+        <ResponseField name="products" type="number">Current product count for the table.</ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="currency_config" type="object">
+  <Expandable title="Money-display configuration">
+    <ResponseField name="monthly_fee_czk" type="number | null">Configured monthly fee in CZK.</ResponseField>
+    <ResponseField name="monthly_fee_eur" type="number | null">Configured or auto-computed monthly fee in EUR.</ResponseField>
+    <ResponseField name="monthly_credits" type="number">Monthly credit allocation.</ResponseField>
+    <ResponseField name="auto_eur" type="boolean">Whether the EUR fee is auto-computed from a Stripe subscription.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<Note>
+  For row-level transaction export, use [Get credit usage](/api-reference/credits/usage). For the live balance, use [Get credit balance](/api-reference/credits/balance).
+</Note>
+
+<RequestExample>
+```typescript TypeScript
+const stats = await client.credits.stats({
+  from: "2025-01-01",
+  to: "2025-03-31",
+});
+
+console.log(`Total spent: ${stats.summary.total_spent} credits`);
+for (const m of stats.by_module) {
+  console.log(`${m.module_key}: ${m.total}`);
+}
+```
+
+```python Python
+stats = client.credits.stats(
+    from_="2025-01-01",
+    to="2025-03-31",
+)
+
+print(f"Total spent: {stats['summary']['total_spent']} credits")
+for m in stats["by_module"]:
+    print(f"{m['module_key']}: {m['total']}")
+```
+
+```bash cURL
+curl -X GET "https://hub.banditshq.com/api/v1/credits/stats?from=2025-01-01&to=2025-03-31" \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "period": { "from": "2025-01-01", "to": "2025-03-31" },
+  "summary": {
+    "total_spent": 4200,
+    "previous_period_spent": 3800,
+    "previous_period_change_pct": 10.5,
+    "monthly_allocation": 50000,
+    "period_end": "2025-04-18T00:00:00.000Z",
+    "cost_per_credit": {
+      "amount": 0.02,
+      "currency": "EUR",
+      "monthly_fee": 1000,
+      "monthly_credits": 50000
+    }
+  },
+  "daily": [
+    {
+      "date": "2025-01-01",
+      "total": 120,
+      "by_module": { "lasso": 120 },
+      "by_user": { "5f0e...": 120 }
+    }
+  ],
+  "by_module": [{ "module_key": "lasso", "total": 3000 }],
+  "by_service": [{ "service_type": "ai_field", "total": 1500 }],
+  "by_user": [{ "user_id": "5f0e...", "total": 800 }],
+  "lasso": {
+    "credits_spent": 3000,
+    "products_enhanced": 450,
+    "credits_per_product": 6.67,
+    "by_table": [
+      {
+        "table_id": "9b81...",
+        "name": "Summer catalog",
+        "total": 800,
+        "products": 120
+      }
+    ]
+  },
+  "currency_config": {
+    "monthly_fee_czk": 25000,
+    "monthly_fee_eur": 1000,
+    "monthly_credits": 50000,
+    "auto_eur": false
+  }
+}
+```
+</ResponseExample>
+
+## Errors
+
+| Status | Meaning |
+|--------|---------|
+| 400 | Missing/invalid `from` or `to`, `from` after `to`, or range larger than 1830 days |
+| 401 | Invalid or missing API key |
+| 500 | Server or database error |

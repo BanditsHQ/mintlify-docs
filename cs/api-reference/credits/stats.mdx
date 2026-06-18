@@ -1,0 +1,192 @@
+---
+title: 'Získat statistiky kreditů'
+api: "GET /credits/stats"
+description: 'Načtení agregovaných statistik využití kreditů za období, připravených pro BI nástroje jako Power BI nebo Looker.'
+---
+
+Vrací souhrn útraty, denní rozpad, rozdělení podle modulu/služby/uživatele, využití Lasso tabulek a konfiguraci zobrazení v penězích pro zvolené období.
+
+## Query parametry
+
+<ParamField query="from" type="string" required>
+  Počáteční datum, včetně (`YYYY-MM-DD`).
+</ParamField>
+
+<ParamField query="to" type="string" required>
+  Koncové datum, včetně (`YYYY-MM-DD`). Musí být stejné nebo pozdější než `from` a rozsah může být nejvýše 1830 dní (~5 let).
+</ParamField>
+
+## Odpověď
+
+<ResponseField name="period" type="object">
+  <Expandable title="Zvolené období">
+    <ResponseField name="from" type="string">Počáteční datum.</ResponseField>
+    <ResponseField name="to" type="string">Koncové datum.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="summary" type="object">
+  <Expandable title="Souhrnné metriky">
+    <ResponseField name="total_spent" type="number">Celkem utracené kredity za období.</ResponseField>
+    <ResponseField name="previous_period_spent" type="number">Kredity utracené ve stejně dlouhém okně bezprostředně před `from`.</ResponseField>
+    <ResponseField name="previous_period_change_pct" type="number | null">Procentuální změna oproti předchozímu období. `null`, pokud předchozí okno nemělo žádnou útratu (chybí základna).</ResponseField>
+    <ResponseField name="monthly_allocation" type="number">Měsíční alokace kreditů společnosti.</ResponseField>
+    <ResponseField name="period_end" type="string | null">Konec aktuálního fakturačního období (ISO 8601), pokud je znám.</ResponseField>
+    <ResponseField name="cost_per_credit" type="object | null">
+      <Expandable title="Cena za kredit (vynecháno, pokud není nastaven měsíční poplatek)">
+        <ResponseField name="amount" type="number">Peněžní hodnota jednoho kreditu.</ResponseField>
+        <ResponseField name="currency" type="string">`CZK` nebo `EUR`.</ResponseField>
+        <ResponseField name="monthly_fee" type="number">Nastavený měsíční poplatek použitý pro převod.</ResponseField>
+        <ResponseField name="monthly_credits" type="number">Alokace použitá jako jmenovatel.</ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="daily" type="array">
+  <Expandable title="Denní rozpad">
+    <ResponseField name="date" type="string">Den (`YYYY-MM-DD`).</ResponseField>
+    <ResponseField name="total" type="number">Celkem utracené kredity v daný den.</ResponseField>
+    <ResponseField name="by_module" type="object">Mapa `module_key` na utracené kredity.</ResponseField>
+    <ResponseField name="by_user" type="object">Mapa `user_id` na utracené kredity.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="by_module" type="array">
+  <Expandable title="Součty podle modulu">
+    <ResponseField name="module_key" type="string">Modul (např. `lasso`, `saddle`, `scout`).</ResponseField>
+    <ResponseField name="total" type="number">Kredity utracené modulem.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="by_service" type="array">
+  <Expandable title="Součty podle služby">
+    <ResponseField name="service_type" type="string">Služba (např. `ai_field`, `product_import`, `subtitles`).</ResponseField>
+    <ResponseField name="total" type="number">Kredity utracené službou.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="by_user" type="array">
+  <Expandable title="Součty podle uživatele">
+    <ResponseField name="user_id" type="string">Identifikátor uživatele, nebo `system` pro systémovou aktivitu.</ResponseField>
+    <ResponseField name="total" type="number">Kredity utracené uživatelem.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="lasso" type="object">
+  <Expandable title="Využití Lasso (extrakce produktů)">
+    <ResponseField name="credits_spent" type="number">Celkem utracené Lasso kredity za období.</ResponseField>
+    <ResponseField name="products_enhanced" type="number">Součet aktuálního `total_products` napříč tabulkami, které měly v období Lasso útratu — jde o aktuální stav velikosti tabulek, nikoli počet produktů zpracovaných v daném období.</ResponseField>
+    <ResponseField name="credits_per_product" type="number | null">`credits_spent / products_enhanced` z těchto aktuálních počtů.</ResponseField>
+    <ResponseField name="by_table" type="array">
+      <Expandable title="Využití podle tabulky">
+        <ResponseField name="table_id" type="string | null">ID extrakční úlohy, nebo `null` u tabulek smazaných po útratě.</ResponseField>
+        <ResponseField name="name" type="string">Název tabulky.</ResponseField>
+        <ResponseField name="total" type="number">Kredity utracené na tabulce.</ResponseField>
+        <ResponseField name="products" type="number">Aktuální počet produktů v tabulce.</ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="currency_config" type="object">
+  <Expandable title="Konfigurace zobrazení v penězích">
+    <ResponseField name="monthly_fee_czk" type="number | null">Nastavený měsíční poplatek v CZK.</ResponseField>
+    <ResponseField name="monthly_fee_eur" type="number | null">Nastavený nebo automaticky vypočtený měsíční poplatek v EUR.</ResponseField>
+    <ResponseField name="monthly_credits" type="number">Měsíční alokace kreditů.</ResponseField>
+    <ResponseField name="auto_eur" type="boolean">Zda je poplatek v EUR automaticky vypočten z předplatného Stripe.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<Note>
+  Pro export jednotlivých transakcí použijte [Získat využití kreditů](/cs/api-reference/credits/usage). Pro aktuální zůstatek použijte [Získat zůstatek kreditů](/cs/api-reference/credits/balance).
+</Note>
+
+<RequestExample>
+```typescript TypeScript
+const stats = await client.credits.stats({
+  from: "2025-01-01",
+  to: "2025-03-31",
+});
+
+console.log(`Total spent: ${stats.summary.total_spent} credits`);
+for (const m of stats.by_module) {
+  console.log(`${m.module_key}: ${m.total}`);
+}
+```
+
+```python Python
+stats = client.credits.stats(
+    from_="2025-01-01",
+    to="2025-03-31",
+)
+
+print(f"Total spent: {stats['summary']['total_spent']} credits")
+for m in stats["by_module"]:
+    print(f"{m['module_key']}: {m['total']}")
+```
+
+```bash cURL
+curl -X GET "https://hub.banditshq.com/api/v1/credits/stats?from=2025-01-01&to=2025-03-31" \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "period": { "from": "2025-01-01", "to": "2025-03-31" },
+  "summary": {
+    "total_spent": 4200,
+    "previous_period_spent": 3800,
+    "previous_period_change_pct": 10.5,
+    "monthly_allocation": 50000,
+    "period_end": "2025-04-18T00:00:00.000Z",
+    "cost_per_credit": {
+      "amount": 0.02,
+      "currency": "EUR",
+      "monthly_fee": 1000,
+      "monthly_credits": 50000
+    }
+  },
+  "daily": [
+    {
+      "date": "2025-01-01",
+      "total": 120,
+      "by_module": { "lasso": 120 },
+      "by_user": { "5f0e...": 120 }
+    }
+  ],
+  "by_module": [{ "module_key": "lasso", "total": 3000 }],
+  "by_service": [{ "service_type": "ai_field", "total": 1500 }],
+  "by_user": [{ "user_id": "5f0e...", "total": 800 }],
+  "lasso": {
+    "credits_spent": 3000,
+    "products_enhanced": 450,
+    "credits_per_product": 6.67,
+    "by_table": [
+      {
+        "table_id": "9b81...",
+        "name": "Summer catalog",
+        "total": 800,
+        "products": 120
+      }
+    ]
+  },
+  "currency_config": {
+    "monthly_fee_czk": 25000,
+    "monthly_fee_eur": 1000,
+    "monthly_credits": 50000,
+    "auto_eur": false
+  }
+}
+```
+</ResponseExample>
+
+## Chyby
+
+| Stav | Význam |
+|------|--------|
+| 400 | Chybějící/neplatné `from` nebo `to`, `from` po `to`, nebo rozsah větší než 1830 dní |
+| 401 | Neplatný nebo chybějící API klíč |
+| 500 | Chyba serveru nebo databáze |
