@@ -182,7 +182,8 @@
                 "group": "Credits",
                 "pages": [
                   "api-reference/credits/balance",
-                  "api-reference/credits/usage"
+                  "api-reference/credits/usage",
+                  "api-reference/credits/stats"
                 ]
               },
               {
@@ -351,7 +352,8 @@
                 "group": "Kredity",
                 "pages": [
                   "cs/api-reference/credits/balance",
-                  "cs/api-reference/credits/usage"
+                  "cs/api-reference/credits/usage",
+                  "cs/api-reference/credits/stats"
                 ]
               },
               {
