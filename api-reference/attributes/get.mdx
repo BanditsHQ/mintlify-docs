@@ -1,0 +1,16 @@
+---
+title: 'Get attribute'
+api: "GET /attributes/{key}"
+description: 'Retrieve a single attribute by key.'
+---
+
+<ParamField path="key" type="string" required>
+  The attribute key (URL-encoded if needed).
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://hub.banditshq.com/api/v1/attributes/color" \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>

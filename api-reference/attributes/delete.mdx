@@ -1,0 +1,22 @@
+---
+title: 'Delete attribute'
+api: "DELETE /attributes/{key}"
+description: 'Delete an attribute and cascade removal across schemas and catalog.'
+---
+
+Deletes the dictionary entry and removes the key from product schemas, catalog products, feeds, source mappings, and history.
+
+<ParamField path="key" type="string" required>
+  The attribute key to delete.
+</ParamField>
+
+<Warning>
+  This operation is destructive and cannot be undone. All product data stored under this key will be removed from catalog products.
+</Warning>
+
+<RequestExample>
+```bash cURL
+curl -X DELETE "https://hub.banditshq.com/api/v1/attributes/color" \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>

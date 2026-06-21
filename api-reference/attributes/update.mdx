@@ -1,0 +1,48 @@
+---
+title: 'Update attribute'
+api: "PUT /attributes/{key}"
+description: 'Update mutable fields on an attribute.'
+---
+
+Type changes are not allowed — create a new attribute with a different key instead.
+
+<ParamField path="key" type="string" required>
+  The attribute key to update.
+</ParamField>
+
+<ParamField body="label" type="string">
+  Updated label.
+</ParamField>
+
+<ParamField body="enum_values" type="array">
+  Updated enum values.
+</ParamField>
+
+<ParamField body="tags_values" type="array">
+  Updated tags values.
+</ParamField>
+
+<ParamField body="description" type="string">
+  Updated description.
+</ParamField>
+
+<ParamField body="is_reviewed" type="boolean">
+  Review status.
+</ParamField>
+
+<ParamField body="detach" type="boolean">
+  When `true`, clears sync metadata (`source_id`, `external_id`, `source_synced_at`) so synced attributes become editable.
+</ParamField>
+
+<Warning>
+  Synced attributes cannot update label, enum_values, tags_values, or description unless `detach` is `true`.
+</Warning>
+
+<RequestExample>
+```bash cURL
+curl -X PUT "https://hub.banditshq.com/api/v1/attributes/color" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{"label": "Product Color", "is_reviewed": true}'
+```
+</RequestExample>

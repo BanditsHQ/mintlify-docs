@@ -95,6 +95,10 @@ Pokud váš endpoint neodpoví stavovým kódem `2xx` do 10 sekund, API zopakuje
 
 Po 3 neúspěšných pokusech je doručení ukončeno. Stav tabulky můžete kdykoli zkontrolovat přes API.
 
+## Webhooky katalogu a atributů
+
+Pro produkty katalogu a změny slovníku atributů se přihlaste přes [Webhooky katalogu](/cs/api-reference/catalog/webhooks/create). Podporované události: `product.created`, `product.updated`, `product.deleted`, `attribute.created`, `attribute.updated`, `attribute.deleted`.
+
 ## Vlastní autentizační hlavičky
 
 Při vytváření tabulky můžete nastavit vlastní autentizační hlavičku pro doručování webhooků pomocí parametrů `webhook_auth_header_name` a `webhook_auth_header_value` ve vstupních datech.

@@ -1,0 +1,10 @@
+---
+title: 'Aktualizovat atribut'
+api: "PUT /attributes/{key}"
+description: 'Aktualizace měnitelných polí atributu.'
+---
+
+Změna typu není povolena. Synchronizované atributy vyžadují `detach: true` pro editaci label nebo enum hodnot.
+
+<ParamField path="key" type="string" required>Klíč atributu.</ParamField>
+<ParamField body="detach" type="boolean">Odpojí atribut od sync zdroje.</ParamField>

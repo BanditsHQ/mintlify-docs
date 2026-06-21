@@ -95,6 +95,21 @@ If your endpoint does not respond with a `2xx` status code within 10 seconds, th
 
 After 3 failed retries, the delivery is abandoned. You can check the table status via the API at any time.
 
+## Catalog and attribute webhooks
+
+For catalog products and attribute dictionary changes, subscribe via [Catalog Webhooks](/api-reference/catalog/webhooks/create). Supported events:
+
+| Event | Description |
+|---|---|
+| `product.created` | A catalog product was created |
+| `product.updated` | A catalog product was updated |
+| `product.deleted` | A catalog product was deleted |
+| `attribute.created` | An attribute dictionary entry was created |
+| `attribute.updated` | An attribute was updated or renamed |
+| `attribute.deleted` | An attribute was deleted |
+
+Attribute webhook payloads include `attribute_id` and the full attribute object in `data`.
+
 ## Custom auth headers
 
 You can include a custom authentication header on webhook deliveries by setting `webhook_auth_header_name` and `webhook_auth_header_value` in your table creation input data.

@@ -81,6 +81,7 @@
                   "learn/enrich",
                   "learn/tables",
                   "learn/schemas",
+                  "learn/attributes",
                   "learn/enhancement",
                   "learn/files",
                   "learn/exports",
@@ -159,6 +160,17 @@
                   "api-reference/schemas/update",
                   "api-reference/schemas/delete",
                   "api-reference/schemas/generate"
+                ]
+              },
+              {
+                "group": "Attributes",
+                "pages": [
+                  "api-reference/attributes/list",
+                  "api-reference/attributes/create",
+                  "api-reference/attributes/get",
+                  "api-reference/attributes/update",
+                  "api-reference/attributes/delete",
+                  "api-reference/attributes/rename"
                 ]
               },
               {
@@ -251,6 +263,7 @@
                   "cs/learn/enrich",
                   "cs/learn/tables",
                   "cs/learn/schemas",
+                  "cs/learn/attributes",
                   "cs/learn/enhancement",
                   "cs/learn/files",
                   "cs/learn/exports",
@@ -329,6 +342,17 @@
                   "cs/api-reference/schemas/update",
                   "cs/api-reference/schemas/delete",
                   "cs/api-reference/schemas/generate"
+                ]
+              },
+              {
+                "group": "Atributy",
+                "pages": [
+                  "cs/api-reference/attributes/list",
+                  "cs/api-reference/attributes/create",
+                  "cs/api-reference/attributes/get",
+                  "cs/api-reference/attributes/update",
+                  "cs/api-reference/attributes/delete",
+                  "cs/api-reference/attributes/rename"
                 ]
               },
               {

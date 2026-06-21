@@ -1,0 +1,24 @@
+---
+title: 'Atributy'
+description: 'Správa slovníku atributů společnosti — kanonických definic polí sdílených napříč schématy a katalogem.'
+---
+
+**Slovník atributů** je kanonický registr produktových polí vaší společnosti. Každý atribut definuje stabilní `key`, lidsky čitelný `label` a `type` (text, enum, number atd.). Schémata odkazují na tyto klíče, takže stejná definice pole se používá napříč tabulkami, rodinami katalogu a exporty.
+
+## Proč atributy jsou důležité
+
+- **Konzistence** — Jedna definice pro `color` platí všude, bez duplikace konfigurace sloupce v každém schématu.
+- **Synchronizace** — Externí PIM a dodavatelské feedy mohou upsertovat atributy přes API.
+- **Katalog** — Produktové `attributes` v katalogu používají stejné klíče jako slovník.
+
+## Synchronizované vs ruční atributy
+
+Atributy importované z externího zdroje mohou mít nastavené `source_id`. Synchronizované atributy nemohou měnit label ani enum hodnoty, dokud je **odpojíte** (`detach: true` při aktualizaci).
+
+## Správa přes API
+
+Použijte [API atributů](/cs/api-reference/attributes/list) pro list, vytvoření, aktualizaci, přejmenování a smazání. Bulk upsert podporuje synchronizaci velkých sad atributů.
+
+<Warning>
+  Smazání nebo přejmenování atributu se propaguje do schémat, produktů katalogu, feedů a mapování — stejně jako v dashboardu.
+</Warning>

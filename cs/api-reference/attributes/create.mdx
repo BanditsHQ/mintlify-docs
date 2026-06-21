@@ -1,0 +1,12 @@
+---
+title: 'Vytvořit atribut'
+api: "POST /attributes"
+description: 'Vytvoření jednoho atributu nebo bulk upsert více atributů.'
+---
+
+Odesláním `key`, `label` a `type` vytvoříte jeden atribut. Opětovné odeslání stejného `key` aktualizuje atribut a vrací **200** (první vytvoření vrací **201**). Pro synchronizaci použijte pole `attributes` (max 500 položek).
+
+<ParamField body="key" type="string" required>Stabilní klíč.</ParamField>
+<ParamField body="label" type="string" required>Popisek.</ParamField>
+<ParamField body="type" type="string" required>Typ dat.</ParamField>
+<ParamField body="attributes" type="array">Pole atributů pro bulk upsert.</ParamField>

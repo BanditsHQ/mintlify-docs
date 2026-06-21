@@ -4,14 +4,14 @@ api: 'POST /catalog/webhooks'
 description: 'Subscribe to catalog product events'
 ---
 
-Create a webhook subscription to receive notifications when products are created, updated, or deleted. A signing secret is generated automatically and returned in the response.
+Create a webhook subscription to receive notifications when products or attribute dictionary entries are created, updated, or deleted. A signing secret is generated automatically and returned in the response.
 
 <ParamField body="url" type="string" required>
   The HTTPS endpoint URL that will receive webhook events.
 </ParamField>
 
 <ParamField body="events" type="array" required>
-  Events to subscribe to. Valid values: `product.created`, `product.updated`, `product.deleted`.
+  Events to subscribe to. Valid values: `product.created`, `product.updated`, `product.deleted`, `attribute.created`, `attribute.updated`, `attribute.deleted`.
 </ParamField>
 
 <ParamField body="description" type="string">

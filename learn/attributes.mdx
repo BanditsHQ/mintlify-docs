@@ -1,0 +1,48 @@
+---
+title: 'Attributes'
+description: 'Manage your company attribute dictionary — canonical field definitions shared across schemas and catalog.'
+---
+
+The **attribute dictionary** is your company's canonical registry of product fields. Each attribute defines a stable `key`, human-readable `label`, and `type` (text, enum, number, etc.). Schemas reference these keys so the same field definition is reused across tables, catalog families, and exports.
+
+## Why attributes matter
+
+- **Consistency** — One definition for `color` applies everywhere instead of duplicating column config per schema.
+- **Sync** — External PIMs and supplier feeds can upsert attributes via the API to stay aligned with Lasso.
+- **Catalog** — Product `attributes` in the catalog use the same keys as your dictionary.
+
+## Synced vs manual attributes
+
+Attributes imported from an external source may have `source_id` set. Synced attributes cannot edit label or enum values until you **detach** them (`detach: true` on update), which clears sync metadata and makes the attribute editable again.
+
+## Managing attributes via API
+
+Use the [Attributes API](/api-reference/attributes/list) to list, create, update, rename, and delete dictionary entries. Bulk upsert is supported for keeping large attribute sets in sync:
+
+<CodeGroup>
+```typescript TypeScript
+await client.attributes.bulkUpsert({
+  attributes: [
+    { key: "color", label: "Color", type: "enum", enum_values: ["Red", "Blue"] },
+    { key: "weight_kg", label: "Weight (kg)", type: "number" },
+  ],
+});
+```
+
+```python Python
+client.attributes.bulk_upsert(
+    attributes=[
+        {"key": "color", "label": "Color", "type": "enum", "enum_values": ["Red", "Blue"]},
+        {"key": "weight_kg", "label": "Weight (kg)", "type": "number"},
+    ],
+)
+```
+</CodeGroup>
+
+## Webhooks
+
+Subscribe to `attribute.created`, `attribute.updated`, and `attribute.deleted` via [Catalog Webhooks](/api-reference/catalog/webhooks/create) to react when your dictionary changes.
+
+<Warning>
+  Deleting or renaming an attribute cascades across schemas, catalog products, feeds, and mappings — the same behavior as in the dashboard attribute dictionary.
+</Warning>

@@ -1,0 +1,10 @@
+---
+title: 'Seznam atributů'
+api: "GET /attributes"
+description: 'Paginovaný seznam položek slovníku atributů společnosti.'
+---
+
+<ParamField query="page" type="integer" default="1">Číslo stránky.</ParamField>
+<ParamField query="limit" type="integer" default="25">Počet položek na stránku (max 100).</ParamField>
+<ParamField query="search" type="string">Filtr podle podřetězce klíče.</ParamField>
+<ParamField query="type" type="string">Filtr podle typu atributu.</ParamField>

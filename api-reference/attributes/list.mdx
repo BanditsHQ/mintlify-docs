@@ -1,0 +1,56 @@
+---
+title: 'List attributes'
+api: "GET /attributes"
+description: 'Retrieve a paginated list of company attribute dictionary entries.'
+---
+
+## Query parameters
+
+<ParamField query="page" type="integer" default="1">
+  Page number for pagination.
+</ParamField>
+
+<ParamField query="limit" type="integer" default="25">
+  Number of items per page (max 100).
+</ParamField>
+
+<ParamField query="search" type="string">
+  Filter attributes by key substring (case-insensitive).
+</ParamField>
+
+<ParamField query="type" type="string">
+  Filter by attribute type (e.g. `text`, `enum`).
+</ParamField>
+
+## Response
+
+<ResponseField name="data" type="array">
+  <Expandable title="Attribute object">
+    <ResponseField name="id" type="string">Unique attribute ID.</ResponseField>
+    <ResponseField name="key" type="string">Stable machine-readable key.</ResponseField>
+    <ResponseField name="label" type="string">Human-readable label.</ResponseField>
+    <ResponseField name="type" type="string">Attribute data type.</ResponseField>
+    <ResponseField name="enum_values" type="array | null">Allowed values for `enum` type.</ResponseField>
+    <ResponseField name="tags_values" type="array | null">Suggested values for `tags` type.</ResponseField>
+    <ResponseField name="description" type="string | null">Optional description.</ResponseField>
+    <ResponseField name="is_reviewed" type="boolean">Whether the attribute has been reviewed.</ResponseField>
+    <ResponseField name="source_id" type="string | null">Sync source ID if synced from external system.</ResponseField>
+    <ResponseField name="created_at" type="string">ISO 8601 timestamp.</ResponseField>
+    <ResponseField name="updated_at" type="string">ISO 8601 timestamp.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  <Expandable title="Pagination metadata">
+    <ResponseField name="page" type="integer">Current page.</ResponseField>
+    <ResponseField name="limit" type="integer">Items per page.</ResponseField>
+    <ResponseField name="total" type="integer">Total number of attributes.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://hub.banditshq.com/api/v1/attributes?page=1&limit=25&search=color" \
+  -H "Authorization: Bearer lasso_..."
+```
+</RequestExample>

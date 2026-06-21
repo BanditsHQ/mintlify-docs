@@ -1,0 +1,36 @@
+---
+title: 'Rename attribute'
+api: "POST /attributes/{key}/rename"
+description: 'Rename an attribute key with cascade across schemas and catalog.'
+---
+
+Renames the attribute key everywhere it is referenced: product schemas, catalog products, feeds, mappings, and the dictionary.
+
+<ParamField path="key" type="string" required>
+  Current attribute key.
+</ParamField>
+
+<ParamField body="new_key" type="string" required>
+  New key (must start with a letter; letters, digits, underscores only).
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X POST "https://hub.banditshq.com/api/v1/attributes/color/rename" \
+  -H "Authorization: Bearer lasso_..." \
+  -H "Content-Type: application/json" \
+  -d '{"new_key": "product_color"}'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "success": true,
+  "old_key": "color",
+  "new_key": "product_color",
+  "attribute": { "key": "product_color", "label": "Color", "type": "enum", ... },
+  "results": { ... }
+}
+```
+</ResponseExample>
