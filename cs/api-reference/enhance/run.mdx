@@ -8,7 +8,7 @@ openapi: "openapi.yaml POST /tables/{table_id}/enhance"
 
 - Tabulka musí být `completed` a nesmí být uzamčená.
 - Odešlete jedno `row_id` pro jednu buňku nebo nejvýše 1 000 ID řádků pro jeden sloupec. Duplicitní ID se zpracují jednou.
-- Prompt může odkazovat na jiný sloupec pomocí jeho názvu, například `Přelož {{Product name}} do češtiny`.
+- Na jiný sloupec odkazujte pomocí jeho klíče, například `Přelož {{product_name}} do češtiny`.
 - Operace stojí 2 kredity za každý zařazený řádek a vždy vrací `202`.
 
 Průběh sledujte přes `GET /tables/{table_id}/enhance/status`. Vygenerovanou hodnotu získáte novým načtením řádku.

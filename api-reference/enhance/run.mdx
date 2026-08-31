@@ -8,7 +8,7 @@ openapi: "openapi.yaml POST /tables/{table_id}/enhance"
 
 - The table must be `completed` and unlocked.
 - Send one `row_id` for one cell or up to 1,000 row IDs for one column. Duplicate IDs are processed once.
-- Prompts may reference another column by its label, for example `Translate {{Product name}} to Czech`.
+- Reference another column by its key, for example `Translate {{product_name}} to Czech`.
 - This operation costs 2 credits per queued row and always returns `202`.
 
 Poll `GET /tables/{table_id}/enhance/status` to track completion. Read the updated row to obtain the generated value.

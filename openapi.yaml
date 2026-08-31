@@ -1029,7 +1029,7 @@ components:
           type: string
         prompt:
           type: string
-          description: "AI instructions. Supports {{Column Name}} references."
+          description: "AI instructions. Reference another column with its key, for example {{product_name}}."
         model:
           type: string
           enum: [auto, gemini-pro, claude-opus]
@@ -1048,7 +1048,7 @@ components:
           - 83ba2c61-8592-4614-ac46-10f43580dfb8
           - 2f98bfb5-820e-488e-b92f-3f4559a4a788
         column_key: product_name_cs
-        prompt: Translate {{Product name}} to Czech.
+        prompt: Translate {{product_name}} to Czech.
         target_language: cs
         use_glossary: true
 
@@ -1081,9 +1081,9 @@ components:
         row_id: 83ba2c61-8592-4614-ac46-10f43580dfb8
         columns:
           - key: short_description
-            prompt: Write a concise description from {{Product name}} and {{Material}}.
+            prompt: Write a concise description from {{product_name}} and {{material}}.
           - key: product_name_cs
-            prompt: Translate {{Product name}} to Czech.
+            prompt: Translate {{product_name}} to Czech.
             target_language: cs
 
     EnhanceResponse:
@@ -3971,7 +3971,7 @@ paths:
               --data '{
                 "row_ids": ["83ba2c61-8592-4614-ac46-10f43580dfb8"],
                 "column_key": "product_name_cs",
-                "prompt": "Translate {{Product name}} to Czech.",
+                "prompt": "Translate {{product_name}} to Czech.",
                 "target_language": "cs",
                 "use_glossary": true
               }'
@@ -3990,7 +3990,7 @@ paths:
                 body: JSON.stringify({
                   row_ids: ["83ba2c61-8592-4614-ac46-10f43580dfb8"],
                   column_key: "product_name_cs",
-                  prompt: "Translate {{Product name}} to Czech.",
+                  prompt: "Translate {{product_name}} to Czech.",
                   target_language: "cs",
                   use_glossary: true,
                 }),
@@ -4012,7 +4012,7 @@ paths:
                 json={
                     "row_ids": ["83ba2c61-8592-4614-ac46-10f43580dfb8"],
                     "column_key": "product_name_cs",
-                    "prompt": "Translate {{Product name}} to Czech.",
+                    "prompt": "Translate {{product_name}} to Czech.",
                     "target_language": "cs",
                     "use_glossary": True,
                 },
@@ -4068,8 +4068,8 @@ paths:
               --data '{
                 "row_id": "83ba2c61-8592-4614-ac46-10f43580dfb8",
                 "columns": [
-                  {"key": "short_description", "prompt": "Write a concise description from {{Product name}} and {{Material}}."},
-                  {"key": "product_name_cs", "prompt": "Translate {{Product name}} to Czech.", "target_language": "cs"}
+                  {"key": "short_description", "prompt": "Write a concise description from {{product_name}} and {{material}}."},
+                  {"key": "product_name_cs", "prompt": "Translate {{product_name}} to Czech.", "target_language": "cs"}
                 ]
               }'
         - lang: typescript
@@ -4087,8 +4087,8 @@ paths:
                 body: JSON.stringify({
                   row_id: "83ba2c61-8592-4614-ac46-10f43580dfb8",
                   columns: [
-                    { key: "short_description", prompt: "Write a concise description from {{Product name}} and {{Material}}." },
-                    { key: "product_name_cs", prompt: "Translate {{Product name}} to Czech.", target_language: "cs" },
+                    { key: "short_description", prompt: "Write a concise description from {{product_name}} and {{material}}." },
+                    { key: "product_name_cs", prompt: "Translate {{product_name}} to Czech.", target_language: "cs" },
                   ],
                 }),
               },
@@ -4109,8 +4109,8 @@ paths:
                 json={
                     "row_id": "83ba2c61-8592-4614-ac46-10f43580dfb8",
                     "columns": [
-                        {"key": "short_description", "prompt": "Write a concise description from {{Product name}} and {{Material}}."},
-                        {"key": "product_name_cs", "prompt": "Translate {{Product name}} to Czech.", "target_language": "cs"},
+                        {"key": "short_description", "prompt": "Write a concise description from {{product_name}} and {{material}}."},
+                        {"key": "product_name_cs", "prompt": "Translate {{product_name}} to Czech.", "target_language": "cs"},
                     ],
                 },
                 timeout=30,
