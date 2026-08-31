@@ -1,7 +1,14 @@
 ---
 title: 'Přejmenovat atribut'
-api: "POST /attributes/{key}/rename"
-description: 'Přejmenování klíče atributu s propagací napříč schématy a katalogem.'
+openapi: "openapi.yaml POST /attributes/{key}/rename"
+description: 'Přejmenování klíče atributu a pokus o migraci všech závislých dat.'
 ---
 
-<ParamField body="new_key" type="string" required>Nový klíč atributu.</ParamField>
+## Zpracování částečného dokončení
+
+Operace nejprve přejmenuje kanonický Attribute a potom migruje závislé zdroje. Tyto závislé zápisy netvoří jednu atomickou transakci.
+
+- `200` znamená, že se dokončily všechny migrace.
+- `207` znamená, že se kanonické přejmenování dokončilo, ale alespoň jedna závislá migrace selhala. Před pokračováním zkontrolujte `results`.
+- Částečné přejmenování obnovíte voláním stejného endpointu se stejným starým a novým klíčem a s vráceným `attribute.id` v `attribute_id`.
+- `errors` obsahuje stabilní sanitizované kódy. Nikdy neodhaluje soukromá ID zdrojů ani surové databázové chyby.

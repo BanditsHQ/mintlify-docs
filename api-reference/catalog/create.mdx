@@ -1,71 +1,20 @@
 ---
-title: 'Create Product'
-api: 'POST /catalog'
-description: 'Create a new product in the catalog'
+title: "Create a Catalog product"
+description: "Product-only Shared Attributes are attached by stable ID without widening the selected Product Schema."
+openapi: "openapi.yaml POST /catalog"
 ---
 
-Create a new product with the specified attributes. The product will be validated against its schema's column definitions.
+import CatalogCreateExamples from "/snippets/api/catalog-create-examples.mdx";
 
-<ParamField body="schema_id" type="string" required>
-  The ID of the catalog schema this product belongs to.
-</ParamField>
+## Usage notes
 
-<ParamField body="attributes" type="object" required>
-  Product attributes as key-value pairs matching the schema columns.
-  <Expandable title="Example attributes">
-    Keys must match column keys defined in the schema. Values are validated against column types (text, number, boolean, enum, etc.).
-  </Expandable>
-</ParamField>
+- `schema_id` selects the product's reusable Product Schema.
+- Keys in `attributes` must resolve to active Attributes in that schema or in `attribute_extension_ids`.
+- `attribute_extension_ids` attaches existing company Attributes to this product only. It does not add them to the reusable Product Schema.
+- Relation values and Attribute values are validated before the product is created. A validation failure creates nothing.
 
-<ResponseField name="id" type="string">Unique product ID.</ResponseField>
-<ResponseField name="schema_id" type="string">Catalog schema ID.</ResponseField>
-<ResponseField name="source" type="string">Always `manual` for API-created products.</ResponseField>
-<ResponseField name="status" type="string">Defaults to `draft`.</ResponseField>
-<ResponseField name="attributes" type="object">The stored attributes (with type coercion applied).</ResponseField>
-<ResponseField name="created_at" type="string">ISO 8601 timestamp.</ResponseField>
-<ResponseField name="updated_at" type="string">ISO 8601 timestamp.</ResponseField>
+New API-created products use the handler's default source and lifecycle state; inspect the returned `source` and `status` instead of assuming them.
 
-<RequestExample>
-```typescript TypeScript
-const product = await lasso.catalog.create({
-  schema_id: 'e5f6a7b8-...',
-  attributes: {
-    title: 'New Widget',
-    sku: 'WDG-002',
-    price: 19.99,
-  },
-});
-```
+## Examples
 
-```python Python
-product = client.catalog.create(
-    schema_id="e5f6a7b8-...",
-    attributes={"title": "New Widget", "sku": "WDG-002", "price": 19.99},
-)
-```
-
-```bash cURL
-curl -X POST "https://hub.banditshq.com/api/v1/catalog" \
-  -H "Authorization: Bearer lasso_..." \
-  -H "Content-Type: application/json" \
-  -d '{"schema_id": "e5f6a7b8-...", "attributes": {"title": "New Widget", "sku": "WDG-002", "price": 19.99}}'
-```
-</RequestExample>
-
-<ResponseExample>
-```json
-{
-  "id": "f9e8d7c6-...",
-  "schema_id": "e5f6a7b8-...",
-  "source": "manual",
-  "status": "draft",
-  "attributes": {
-    "title": "New Widget",
-    "sku": "WDG-002",
-    "price": 19.99
-  },
-  "created_at": "2026-05-27T10:00:00Z",
-  "updated_at": "2026-05-27T10:00:00Z"
-}
-```
-</ResponseExample>
+<CatalogCreateExamples />

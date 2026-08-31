@@ -1,0 +1,87 @@
+<CodeGroup>
+```bash cURL
+curl --request POST \
+  --url https://app.productlasso.com/api/v1/enrich \
+  --header "Authorization: Bearer $LASSO_API_KEY" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "items": [{"data": {"sku": "WH-1000XM5-B", "product_name": "Sony WH-1000XM5"}}],
+    "columns": [
+      {"key": "brand", "label": "Brand", "type": "text"},
+      {"key": "color", "label": "Color", "type": "text"}
+    ],
+    "thinking": "medium",
+    "web_search": true
+  }'
+```
+
+```typescript TypeScript
+const response = await fetch("https://app.productlasso.com/api/v1/enrich", {
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${process.env.LASSO_API_KEY}`,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    items: [{ data: { sku: "WH-1000XM5-B", product_name: "Sony WH-1000XM5" } }],
+    columns: [
+      { key: "brand", label: "Brand", type: "text" },
+      { key: "color", label: "Color", type: "text" },
+    ],
+    thinking: "medium",
+    web_search: true,
+  }),
+});
+
+if (!response.ok) throw new Error(await response.text());
+const result = await response.json();
+```
+
+```python Python
+import os
+import requests
+
+response = requests.post(
+    "https://app.productlasso.com/api/v1/enrich",
+    headers={"Authorization": f"Bearer {os.environ['LASSO_API_KEY']}"},
+    json={
+        "items": [{"data": {"sku": "WH-1000XM5-B", "product_name": "Sony WH-1000XM5"}}],
+        "columns": [
+            {"key": "brand", "label": "Brand", "type": "text"},
+            {"key": "color", "label": "Color", "type": "text"},
+        ],
+        "thinking": "medium",
+        "web_search": True,
+    },
+    timeout=120,
+)
+response.raise_for_status()
+result = response.json()
+```
+</CodeGroup>
+
+```json Example response
+{
+  "id": "47af2c6b-3429-4da5-b8ea-6580bc13acd4",
+  "status": "completed",
+  "items": [
+    {
+      "data": {
+        "sku": "WH-1000XM5-B",
+        "product_name": "Sony WH-1000XM5",
+        "brand": "Sony",
+        "color": "Black"
+      },
+      "basis": [
+        {
+          "field": "color",
+          "citations": [{"url": "https://example.com/products/sony-wh-1000xm5", "title": "Product page"}],
+          "reasoning": "The product page identifies the black variant.",
+          "confidence": "high"
+        }
+      ]
+    }
+  ],
+  "credits_used": 2
+}
+```

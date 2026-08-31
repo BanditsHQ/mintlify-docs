@@ -1,34 +1,5 @@
 ---
 title: 'Smazat tabulku'
-api: 'DELETE /tables/{table_id}'
+openapi: "openapi.yaml DELETE /tables/{table_id}"
 description: 'Trvalé smazání tabulky a všech jejích řádků.'
 ---
-
-## Parametry cesty
-
-<ParamField path="table_id" type="string" required>
-  Jedinečný identifikátor tabulky ke smazání.
-</ParamField>
-
-## Odpověď
-
-Při úspěchu vrací `204 No Content`. Tabulka, všechny její řádky a přidružená úloha jsou trvale odstraněny.
-
-<Warning>
-  Tato akce je nevratná. Všechna extrahovaná data pro tuto tabulku budou trvale smazána.
-</Warning>
-
-<RequestExample>
-```typescript TypeScript
-await client.tables.delete("tbl_abc123");
-```
-
-```python Python
-client.tables.delete("tbl_abc123")
-```
-
-```bash cURL
-curl -X DELETE "https://hub.banditshq.com/api/v1/tables/tbl_abc123" \
-  -H "Authorization: Bearer lasso_..."
-```
-</RequestExample>

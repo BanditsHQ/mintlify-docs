@@ -1,0 +1,28 @@
+---
+title: "Product analytics API"
+description: "Measure Catalog delivery outcomes and Lasso extraction volume."
+---
+
+Product analytics combines Catalog outcomes with Lasso extraction workflow volume. Every endpoint derives the company from the API key.
+
+## Date range and filters
+
+All three operations require inclusive `from` and `to` dates in `YYYY-MM-DD` format. The range can contain at most 1,830 days.
+
+Depending on the operation and scope, you can filter by `catalog_status`, `user_id`, `schema_id`, `table_id`, and Catalog `source`. The `source` filter requires `scope=catalog`.
+
+## Operations
+
+- [Summary](/api-reference/analytics/summary) returns Catalog KPIs, current inventory, daily trends and a leaderboard, plus Lasso KPIs, daily trends, users, and tables. `scope` defaults to `all`.
+- [Leaderboard](/api-reference/analytics/leaderboard) requires `scope=catalog` or `scope=extraction`.
+- [Activity](/api-reference/analytics/activity) lists the exact products or result rows behind a metric using cursor pagination.
+
+## Metric semantics
+
+- **Catalog unique products delivered** counts live products with at least one meaningful product-field write in the period. Repeated edits count once.
+- **New products** and **updated existing** are mutually exclusive and add up to unique products.
+- **Total actions** collapses field-level history from one write and excludes deletion or source bookkeeping.
+- **Current Catalog total** is a current inventory snapshot. Date and user filters do not affect it, but status, schema, and source filters do.
+- **Products prepared in Lasso** counts extraction result rows created in the period and attributes them to the table initiator.
+
+Catalog leaderboard rows are unique per contributor. One product can appear for more than one contributor, so those rows do not add up to the company-wide unique total.

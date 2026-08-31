@@ -1,12 +1,14 @@
 ---
 title: 'Vytvořit atribut'
-api: "POST /attributes"
+openapi: "openapi.yaml POST /attributes"
 description: 'Vytvoření jednoho atributu nebo bulk upsert více atributů.'
 ---
 
-Odesláním `key`, `label` a `type` vytvoříte jeden atribut. Opětovné odeslání stejného `key` aktualizuje atribut a vrací **200** (první vytvoření vrací **201**). Pro synchronizaci použijte pole `attributes` (max 500 položek).
+## Chování jednoho a hromadného zápisu
 
-<ParamField body="key" type="string" required>Stabilní klíč.</ParamField>
-<ParamField body="label" type="string" required>Popisek.</ParamField>
-<ParamField body="type" type="string" required>Typ dat.</ParamField>
-<ParamField body="attributes" type="array">Pole atributů pro bulk upsert.</ParamField>
+- Pro vytvoření nebo upsert jednoho klíče odešlete jeden objekt Attribute. Nový klíč vrátí `201`; existující kompatibilní klíč vrátí `200` se samotným objektem Attribute.
+- Pro atomický upsert nejvýše 500 Attributes odešlete `{ "attributes": [...] }`. Odpověď je `200` s `{ "data": [...] }`.
+- `type` existujícího Attribute nelze změnit. U Relation Attribute nelze změnit ani druh relace.
+- Vynechané hodnoty `language`, `image_config` a `number_config` při upsertu zachovají existující metadata.
+
+Když potřebujete jiný typ, použijte nový klíč. `POST /attributes/{key}/rename` použijte pouze tehdy, když se nemění identita a mění se jen klíč.

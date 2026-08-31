@@ -1,96 +1,42 @@
 ---
-title: 'Úvod'
-description: 'Seznamte se s obecnými koncepty, stavovými kódy a strategiemi autentizace.'
+title: "Úvod"
+description: "Seznamte se se základní URL, zdroji, autentizací, odpověďmi a úplným OpenAPI kontraktem Lasso API."
 ---
 
-Lasso API je postaveno na principech REST. Všechny požadavky používají HTTPS a vrací odpovědi ve formátu JSON.
+Lasso API poskytuje přístup v rámci jedné společnosti k vyhledávání a obohacení produktů, extrakčním tabulkám, sdíleným atributům, produktovým schématům, Katalogu, webhookům, kreditům a produktové analytice.
 
 ## Základní URL
 
-Všechny požadavky obsahují následující základní URL:
+```text
+https://app.productlasso.com/api/v1
+```
 
-```
-https://hub.banditshq.com/api/v1
-```
+Většina odpovědí používá JSON. Nahrávání souborů používá `multipart/form-data`. Exporty mohou vrátit JSON, CSV, XLSX nebo ZIP.
 
 ## Autentizace
 
-Pro autentizaci je potřeba přidat hlavičku `Authorization` s obsahem `Bearer lasso_xxxxxxxxx`, kde `lasso_xxxxxxxxx` je váš [API klíč](https://hub.banditshq.com).
+Každý požadavek musí obsahovat API klíč:
 
-```
-Authorization: Bearer lasso_xxxxxxxxx
-```
-
-API klíče jsou vázané na jednu společnost. Všechny zdroje přístupné přes klíč patří dané společnosti. Více informací o správě klíčů a bezpečnostních doporučeních najdete na stránce [Autentizace](/cs/api-reference/authentication).
-
-## SDK
-
-Oficiální SDK jsou k dispozici pro TypeScript a Python.
-
-<CodeGroup>
-```bash npm
-npm install @lasso-ai/sdk
+```http
+Authorization: Bearer lasso_vas_api_klic
 ```
 
-```bash pip
-pip install lasso-ai
-```
-</CodeGroup>
+Klíče začínají `lasso_` a zpřístupňují jednu společnost. Podrobnosti najdete v části [Autentizace](/cs/api-reference/authentication).
 
-<CodeGroup>
-```typescript TypeScript
-import LassoClient from "@lasso-ai/sdk";
+## API kontrakt
 
-const client = new LassoClient({ apiKey: "lasso_..." });
-```
+[OpenAPI 3.1 kontrakt](/openapi.yaml) obsahuje všech 59 veřejných operací aktuálního Stage API včetně schémat požadavků, odpovědí a chyb. Stránky jednotlivých endpointů se generují z tohoto kontraktu.
 
-```python Python
-from lasso import LassoClient
+## Úspěšné odpovědi
 
-client = LassoClient(api_key="lasso_...")
-```
-</CodeGroup>
-
-## Stavové kódy
-
-Lasso používá standardní HTTP kódy k indikaci úspěchu nebo selhání vašich požadavků.
-
-| Stav | Typ | Popis |
-|---|---|---|
-| `200` | Success | Úspěšný požadavek. |
-| `201` | Created | Zdroj byl úspěšně vytvořen. |
-| `204` | No Content | Úspěšné smazání. |
-| `400` | `invalid_request` | Požadavek je chybně formulovaný nebo používá nepodporovanou HTTP metodu. |
-| `401` | `unauthenticated` | Chybějící, neplatný nebo deaktivovaný API klíč. |
-| `402` | `insufficient_credits` | Váš účet nemá dostatek kreditů. |
-| `403` | `forbidden` | API klíč nemá oprávnění k této akci. |
-| `404` | `not_found` | Zdroj neexistuje nebo nepatří vaší společnosti. |
-| `409` | `conflict` | Požadavek je v konfliktu s aktuálním stavem zdroje. |
-| `422` | `validation_error` | Chybějící povinná pole nebo neplatné hodnoty. |
-| `429` | `rate_limited` | Příliš mnoho požadavků. Snižte frekvenci a zkuste to znovu. |
-| `500` | `internal_error` | Na serveru došlo k neočekávané chybě. |
-
-Úplný formát chybových odpovědí najdete v sekci [Chyby](/cs/api-reference/errors).
+| Stav | Význam |
+| --- | --- |
+| `200` | Požadavek byl úspěšný. |
+| `201` | Zdroj byl vytvořen. |
+| `202` | Asynchronní zpracování bylo přijato. |
+| `204` | Požadavek byl úspěšný bez těla odpovědi. |
+| `207` | Atribut byl přejmenován, ale alespoň jedna závislá migrace selhala. Před pokračováním zkontrolujte odpověď. |
 
 ## Stránkování
 
-Endpointy pro výpis seznamů podporují stránkování pomocí query parametrů `page` a `limit`. Výchozí velikost stránky je 25, maximum je 100.
-
-```json
-{
-  "data": [...],
-  "pagination": {
-    "page": 1,
-    "limit": 25,
-    "total": 143
-  }
-}
-```
-
-Podrobnosti a příklady iterace najdete v sekci [Stránkování](/cs/api-reference/pagination).
-
-## Webhooky
-
-Při vytváření tabulky můžete nastavit `webhook_url` pro příjem HTTP POST notifikací po dokončení zpracování. Payloady webhooků jsou podepsány pomocí HMAC-SHA256 a v případě selhání se opakují až 3krát s exponenciálním prodlužováním intervalů.
-
-Formát doručení, ověření podpisu a pravidla opakování najdete v sekci [Webhooky](/cs/api-reference/webhooks).
+API podle zdroje používá stránkování pomocí stránky, kurzoru nebo offsetu. Ne všechny seznamy přijímají `page` a `limit`. Podrobnosti najdete v části [Stránkování](/cs/api-reference/pagination).

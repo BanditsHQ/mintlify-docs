@@ -1,48 +1,14 @@
 ---
-title: 'Update attribute'
-api: "PUT /attributes/{key}"
-description: 'Update mutable fields on an attribute.'
+title: "Update canonical Attribute metadata"
+description: "Type is immutable and key changes use the dedicated rename operation. Relation kind is also immutable. Omitted fields remain unchanged."
+openapi: "openapi.yaml PUT /attributes/{key}"
 ---
 
-Type changes are not allowed — create a new attribute with a different key instead.
+## Usage notes
 
-<ParamField path="key" type="string" required>
-  The attribute key to update.
-</ParamField>
+- Omitted fields remain unchanged. `type` and the Relation kind are immutable.
+- Send `expected_updated_at` from your latest read to prevent overwriting a newer edit. A stale value returns `409` with code `stale_write` and `current_updated_at`.
+- A source-managed Attribute rejects source-owned changes unless you set `detach: true` in the same request.
+- Sending an empty `image_config` clears canonical image requirements. Sending `number_config: null` clears number presentation metadata.
 
-<ParamField body="label" type="string">
-  Updated label.
-</ParamField>
-
-<ParamField body="enum_values" type="array">
-  Updated enum values.
-</ParamField>
-
-<ParamField body="tags_values" type="array">
-  Updated tags values.
-</ParamField>
-
-<ParamField body="description" type="string">
-  Updated description.
-</ParamField>
-
-<ParamField body="is_reviewed" type="boolean">
-  Review status.
-</ParamField>
-
-<ParamField body="detach" type="boolean">
-  When `true`, clears sync metadata (`source_id`, `external_id`, `source_synced_at`) so synced attributes become editable.
-</ParamField>
-
-<Warning>
-  Synced attributes cannot update label, enum_values, tags_values, or description unless `detach` is `true`.
-</Warning>
-
-<RequestExample>
-```bash cURL
-curl -X PUT "https://hub.banditshq.com/api/v1/attributes/color" \
-  -H "Authorization: Bearer lasso_..." \
-  -H "Content-Type: application/json" \
-  -d '{"label": "Product Color", "is_reviewed": true}'
-```
-</RequestExample>
+The deprecated body field `key` does not rename the Attribute. Use the dedicated rename endpoint.

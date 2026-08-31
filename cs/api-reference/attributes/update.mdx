@@ -1,10 +1,14 @@
 ---
 title: 'Aktualizovat atribut'
-api: "PUT /attributes/{key}"
+openapi: "openapi.yaml PUT /attributes/{key}"
 description: 'Aktualizace měnitelných polí atributu.'
 ---
 
-Změna typu není povolena. Synchronizované atributy vyžadují `detach: true` pro editaci label nebo enum hodnot.
+## Poznámky k použití
 
-<ParamField path="key" type="string" required>Klíč atributu.</ParamField>
-<ParamField body="detach" type="boolean">Odpojí atribut od sync zdroje.</ParamField>
+- Vynechaná pole zůstávají beze změny. `type` a druh Relation jsou neměnné.
+- Odešlete `expected_updated_at` z posledního načtení, abyste nepřepsali novější změnu. Zastaralá hodnota vrátí `409` s kódem `stale_write` a polem `current_updated_at`.
+- Attribute spravovaný zdrojem odmítne změnu vlastněnou zdrojem, pokud ve stejném požadavku nenastavíte `detach: true`.
+- Prázdný `image_config` vymaže kanonické požadavky na obrázek. `number_config: null` vymaže metadata zobrazení čísel.
+
+Zastaralé pole těla `key` Attribute nepřejmenuje. Použijte samostatný endpoint pro přejmenování.

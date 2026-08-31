@@ -1,0 +1,12 @@
+---
+title: "Test nebo opakované doručení webhooku"
+description: "Odešlete testovací událost nebo zopakujte neúspěšný pokus o doručení."
+openapi: "openapi.yaml POST /catalog/webhooks/{id}"
+---
+
+## Akce
+
+- Odešlete `{ "action": "test" }` pro záznam a doručení syntetické události `webhook.test`.
+- Odešlete `{ "action": "redeliver", "delivery_record_id": "..." }` pro opakování neúspěšného nebo jiného než 2xx pokusu.
+
+Jako `delivery_record_id` použijte `id` záznamu pokusu, ne stabilní logické `delivery_id`. Opakované doručení vytvoří nový pokus a zachová logický identifikátor doručení v hlavičce `X-Lasso-Delivery-Id`.

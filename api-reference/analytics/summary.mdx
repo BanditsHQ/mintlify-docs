@@ -1,0 +1,15 @@
+---
+title: "Get Catalog and Lasso product analytics"
+description: "Returns Catalog business outcomes and Lasso workflow volume for an inclusive date range. Catalog current totals are snapshots and therefore do not change with the date or user filter."
+openapi: "openapi.yaml GET /analytics/products/summary"
+---
+
+## Metric semantics
+
+- `from` and `to` are inclusive dates. `scope` defaults to `all`; sections outside a selected narrower scope are omitted.
+- Catalog unique products count live products with at least one meaningful field write in the period. Repeated edits to one product count once.
+- Catalog `new_products` and `updated_existing` are mutually exclusive and add up to the unique product count.
+- Current Catalog totals are inventory snapshots. Date and user filters do not change them; status, schema, and source filters do.
+- Lasso products prepared count extraction result rows created in the period and attribute them to the table initiator.
+
+`source` is a Catalog-only filter and requires `scope=catalog`.

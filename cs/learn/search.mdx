@@ -15,9 +15,15 @@ Lasso Vyhledávání umožňuje najít produkty pomocí přirozeného jazyka. Po
 
 Výstupní tvar ovládáte třemi způsoby:
 
-- **Použijte existující schéma** -- Předejte `schema_id` ze schématu vytvořeného přes `POST /v1/schemas`.
+- **Použijte existující schéma** -- Předejte `schema_id` ze schématu vytvořeného přes `POST /schemas`.
 - **Definujte sloupce inline** -- Předejte pole `columns` přímo v požadavku.
 - **Použijte výchozí** -- Vynechte obojí a Lasso použije standardní produktové schéma.
+
+## Synchronní a asynchronní režim
+
+Ve výchozím nastavení je vyhledávání synchronní. Když předáte `webhook_url`, Lasso okamžitě vrátí `202` a po dokončení odešle výsledky na zadanou URL.
+
+`max_results` má výchozí hodnotu `7` a přijímá hodnoty od `1` do `7`.
 
 ## Kredity
 

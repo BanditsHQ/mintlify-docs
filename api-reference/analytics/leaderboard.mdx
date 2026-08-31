@@ -1,0 +1,14 @@
+---
+title: "Get the Catalog or Lasso leaderboard"
+description: "Get the Catalog or Lasso leaderboard."
+openapi: "openapi.yaml GET /analytics/products/leaderboard"
+---
+
+## Usage notes
+
+Choose exactly one `scope`:
+
+- `catalog` ranks contributors by product delivery activity.
+- `extraction` returns both user and table rankings for rows prepared in Lasso.
+
+Catalog rows are unique per contributor, not across the entire company. One product touched by two contributors appears in both rows, so summing the leaderboard can exceed the company-wide unique product total.

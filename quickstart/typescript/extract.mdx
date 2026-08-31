@@ -55,18 +55,27 @@ const table = await client.tables.create({
 });
 
 console.log(table.id);     // "tbl_..."
-console.log(table.status); // "processing"
+console.log(table.status); // "queued_for_processing"
 ```
 
 ## 4. Wait for results
 
-The SDK includes a polling helper that waits for extraction to complete.
+Poll the table endpoint and handle every terminal status.
 
 ```typescript
-const completed = await client.tables.waitForCompletion(table.id, {
-  intervalMs: 3000,
-  timeoutMs: 300000,
-});
+let completed;
+for (let attempt = 0; attempt < 100; attempt++) {
+  const current = await client.tables.get(table.id);
+  if (current.status === "completed") {
+    completed = current;
+    break;
+  }
+  if (["error", "cancelled"].includes(current.status)) {
+    throw new Error(current.error_message ?? `Extraction ${current.status}`);
+  }
+  await new Promise((resolve) => setTimeout(resolve, 3000));
+}
+if (!completed) throw new Error("Timed out waiting for extraction");
 
 console.log(completed.status);     // "completed"
 console.log(completed.total_rows); // 42

@@ -1,53 +1,67 @@
 ---
-title: 'Introduction'
-description: 'Understand general concepts, response codes, and authentication strategies.'
+title: "Introduction"
+description: "Understand the Lasso API base URL, resources, authentication, responses, and complete OpenAPI contract."
 ---
 
-The Lasso API is built on REST principles. All requests use HTTPS and return JSON responses.
-
-Use Lasso to **search** for products, **enrich** partial data into complete records, **extract** structured data from files, and **enhance** it with AI — all through a single API.
+The Lasso API provides company-scoped access to product search and enrichment, extraction tables, Shared Attributes, Product Schemas, Catalog products, webhooks, credits, and product analytics.
 
 ## Base URL
 
-All requests contain the following base URL:
-
-```
-https://hub.banditshq.com/api/v1
+```text
+https://app.productlasso.com/api/v1
 ```
 
-## Quick examples
-
-The fastest way to use Lasso — no setup required:
-
-<CodeGroup>
-```bash Search for products
-curl -X POST "https://hub.banditshq.com/api/v1/search" \
-  -H "Authorization: Bearer lasso_..." \
-  -H "Content-Type: application/json" \
-  -d '{ "query": "Sony wireless earbuds under $200" }'
-```
-
-```bash Enrich product data
-curl -X POST "https://hub.banditshq.com/api/v1/enrich" \
-  -H "Authorization: Bearer lasso_..." \
-  -H "Content-Type: application/json" \
-  -d '{ "items": [{ "data": { "name": "Sony WF-1000XM5" } }] }'
-```
-</CodeGroup>
+Send HTTPS requests to this URL. Most responses use JSON. File uploads use `multipart/form-data`, and export endpoints can return JSON, CSV, XLSX, or ZIP content.
 
 ## Authentication
 
-To authenticate you need to add an `Authorization` header with the contents of the header being `Bearer lasso_xxxxxxxxx` where `lasso_xxxxxxxxx` is your [API Key](https://hub.banditshq.com).
+Send your API key as a bearer token on every request:
 
-```
-Authorization: Bearer lasso_xxxxxxxxx
+```http
+Authorization: Bearer lasso_your_api_key
 ```
 
-API keys are scoped to a single company. All resources accessed through a key belong to that company. See the [Authentication](/api-reference/authentication) page for more details on key management and security best practices.
+API keys start with `lasso_` and grant access to one company. See [Authentication](/api-reference/authentication) for creation and storage guidance.
+
+## API contract
+
+The [OpenAPI 3.1 contract](/openapi.yaml) contains all 59 public operations on the current Stage API, including request schemas, response schemas, errors, and examples. The endpoint pages in this reference are generated from that contract.
+
+The main resource groups are:
+
+- Search and enrichment
+- Tables, rows, enhancements, files, and exports
+- Shared Attributes and Product Schemas
+- Catalog products and Catalog webhooks
+- Credits and product analytics
+
+## Request example
+
+```bash
+curl --request GET \
+  --url "https://app.productlasso.com/api/v1/tables?page=1&limit=25" \
+  --header "Authorization: Bearer lasso_your_api_key"
+```
+
+## Success responses
+
+| Status | Meaning |
+| --- | --- |
+| `200` | The request succeeded. |
+| `201` | A resource was created. |
+| `202` | Asynchronous processing was accepted. |
+| `204` | The request succeeded without a response body. |
+| `207` | An Attribute rename completed with one or more dependent migration failures. Inspect the response before continuing. |
+
+See [Errors](/api-reference/errors) for the error envelope and retry metadata.
+
+## Pagination
+
+The API uses page-based, cursor-based, and offset-based pagination depending on the resource. Do not assume that every list endpoint accepts `page` and `limit`. See [Pagination](/api-reference/pagination) and the endpoint contract.
 
 ## SDKs
 
-Official SDKs are available for TypeScript and Python.
+The Stage repository contains TypeScript and Python SDKs at version `0.2.0`.
 
 <CodeGroup>
 ```bash npm
@@ -58,76 +72,3 @@ npm install @lasso-ai/sdk
 pip install lasso-ai
 ```
 </CodeGroup>
-
-<CodeGroup>
-```typescript TypeScript
-import LassoClient from "@lasso-ai/sdk";
-
-const client = new LassoClient({ apiKey: "lasso_..." });
-
-// Search
-const results = await client.search({ query: "wireless earbuds" });
-
-// Enrich
-const enriched = await client.enrich({
-  items: [{ data: { name: "Sony WF-1000XM5" } }],
-});
-```
-
-```python Python
-from lasso import LassoClient
-
-client = LassoClient(api_key="lasso_...")
-
-# Search
-results = client.search(query="wireless earbuds")
-
-# Enrich
-enriched = client.enrich(items=[{"data": {"name": "Sony WF-1000XM5"}}])
-```
-</CodeGroup>
-
-## Response codes
-
-Lasso uses standard HTTP codes to indicate the success or failure of your requests.
-
-| Status | Type | Description |
-|---|---|---|
-| `200` | Success | Successful request. |
-| `201` | Created | Resource successfully created. |
-| `202` | Accepted | Async job queued (search, enrich, enhance). |
-| `204` | No Content | Successful deletion. |
-| `400` | `invalid_request` | The request is malformed or uses an unsupported HTTP method. |
-| `401` | `unauthenticated` | Missing, invalid, or deactivated API key. |
-| `402` | `insufficient_credits` | Your account does not have enough credits. |
-| `403` | `forbidden` | The API key does not have permission for this action. |
-| `404` | `not_found` | The resource does not exist or does not belong to your company. |
-| `409` | `conflict` | The request conflicts with the current state of the resource. |
-| `422` | `validation_error` | Missing required fields or invalid values. |
-| `429` | `rate_limited` | Too many requests. Back off and retry. |
-| `500` | `internal_error` | An unexpected error on the server. |
-
-See [Errors](/api-reference/errors) for the full error response format.
-
-## Pagination
-
-List endpoints support page-based pagination with `page` and `limit` query parameters. The default page size is 25 and the maximum is 100.
-
-```json
-{
-  "data": [...],
-  "pagination": {
-    "page": 1,
-    "limit": 25,
-    "total": 143
-  }
-}
-```
-
-See [Pagination](/api-reference/pagination) for details and iteration examples.
-
-## Webhooks
-
-Configure a `webhook_url` on search, enrich, or table creation to receive HTTP POST notifications when processing completes. Webhook payloads are signed with HMAC-SHA256 and retried up to 3 times with exponential backoff.
-
-See [Webhooks](/api-reference/webhooks) for delivery format, signature verification, and retry policy.

@@ -1,32 +1,5 @@
 ---
-title: 'Delete Webhook'
-api: 'DELETE /catalog/webhooks/{id}'
-description: 'Delete a webhook subscription'
+title: "Delete a webhook endpoint and its delivery history"
+description: "Delete a webhook endpoint and its delivery history."
+openapi: "openapi.yaml DELETE /catalog/webhooks/{id}"
 ---
-
-Permanently delete a webhook subscription. Events will no longer be delivered to this endpoint.
-
-<ParamField path="id" type="string" required>
-  The webhook subscription ID to delete.
-</ParamField>
-
-<RequestExample>
-```typescript TypeScript
-await lasso.catalog.webhooks.delete('wh_abc123...');
-```
-
-```python Python
-client.catalog.webhooks.delete("wh_abc123...")
-```
-
-```bash cURL
-curl -X DELETE "https://hub.banditshq.com/api/v1/catalog/webhooks/wh_abc123..." \
-  -H "Authorization: Bearer lasso_..."
-```
-</RequestExample>
-
-<ResponseExample>
-```json
-204 No Content
-```
-</ResponseExample>

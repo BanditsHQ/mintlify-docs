@@ -1,55 +1,43 @@
-# Mintlify Starter Kit
+# Lasso public API documentation
 
-Use the starter kit to get your docs deployed and ready to customize.
+This Mintlify site documents Lasso's public `/api/v1` API in English and Czech. The API implementation and primary OpenAPI definition live in the `bandits_dashboard` repository.
 
-Click the green **Use this template** button at the top of this repo to copy the Mintlify starter kit. The starter kit contains examples with
+## Source of truth
 
-- Guide pages
-- Navigation
-- Customizations
-- API reference pages
-- Use of popular components
+- Sync against the `stage` branch of `bandits_dashboard` so unreleased API changes are documented before promotion.
+- Start with `bandits_dashboard/api-spec/openapi.yaml`, then verify it against the handlers under `bandits_dashboard/api/v1`.
+- Keep `openapi.yaml`, English endpoint pages, Czech endpoint pages, and `docs.json` navigation in sync.
+- Exclude `/api/v1/internal` and dashboard-only endpoints.
 
-**[Follow the full quickstart guide](https://starter.mintlify.com/quickstart)**
+The documentation OpenAPI file currently supplements the application spec with public handler routes that are not yet declared there: `GET /catalog/lookup`, `GET /catalog/changes`, `POST /tables/{table_id}/rows`, and `GET /credits/stats`.
 
 ## AI-assisted writing
 
-Set up your AI coding tool to work with Mintlify:
+Install Mintlify's documentation skill for your AI coding tools:
 
 ```bash
 npx skills add https://mintlify.com/docs
 ```
 
-This command installs Mintlify's documentation skill for your configured AI tools like Claude Code, Cursor, Windsurf, and others. The skill includes component reference, writing standards, and workflow guidance.
+## Local development
 
-See the [AI tools guides](/ai-tools) for tool-specific setup.
+Install the Mintlify CLI and start the preview from the repository root:
 
-## Development
-
-Install the [Mintlify CLI](https://www.npmjs.com/package/mint) to preview your documentation changes locally. To install, use the following command:
-
-```
+```bash
 npm i -g mint
-```
-
-Run the following command at the root of your documentation, where your `docs.json` is located:
-
-```
 mint dev
 ```
 
-View your local preview at `http://localhost:3000`.
+Open `http://localhost:3000`.
 
-## Publishing changes
+## Validate changes
 
-Install our GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app) to propagate changes from your repo to your deployment. Changes are deployed to production automatically after pushing to the default branch.
+Run these checks from the repository root:
 
-## Need help?
+```bash
+npx mintlify@latest validate
+npx mintlify@latest broken-links
+npx mintlify@latest a11y
+```
 
-### Troubleshooting
-
-- If your dev environment isn't running: Run `mint update` to ensure you have the most recent version of the CLI.
-- If a page loads as a 404: Make sure you are running in a folder with a valid `docs.json`.
-
-### Resources
-- [Mintlify documentation](https://mintlify.com/docs)
+Before publishing an API sync, also compare the documented method/path pairs with every public handler method under `api/v1` in the Stage source tree.

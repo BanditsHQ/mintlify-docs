@@ -1,77 +1,26 @@
 ---
 title: 'Exportovat tabulku'
-api: 'GET /tables/{table_id}/export'
+openapi: "openapi.yaml GET /tables/{table_id}/export"
 description: 'Export dat tabulky jako CSV, XLSX, JSON nebo ZIP archiv obrázků.'
 ---
 
-## Parametry cesty
+import ExportExamples from "/snippets/api/export-examples.mdx";
 
-<ParamField path="table_id" type="string" required>
-  Jedinečný identifikátor tabulky.
-</ParamField>
+## Formáty odpovědi
 
-## Query parametry
+| `format` | Content-Type | Odpověď |
+| --- | --- | --- |
+| `csv` | `text/csv` | Soubor CSV |
+| `xlsx` | `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` | Sešit Excel |
+| `json` | `application/json` | Pole JSON s objekty řádků |
+| `images` | `application/zip` | Archiv ZIP s exportovanými obrázky |
 
-<ParamField query="format" type="string" required>
-  Formát exportu. Jeden z: `csv`, `xlsx`, `json`, `images`.
-</ParamField>
+Před exportem musí být tabulka dokončená. Parametr `columns` odešlete jako seznam klíčů sloupců oddělený čárkami. Všechny odpovědi jiné než JSON zpracujte jako bajty a při ukládání zachovejte název souboru z `Content-Disposition`.
 
-<ParamField query="columns" type="string">
-  Čárkou oddělený seznam klíčů sloupců k zahrnutí. Vynechte pro export všech sloupců.
-</ParamField>
+<Warning>
+  Pomocné metody TypeScript SDK pro `csv`, `xlsx` a `images` a metoda Python SDK pro `csv` se nyní pokoušejí odpověď zpracovat jako JSON. Pro tyto formáty použijte přímé HTTP. Metody Python SDK pro `xlsx` a `images` už vracejí bajty.
+</Warning>
 
-## Odpověď
+## Příklady
 
-Odpověď závisí na zvoleném formátu:
-
-| Formát | Content-Type | Popis |
-|---|---|---|
-| `csv` | `text/csv` | CSV soubor oddělený středníkem. |
-| `xlsx` | `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` | Excelový sešit. |
-| `json` | `application/json` | JSON pole objektů řádků. |
-| `images` | `application/zip` | ZIP archiv všech obrázků ze sloupcových obrázků, organizovaný podle řádků. |
-
-<RequestExample>
-```typescript TypeScript
-// Export as JSON
-const data = await client.export.json("tbl_abc123");
-console.log(data); // [{ name: "...", price: 29.99 }, ...]
-
-// Export specific columns as CSV
-const csv = await client.export.csv("tbl_abc123", {
-  columns: "name,price,url",
-});
-
-// Export as XLSX
-const xlsx = await client.export.xlsx("tbl_abc123");
-
-// Export images as ZIP
-const images = await client.export.images("tbl_abc123");
-```
-
-```python Python
-# Export as JSON
-data = client.export.json("tbl_abc123")
-print(data)  # [{"name": "...", "price": 29.99}, ...]
-
-# Export specific columns as CSV
-csv_data = client.export.csv("tbl_abc123", columns="name,price,url")
-
-# Export as XLSX and save to file
-client.export.xlsx("tbl_abc123", path="export.xlsx")
-
-# Export images and save to file
-client.export.images("tbl_abc123", path="images.zip")
-```
-
-```bash cURL
-# Export as JSON
-curl -X GET "https://hub.banditshq.com/api/v1/tables/tbl_abc123/export?format=json" \
-  -H "Authorization: Bearer lasso_..."
-
-# Export specific columns as CSV
-curl -X GET "https://hub.banditshq.com/api/v1/tables/tbl_abc123/export?format=csv&columns=name,price,url" \
-  -H "Authorization: Bearer lasso_..." \
-  -o export.csv
-```
-</RequestExample>
+<ExportExamples />

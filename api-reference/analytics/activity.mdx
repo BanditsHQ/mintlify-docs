@@ -1,0 +1,11 @@
+---
+title: "List the exact products or result rows behind a metric"
+description: "List the exact products or result rows behind a metric."
+openapi: "openapi.yaml GET /analytics/products/activity"
+---
+
+## Usage notes
+
+Use this endpoint to drill from an aggregate metric into the exact Catalog products or Lasso result rows behind it. Keep the same date range, scope, and filters that you used for the summary or leaderboard.
+
+The response uses cursor pagination. Pass `next_cursor` unchanged to the next request. Do not interpret or construct cursors yourself.

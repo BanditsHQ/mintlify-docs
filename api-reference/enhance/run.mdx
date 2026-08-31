@@ -1,100 +1,14 @@
 ---
-title: 'Enhance cells'
-description: 'Use AI to enhance or generate values for a specific column across selected rows.'
-api: "POST /tables/{table_id}/enhance"
+title: "Enhance cells with AI"
+description: "Enhance one or more cells in a single column. Pass one row_id for a single cell, or multiple row_ids to enhance the entire column."
+openapi: "openapi.yaml POST /tables/{table_id}/enhance"
 ---
 
-## Path parameters
+## Usage notes
 
-<ParamField path="table_id" type="string" required>
-  The unique identifier of the table.
-</ParamField>
+- The table must be `completed` and unlocked.
+- Send one `row_id` for one cell or up to 1,000 row IDs for one column. Duplicate IDs are processed once.
+- Prompts may reference another column by its label, for example `Translate {{Product name}} to Czech`.
+- This operation costs 2 credits per queued row and always returns `202`.
 
-## Request body
-
-<ParamField body="row_ids" type="string[]" required>
-  Array of row IDs to enhance. Must be non-empty.
-</ParamField>
-
-<ParamField body="column_key" type="string" required>
-  The column key to enhance.
-</ParamField>
-
-<ParamField body="prompt" type="string" required>
-  Instructions for the AI describing what to generate or how to transform the data.
-</ParamField>
-
-<ParamField body="model" type="string" default="gemini-pro">
-  The AI model to use. Defaults to `gemini-pro`.
-</ParamField>
-
-<ParamField body="web_search" type="boolean" default="true">
-  Whether the AI can use web search to find additional information.
-</ParamField>
-
-<ParamField body="target_language" type="string">
-  Target language for translation-based enhancements.
-</ParamField>
-
-<ParamField body="use_glossary" type="boolean" default="false">
-  Whether to apply your glossary terms during enhancement.
-</ParamField>
-
-## Response
-
-Enhancement runs asynchronously. The response confirms the job was queued.
-
-<ResponseField name="id" type="string">Enhancement job identifier.</ResponseField>
-<ResponseField name="status" type="string">Always `queued`.</ResponseField>
-<ResponseField name="estimated_credits" type="number">Estimated credit cost.</ResponseField>
-<ResponseField name="rows_queued" type="integer">Number of rows queued for enhancement.</ResponseField>
-
-<RequestExample>
-```typescript TypeScript
-const job = await client.enhance.cells("tbl_abc123", {
-  row_ids: ["row_1", "row_2", "row_3"],
-  column_key: "description",
-  prompt: "Write a compelling product description based on the product name and specifications.",
-  web_search: true,
-});
-
-console.log(job.id);                // "enhance_..."
-console.log(job.estimated_credits); // 6
-```
-
-```python Python
-job = client.enhance.cells(
-    "tbl_abc123",
-    row_ids=["row_1", "row_2", "row_3"],
-    column_key="description",
-    prompt="Write a compelling product description based on the product name and specifications.",
-    web_search=True,
-)
-
-print(job["id"])                 # "enhance_..."
-print(job["estimated_credits"])  # 6
-```
-
-```bash cURL
-curl -X POST "https://hub.banditshq.com/api/v1/tables/tbl_abc123/enhance" \
-  -H "Authorization: Bearer lasso_..." \
-  -H "Content-Type: application/json" \
-  -d '{
-    "row_ids": ["row_1", "row_2", "row_3"],
-    "column_key": "description",
-    "prompt": "Write a compelling product description based on the product name and specifications.",
-    "web_search": true
-  }'
-```
-</RequestExample>
-
-<ResponseExample>
-```json Response
-{
-  "id": "enhance_abc123",
-  "status": "queued",
-  "estimated_credits": 6,
-  "rows_queued": 3
-}
-```
-</ResponseExample>
+Poll `GET /tables/{table_id}/enhance/status` to track completion. Read the updated row to obtain the generated value.

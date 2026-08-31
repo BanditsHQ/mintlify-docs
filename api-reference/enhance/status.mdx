@@ -1,69 +1,11 @@
 ---
-title: 'Enhancement status'
-description: 'Check the progress of enhancement operations on a table.'
-api: "GET /tables/{table_id}/enhance/status"
+title: "Get enhancement status"
+description: "Returns per-column enhancement progress across all rows."
+openapi: "openapi.yaml GET /tables/{table_id}/enhance/status"
 ---
 
-## Path parameters
+## Usage notes
 
-<ParamField path="table_id" type="string" required>
-  The unique identifier of the table.
-</ParamField>
+The response groups progress by column key. For each column, compare `completed + failed` with `total`. `pending` and `processing` identify work that has not reached a terminal state.
 
-## Response
-
-<ResponseField name="columns" type="object">
-  A map of column keys to their enhancement progress across all rows.
-  <Expandable title="Column status object">
-    <ResponseField name="total" type="integer">Total rows with enhancement for this column.</ResponseField>
-    <ResponseField name="completed" type="integer">Rows successfully enhanced.</ResponseField>
-    <ResponseField name="failed" type="integer">Rows where enhancement failed.</ResponseField>
-    <ResponseField name="pending" type="integer">Rows waiting to be processed.</ResponseField>
-    <ResponseField name="processing" type="integer">Rows currently being processed.</ResponseField>
-  </Expandable>
-</ResponseField>
-
-<RequestExample>
-```typescript TypeScript
-const status = await client.enhance.status("tbl_abc123");
-
-for (const [column, stats] of Object.entries(status.columns)) {
-  console.log(`${column}: ${stats.completed}/${stats.total} done`);
-}
-```
-
-```python Python
-status = client.enhance.status("tbl_abc123")
-
-for column, stats in status["columns"].items():
-    print(f"{column}: {stats['completed']}/{stats['total']} done")
-```
-
-```bash cURL
-curl -X GET "https://hub.banditshq.com/api/v1/tables/tbl_abc123/enhance/status" \
-  -H "Authorization: Bearer lasso_..."
-```
-</RequestExample>
-
-<ResponseExample>
-```json Response
-{
-  "columns": {
-    "description": {
-      "total": 42,
-      "completed": 38,
-      "failed": 1,
-      "pending": 0,
-      "processing": 3
-    },
-    "seo_title": {
-      "total": 42,
-      "completed": 42,
-      "failed": 0,
-      "pending": 0,
-      "processing": 0
-    }
-  }
-}
-```
-</ResponseExample>
+This endpoint reports counts. Use `GET /tables/{table_id}/rows/{row_id}` for values and `GET /tables/{table_id}/rows/{row_id}/traces` for AI trace details.

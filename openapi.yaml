@@ -1,0 +1,5034 @@
+openapi: 3.1.0
+info:
+  title: Lasso API
+  description: AI-powered product data extraction and enhancement API
+  version: 1.0.0
+  contact:
+    name: Lasso Support
+    url: https://lasso.ai
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+servers:
+  - url: https://app.productlasso.com/api/v1
+    description: Production
+security:
+  - BearerAuth: []
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: API Key
+
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+        minimum: 1
+    LimitParam:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        default: 25
+        minimum: 1
+        maximum: 100
+    SearchParam:
+      name: search
+      in: query
+      schema:
+        type: string
+
+    ProductAnalyticsFromParam:
+      name: from
+      in: query
+      required: true
+      description: Inclusive reporting-period start.
+      schema:
+        type: string
+        format: date
+
+    ProductAnalyticsToParam:
+      name: to
+      in: query
+      required: true
+      description: Inclusive reporting-period end. The range may contain at most 1,830 days.
+      schema:
+        type: string
+        format: date
+
+    ProductAnalyticsCatalogStatusParam:
+      name: catalog_status
+      in: query
+      description: Current Catalog status to include. `all` means active and draft products.
+      schema:
+        type: string
+        enum: [all, active, draft, archived]
+        default: all
+
+    ProductAnalyticsUserParam:
+      name: user_id
+      in: query
+      description: Current or former user UUID, or `system` for unattributed automation.
+      schema:
+        type: string
+
+    ProductAnalyticsSchemaParam:
+      name: schema_id
+      in: query
+      description: Filters both Catalog products and Lasso extraction tables by schema.
+      schema:
+        type: string
+        format: uuid
+
+    ProductAnalyticsTableParam:
+      name: table_id
+      in: query
+      description: Filters Lasso analytics to one extraction table.
+      schema:
+        type: string
+        format: uuid
+
+    ProductAnalyticsSourceParam:
+      name: source
+      in: query
+      description: Catalog-only source filter. Requires `scope=catalog`.
+      schema:
+        type: string
+        enum: [manual, product_extraction, shopify]
+
+  schemas:
+    Error:
+      type: object
+      required: [status_code, error_type, message, request_id]
+      properties:
+        status_code:
+          type: integer
+        error_type:
+          type: string
+          enum:
+            - invalid_request
+            - unauthenticated
+            - forbidden
+            - not_found
+            - conflict
+            - validation_error
+            - rate_limited
+            - insufficient_credits
+            - service_unavailable
+            - internal_error
+        message:
+          type: string
+        request_id:
+          type: string
+        code:
+          type: string
+          description: Stable machine-readable detail code for validation, conflict, and retryable availability errors.
+        retryable:
+          type: boolean
+          description: Whether the request can be retried without changing its payload.
+        attribute_id:
+          type: string
+          format: uuid
+          description: Stable Attribute identity when the error is scoped to one Attribute.
+        attribute_key:
+          type: string
+          description: Attribute key when the error is scoped to one Attribute.
+        details:
+          type: object
+          additionalProperties: true
+        current_updated_at:
+          type: string
+          format: date-time
+          description: Current resource revision supplied for client-directed refetch after a stale write.
+
+    AttributeType:
+      type: string
+      enum: [text, number, url, email, date, boolean, richtext, format, enum, tags, image, images, file, files, json, relation]
+
+    FormatOutputType:
+      type: string
+      enum: [text, number, boolean, json, richtext, file, image]
+      description: The stored result type produced by a format Attribute. Format formulas execute only in Extraction; Catalog stores the resulting value.
+
+    ImageConfig:
+      type: object
+      additionalProperties: false
+      description: Canonical requirements shared by every usage of an image Attribute.
+      properties:
+        format:
+          type: string
+          enum: [original, webp, jpeg, png]
+        required_aspect_ratio:
+          type: string
+          enum: [original, "1:1", "1:4", "1:8", "2:3", "3:2", "3:4", "4:1", "4:3", "4:5", "5:4", "8:1", "9:16", "16:9", "21:9"]
+        required_background_color:
+          type: string
+          enum: [white, black]
+          description: Omit to accept any background and preserve existing image behavior.
+        max_size_mb:
+          type: number
+          minimum: 0
+        min_width:
+          type: number
+          minimum: 0
+        min_height:
+          type: number
+          minimum: 0
+        max_width:
+          type: number
+          minimum: 0
+        max_height:
+          type: number
+          minimum: 0
+
+    NumberConfig:
+      type: object
+      additionalProperties: false
+      description: Presentation metadata for number and Formula-number Attributes. Stored and API values remain numeric.
+      properties:
+        unit:
+          type: string
+          minLength: 1
+          maxLength: 64
+          description: Literal, untranslated unit.
+        unit_position:
+          type: string
+          enum: [before, after]
+          default: after
+        format_style:
+          type: string
+          enum: [dot_plain, comma_plain, dot_with_comma_grouping, comma_with_dot_grouping, dot_with_space_grouping, comma_with_space_grouping]
+        file_export:
+          type: string
+          enum: [raw, formatted_text]
+          default: raw
+          description: Applies to CSV/XLSX file exports, including files requested through export endpoints. JSON and non-file API or integration values remain raw.
+
+    Attribute:
+      type: object
+      additionalProperties: false
+      required: [id, key, label, type, format_output_type, enum_values, tags_values, allow_custom_values, boolean_config, number_config, relation_config, description, validation, language, image_config, status, archived_at, is_reviewed, source_id, external_id, source_synced_at, created_at, updated_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        key:
+          type: string
+        label:
+          type: string
+        type:
+          $ref: "#/components/schemas/AttributeType"
+        format_output_type:
+          oneOf:
+            - $ref: "#/components/schemas/FormatOutputType"
+            - type: "null"
+          type: [string, "null"]
+          description: Declared output type for format Attributes; null for all other Attribute types.
+        enum_values:
+          type: [array, "null"]
+          items:
+            type: string
+        tags_values:
+          type: [array, "null"]
+          items:
+            type: string
+        allow_custom_values:
+          type: boolean
+          description: Whether table editors may append missing enum or tag choices.
+        boolean_config:
+          type: [object, "null"]
+          additionalProperties: true
+        number_config:
+          oneOf:
+            - $ref: "#/components/schemas/NumberConfig"
+            - type: "null"
+          type: [object, "null"]
+          description: Present only as metadata; Attribute values returned by APIs remain raw numbers.
+        relation_config:
+          type: [object, "null"]
+          additionalProperties: true
+        description:
+          type: [string, "null"]
+        validation:
+          type: [object, "null"]
+          additionalProperties: true
+        language:
+          type: [string, "null"]
+        image_config:
+          oneOf:
+            - $ref: "#/components/schemas/ImageConfig"
+            - type: "null"
+          type: [object, "null"]
+        status:
+          type: string
+          enum: [active, archived]
+          description: Derived from archive state. Archive and restore remain Dashboard-only.
+        archived_at:
+          type: [string, "null"]
+          format: date-time
+        is_reviewed:
+          type: boolean
+        source_id:
+          type: [string, "null"]
+          format: uuid
+        external_id:
+          type: [string, "null"]
+        source_synced_at:
+          type: [string, "null"]
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      examples:
+        - id: 11111111-1111-4111-8111-111111111111
+          key: product_name
+          label: Product name
+          type: text
+          format_output_type: null
+          enum_values: null
+          tags_values: null
+          allow_custom_values: true
+          boolean_config: null
+          number_config: null
+          relation_config: null
+          description: Public product title
+          validation: null
+          language: en
+          image_config: null
+          status: active
+          archived_at: null
+          is_reviewed: true
+          source_id: null
+          external_id: null
+          source_synced_at: null
+          created_at: "2026-07-01T00:00:00.000Z"
+          updated_at: "2026-07-14T10:00:00.000Z"
+
+    AttributeInput:
+      type: object
+      additionalProperties: false
+      required: [key, label, type]
+      properties:
+        key:
+          type: string
+          pattern: "^[a-zA-Z0-9][a-zA-Z0-9_/]*$"
+        label:
+          type: string
+        type:
+          $ref: "#/components/schemas/AttributeType"
+        format_output_type:
+          oneOf:
+            - $ref: "#/components/schemas/FormatOutputType"
+            - type: "null"
+          description: Only valid for format Attributes. Defaults to text when omitted or null.
+        enum_values:
+          type: [array, "null"]
+          items:
+            type: string
+        tags_values:
+          type: [array, "null"]
+          items:
+            type: string
+        allow_custom_values:
+          type: boolean
+          default: true
+        boolean_config:
+          type: [object, "null"]
+          additionalProperties: true
+        number_config:
+          oneOf:
+            - $ref: "#/components/schemas/NumberConfig"
+            - type: "null"
+          description: Only valid for number or Formula-number Attributes. Omit during an upsert to preserve existing metadata.
+        relation_config:
+          type: [object, "null"]
+          additionalProperties: true
+          description: Relation kind is immutable after creation.
+        description:
+          type: [string, "null"]
+        validation:
+          type: [object, "null"]
+          additionalProperties: true
+        language:
+          type: [string, "null"]
+          description: When omitted during an upsert, the existing language is preserved.
+        image_config:
+          $ref: "#/components/schemas/ImageConfig"
+          description: When omitted during an upsert, existing canonical image requirements are preserved. Send an empty object to clear them.
+        is_reviewed:
+          type: boolean
+
+    AttributeUpdateInput:
+      type: object
+      additionalProperties: false
+      properties:
+        key:
+          type: string
+          deprecated: true
+          description: Retained for request compatibility but does not rename the Attribute. Use the rename operation.
+        label:
+          type: string
+        format_output_type:
+          oneOf:
+            - $ref: "#/components/schemas/FormatOutputType"
+            - type: "null"
+          description: Only valid for format Attributes. Omit to preserve the current output type; null resets it to text.
+        enum_values:
+          type: [array, "null"]
+          items:
+            type: string
+        tags_values:
+          type: [array, "null"]
+          items:
+            type: string
+        allow_custom_values:
+          type: boolean
+        boolean_config:
+          type: [object, "null"]
+          additionalProperties: true
+        number_config:
+          oneOf:
+            - $ref: "#/components/schemas/NumberConfig"
+            - type: "null"
+          description: Only valid for number or Formula-number Attributes. Send null to clear; omitted fields remain unchanged.
+        relation_config:
+          type: [object, "null"]
+          additionalProperties: true
+          description: Relation configuration may change, but relation kind is immutable.
+        description:
+          type: [string, "null"]
+        validation:
+          type: [object, "null"]
+          additionalProperties: true
+        language:
+          type: [string, "null"]
+          description: Omitted fields remain unchanged.
+        image_config:
+          $ref: "#/components/schemas/ImageConfig"
+          description: Omitted fields remain unchanged. Send an empty object to clear canonical requirements.
+        is_reviewed:
+          type: boolean
+        detach:
+          type: boolean
+          description: Detach a source-managed Attribute before editing source-owned content.
+        expected_updated_at:
+          type: string
+          format: date-time
+          description: Optional compare-and-set revision. Refetch after a stale_write response.
+
+    AttributeBulkInput:
+      type: object
+      required: [attributes]
+      properties:
+        attributes:
+          type: array
+          minItems: 1
+          maxItems: 500
+          items:
+            $ref: "#/components/schemas/AttributeInput"
+
+    AttributeBulkResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Attribute"
+
+    AttributeListResponse:
+      type: object
+      required: [data, pagination]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Attribute"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+
+    AttributeRenameResult:
+      type: object
+      required: [updated, errors, error_count, code]
+      properties:
+        updated:
+          type: integer
+          minimum: 0
+        errors:
+          type: array
+          description: Stable sanitized strings; raw database errors and private resource IDs are never returned.
+          items:
+            type: string
+            enum: [rename_failed]
+        error_count:
+          type: integer
+          minimum: 0
+        code:
+          type: string
+          enum: [ok, rename_failed]
+
+    AttributeRenameResponse:
+      type: object
+      required: [success, partial, old_key, new_key, updated_count, error_count, attribute, results]
+      properties:
+        success:
+          type: boolean
+        partial:
+          type: boolean
+        old_key:
+          type: string
+        new_key:
+          type: string
+        updated_count:
+          type: integer
+          minimum: 0
+        error_count:
+          type: integer
+          minimum: 0
+        attribute:
+          $ref: "#/components/schemas/Attribute"
+        results:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/AttributeRenameResult"
+
+    Pagination:
+      type: object
+      required: [page, limit, total]
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+
+    ColumnType:
+      type: string
+      enum: [text, number, url, email, date, boolean, richtext, runnable, format, enum, tags, image, images, file, files, json, relation]
+
+    Column:
+      type: object
+      additionalProperties: true
+      required: [attribute_id, kind, key, label, type]
+      description: |
+        A column returned by schema and table read APIs. Every returned column includes
+        `attribute_id` and `kind`. Attribute columns are hydrated from the current company
+        Attribute definition; helpers keep their table- or schema-local definition.
+
+        API visibility does not imply eligibility for Catalog or other persistent/scheduled
+        sync destinations. Those destinations accept canonical Attribute-backed columns only.
+        Filter canonical columns with `kind == "attribute"`; helpers remain available for
+        one-time table reads and file exports according to the destination's rules.
+      properties:
+        id:
+          type: string
+          description: Server-issued stable usage ID. Retain it when round-tripping schema updates.
+        attribute_id:
+          type: [string, "null"]
+          format: uuid
+          description: Stable company Attribute ID, or null for a local helper.
+        kind:
+          type: string
+          enum: [attribute, helper]
+          description: Derived column identity. Callers cannot use this field to bypass destination eligibility.
+        attribute_status:
+          type: string
+          enum: [active, archived]
+        attribute_archived_at:
+          type: [string, "null"]
+          format: date-time
+        attribute_resolution_error:
+          type: string
+          enum: [missing_attribute]
+        key:
+          type: string
+          description: Unique column identifier
+        label:
+          type: string
+          description: Display name
+        type:
+          $ref: "#/components/schemas/ColumnType"
+        format_output_type:
+          oneOf:
+            - $ref: "#/components/schemas/FormatOutputType"
+            - type: "null"
+          description: Declared stored value type for Formula columns. Null or omitted defaults to text.
+        required:
+          type: boolean
+          default: false
+        description:
+          type: string
+        language:
+          type: [string, "null"]
+          description: Language code inherited from the canonical Attribute when configured.
+        enum_values:
+          type: array
+          items:
+            type: string
+          description: Allowed values for enum and tags types
+        tags_values:
+          type: array
+          items:
+            type: string
+        boolean_config:
+          type: object
+          additionalProperties: true
+        number_config:
+          oneOf:
+            - $ref: "#/components/schemas/NumberConfig"
+            - type: "null"
+          description: Canonical presentation metadata. API values remain raw numbers.
+        validation:
+          oneOf:
+            - type: object
+              additionalProperties: true
+            - type: string
+        image_config:
+          type: object
+          additionalProperties: true
+        runnable_config:
+          type: object
+          additionalProperties: true
+        format_config:
+          type: object
+          additionalProperties: true
+        enum_config:
+          type: object
+          additionalProperties: true
+        tags_config:
+          type: object
+          additionalProperties: true
+        relation_config:
+          type: [object, "null"]
+          additionalProperties: true
+        zip_export_config:
+          type: object
+          additionalProperties: true
+        fast_photo_config:
+          type: object
+          additionalProperties: true
+        content_template:
+          type: object
+          additionalProperties: true
+        always_export:
+          type: boolean
+        never_export:
+          type: boolean
+        zip_name_column:
+          type: string
+        content_template_id:
+          type: string
+        is_title:
+          type: boolean
+        is_thumbnail:
+          type: boolean
+          description: Marks this Shared image/gallery usage as the Catalog product thumbnail.
+      examples:
+        - attribute_id: 11111111-1111-4111-8111-111111111111
+          kind: attribute
+          key: product_name
+          label: Product name
+          type: text
+          language: en
+        - attribute_id: null
+          kind: helper
+          key: working_copy
+          label: Working copy
+          type: text
+
+    SchemaColumnInput:
+      type: object
+      additionalProperties: true
+      required: [key, label, type]
+      description: |
+        Column accepted by schema create/update. Omitting both `attribute_id` and `kind`
+        retains legacy behavior: the server creates or attaches the shared Attribute for
+        the key. Send `kind: helper` to opt into a local helper. Send `attribute_id` with
+        `kind: attribute` to attach an existing company Attribute; key and type must match.
+      properties:
+        id:
+          type: string
+          description: Existing usage ID to retain during full schema updates.
+        attribute_id:
+          type: [string, "null"]
+          format: uuid
+        kind:
+          type: string
+          enum: [attribute, helper]
+        key:
+          type: string
+        label:
+          type: string
+        type:
+          $ref: "#/components/schemas/ColumnType"
+        format_output_type:
+          oneOf:
+            - $ref: "#/components/schemas/FormatOutputType"
+            - type: "null"
+          description: Declared stored value type for Formula columns. Null or omitted defaults to text.
+        required:
+          type: boolean
+          default: false
+        description:
+          type: string
+        language:
+          type: [string, "null"]
+        enum_values:
+          type: array
+          items:
+            type: string
+        tags_values:
+          type: array
+          items:
+            type: string
+        boolean_config:
+          type: object
+          additionalProperties: true
+        number_config:
+          oneOf:
+            - $ref: "#/components/schemas/NumberConfig"
+            - type: "null"
+        validation:
+          oneOf:
+            - type: object
+              additionalProperties: true
+            - type: string
+        image_config:
+          type: object
+          additionalProperties: true
+        runnable_config:
+          type: object
+          additionalProperties: true
+        format_config:
+          type: object
+          additionalProperties: true
+        enum_config:
+          type: object
+          additionalProperties: true
+        tags_config:
+          type: object
+          additionalProperties: true
+        relation_config:
+          type: [object, "null"]
+          additionalProperties: true
+        zip_export_config:
+          type: object
+          additionalProperties: true
+        fast_photo_config:
+          type: object
+          additionalProperties: true
+        content_template:
+          type: object
+          additionalProperties: true
+        always_export:
+          type: boolean
+        never_export:
+          type: boolean
+        zip_name_column:
+          type: string
+        content_template_id:
+          type: string
+        is_title:
+          type: boolean
+        is_thumbnail:
+          type: boolean
+          description: Marks this Shared image/gallery usage as the Catalog product thumbnail.
+
+    InlineColumn:
+      type: object
+      required: [key, label, type]
+      description: Ephemeral output shape for search/enrich; it does not create or attach a shared Attribute.
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        type:
+          $ref: "#/components/schemas/ColumnType"
+        required:
+          type: boolean
+          default: false
+        description:
+          type: string
+        enum_values:
+          type: array
+          items:
+            type: string
+
+    Schema:
+      type: object
+      required: [id, name, columns, created_at, updated_at]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        is_default:
+          type: boolean
+        columns:
+          type: array
+          items:
+            $ref: "#/components/schemas/Column"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      examples:
+        - id: 9e1c77dd-8f10-41ca-bfe8-e672b89692d1
+          name: Supplier products
+          description: Core supplier feed fields
+          is_default: false
+          columns:
+            - id: 8d79b7da-7134-443e-8110-678fe04de51b
+              attribute_id: 11111111-1111-4111-8111-111111111111
+              kind: attribute
+              key: product_name
+              label: Product name
+              type: text
+          created_at: "2026-08-31T09:00:00.000Z"
+          updated_at: "2026-08-31T09:00:00.000Z"
+
+    SchemaListItem:
+      type: object
+      required: [id, name, columns_count, created_at, updated_at]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        columns_count:
+          type: integer
+        is_default:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    File:
+      type: object
+      required: [id, filename, size, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        filename:
+          type: string
+        size:
+          type: integer
+          description: File size in bytes
+        content_type:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      examples:
+        - id: 4be9e43c-f03a-4309-938c-d2e9482752cf
+          filename: supplier-products.xlsx
+          size: 42816
+          content_type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+          created_at: "2026-08-31T09:10:00.000Z"
+
+    TableStatus:
+      type: string
+      description: Raw extraction job status returned by the API.
+      enum: [queued, queued_for_processing, processing, processing_by_worker, completed, error, cancelled]
+
+    Table:
+      type: object
+      required: [id, name, schema_id, status, total_rows, created_at, updated_at]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        schema_id:
+          type: string
+        status:
+          $ref: "#/components/schemas/TableStatus"
+        progress:
+          type: integer
+          minimum: 0
+          maximum: 100
+        total_rows:
+          type: integer
+        source_type:
+          type: string
+          enum: [files, text, urls]
+        additional_context:
+          type: ["string", "null"]
+        enhancement_context:
+          type: ["string", "null"]
+        error_message:
+          type: ["string", "null"]
+        files:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              path:
+                type: string
+                description: Stored source path or submitted source URL.
+              size:
+                type: integer
+        locked:
+          type: boolean
+        locked_at:
+          type: ["string", "null"]
+          format: date-time
+        locked_by:
+          type: ["string", "null"]
+          format: uuid
+        skipped_source_updates:
+          type: integer
+        last_skipped_source_update_at:
+          type: ["string", "null"]
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      examples:
+        - id: d2b3dbe0-c77d-40d8-a5d2-480722489c64
+          name: August supplier feed
+          schema_id: 9e1c77dd-8f10-41ca-bfe8-e672b89692d1
+          status: queued_for_processing
+          progress: 0
+          total_rows: 0
+          source_type: text
+          additional_context: Prices use EUR.
+          enhancement_context: null
+          error_message: null
+          files: []
+          locked: false
+          locked_at: null
+          locked_by: null
+          skipped_source_updates: 0
+          last_skipped_source_update_at: null
+          created_at: "2026-08-31T09:15:00.000Z"
+          updated_at: "2026-08-31T09:15:00.000Z"
+
+    TableListItem:
+      type: object
+      required: [id, name, status, total_rows, schema_id, created_at]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        status:
+          $ref: "#/components/schemas/TableStatus"
+        total_rows:
+          type: integer
+        schema_id:
+          type: string
+        locked:
+          type: boolean
+        locked_at:
+          type: ["string", "null"]
+          format: date-time
+        locked_by:
+          type: ["string", "null"]
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+
+    Row:
+      type: object
+      required: [id, row_index, data, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        row_index:
+          type: integer
+        data:
+          type: object
+          additionalProperties: true
+          description: Key-value pairs matching the table schema columns
+        validation_status:
+          type: string
+          enum: [valid, warning, error]
+        validation_errors:
+          type: array
+          items:
+            type: object
+            properties:
+              column_key:
+                type: string
+              message:
+                type: string
+        enhancement_status:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              status:
+                type: string
+                enum: [not_run, pending, processing, success, error]
+              confidence:
+                type: number
+                minimum: 0
+                maximum: 1
+              error:
+                type: string
+        is_edited:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+      examples:
+        - id: 83ba2c61-8592-4614-ac46-10f43580dfb8
+          row_index: 0
+          data:
+            sku: A-100
+            product_name: Alpine bottle
+            price: 24.9
+          validation_status: valid
+          validation_errors: []
+          enhancement_status: {}
+          is_edited: false
+          created_at: "2026-08-31T09:20:00.000Z"
+
+    EnhanceRequest:
+      type: object
+      required: [row_ids, column_key, prompt]
+      properties:
+        row_ids:
+          type: array
+          minItems: 1
+          maxItems: 1000
+          items:
+            type: string
+            format: uuid
+          description: One row_id for single cell, multiple for column enhancement. Duplicate IDs are processed once.
+        column_key:
+          type: string
+        prompt:
+          type: string
+          description: "AI instructions. Supports {{Column Name}} references."
+        model:
+          type: string
+          enum: [auto, gemini-pro, claude-opus]
+          default: auto
+        web_search:
+          type: boolean
+          default: true
+        target_language:
+          type: string
+          description: ISO language code for translation
+        use_glossary:
+          type: boolean
+          default: false
+      example:
+        row_ids:
+          - 83ba2c61-8592-4614-ac46-10f43580dfb8
+          - 2f98bfb5-820e-488e-b92f-3f4559a4a788
+        column_key: product_name_cs
+        prompt: Translate {{Product name}} to Czech.
+        target_language: cs
+        use_glossary: true
+
+    EnhanceBulkRequest:
+      type: object
+      required: [row_id, columns]
+      properties:
+        row_id:
+          type: string
+          format: uuid
+        columns:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [key, prompt]
+            properties:
+              key:
+                type: string
+              prompt:
+                type: string
+              model:
+                type: string
+                enum: [auto, gemini-pro, claude-opus]
+              web_search:
+                type: boolean
+              target_language:
+                type: string
+      example:
+        row_id: 83ba2c61-8592-4614-ac46-10f43580dfb8
+        columns:
+          - key: short_description
+            prompt: Write a concise description from {{Product name}} and {{Material}}.
+          - key: product_name_cs
+            prompt: Translate {{Product name}} to Czech.
+            target_language: cs
+
+    EnhanceResponse:
+      type: object
+      required: [id, status, estimated_credits]
+      properties:
+        id:
+          type: string
+          description: Enhancement job ID
+        status:
+          type: string
+          enum: [queued, processing]
+        estimated_credits:
+          type: number
+        rows_queued:
+          type: integer
+
+    EnhanceStatusResponse:
+      type: object
+      properties:
+        columns:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              total:
+                type: integer
+              completed:
+                type: integer
+              failed:
+                type: integer
+              pending:
+                type: integer
+              processing:
+                type: integer
+
+    Trace:
+      type: object
+      properties:
+        column_key:
+          type: string
+        model:
+          type: string
+        confidence:
+          type: number
+        request:
+          type: object
+          properties:
+            system_prompt:
+              type: string
+            user_content:
+              type: string
+            tools:
+              type: array
+              items:
+                type: string
+        response:
+          type: object
+          properties:
+            text:
+              type: string
+            iterations:
+              type: integer
+            tool_calls:
+              type: array
+              items:
+                type: object
+                properties:
+                  tool:
+                    type: string
+                  input:
+                    type: object
+                  output:
+                    type: string
+            thought_summary:
+              type: string
+            sources:
+              type: array
+              items:
+                type: object
+                properties:
+                  url:
+                    type: string
+                  title:
+                    type: string
+
+    GlossaryTerm:
+      type: object
+      required: [id, term, type, created_at]
+      properties:
+        id:
+          type: string
+        term:
+          type: string
+        type:
+          type: string
+          enum: [do_not_translate, specific_translation, context_dependent]
+        case_sensitive:
+          type: boolean
+          default: false
+        category:
+          type: string
+        translations:
+          type: object
+          additionalProperties:
+            type: string
+          description: "Language code to translation mapping, e.g. {\"de\": \"Bildschirm\", \"fr\": \"Écran\"}"
+        created_at:
+          type: string
+          format: date-time
+
+    CreditBalance:
+      type: object
+      required: [balance, currency]
+      properties:
+        balance:
+          type: number
+        currency:
+          type: string
+          default: credits
+      examples:
+        - balance: 1248.5
+          currency: credits
+
+    CreditUsageEntry:
+      type: object
+      properties:
+        id:
+          type: string
+        service:
+          type: string
+          enum: [product_import, pdf_extraction, ai_field, ai_field_bulk, ai_image_generation, product_search, product_enrich]
+        amount:
+          type: number
+        table_id:
+          type: string
+        description:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    CreditStats:
+      type: object
+      required: [period, summary, daily, by_module, by_service, by_user, lasso, currency_config]
+      properties:
+        period:
+          type: object
+          required: [from, to]
+          properties:
+            from:
+              type: string
+              format: date
+            to:
+              type: string
+              format: date
+        summary:
+          type: object
+          required: [total_spent, previous_period_spent, previous_period_change_pct, monthly_allocation, period_end, cost_per_credit]
+          properties:
+            total_spent:
+              type: number
+            previous_period_spent:
+              type: number
+            previous_period_change_pct:
+              type: [number, "null"]
+            monthly_allocation:
+              type: number
+            period_end:
+              type: [string, "null"]
+              format: date-time
+            cost_per_credit:
+              oneOf:
+                - type: object
+                  required: [amount, currency, monthly_fee, monthly_credits]
+                  properties:
+                    amount:
+                      type: number
+                    currency:
+                      type: string
+                      enum: [CZK, EUR]
+                    monthly_fee:
+                      type: number
+                    monthly_credits:
+                      type: number
+                - type: "null"
+        daily:
+          type: array
+          items:
+            type: object
+            required: [date, total, by_module, by_user]
+            properties:
+              date:
+                type: string
+                format: date
+              total:
+                type: number
+              by_module:
+                type: object
+                additionalProperties:
+                  type: number
+              by_user:
+                type: object
+                additionalProperties:
+                  type: number
+        by_module:
+          type: array
+          items:
+            type: object
+            required: [module_key, total]
+            properties:
+              module_key:
+                type: string
+              total:
+                type: number
+        by_service:
+          type: array
+          items:
+            type: object
+            required: [service_type, total]
+            properties:
+              service_type:
+                type: string
+              total:
+                type: number
+        by_user:
+          type: array
+          items:
+            type: object
+            required: [user_id, total]
+            properties:
+              user_id:
+                type: string
+                description: User UUID or `system` for unattributed usage.
+              total:
+                type: number
+        lasso:
+          type: object
+          required: [credits_spent, products_enhanced, credits_per_product, by_table]
+          properties:
+            credits_spent:
+              type: number
+            products_enhanced:
+              type: number
+            credits_per_product:
+              type: [number, "null"]
+            by_table:
+              type: array
+              items:
+                type: object
+                required: [table_id, name, total, products]
+                properties:
+                  table_id:
+                    type: [string, "null"]
+                    format: uuid
+                  name:
+                    type: string
+                  total:
+                    type: number
+                  products:
+                    type: number
+        currency_config:
+          type: object
+          required: [monthly_fee_czk, monthly_fee_eur, monthly_credits, auto_eur]
+          properties:
+            monthly_fee_czk:
+              type: [number, "null"]
+            monthly_fee_eur:
+              type: [number, "null"]
+            monthly_credits:
+              type: number
+            auto_eur:
+              type: boolean
+
+    ProductAnalyticsPeriod:
+      type: object
+      required: [from, to]
+      properties:
+        from:
+          type: string
+          format: date
+        to:
+          type: string
+          format: date
+
+    ProductAnalyticsFilters:
+      type: object
+      required: [catalog_status, user_id, schema_id, table_id, source]
+      properties:
+        catalog_status:
+          type: string
+          enum: [all, active, draft, archived]
+        user_id:
+          type: [string, "null"]
+          description: User UUID, `system`, or null when no user filter is active.
+        schema_id:
+          type: [string, "null"]
+          format: uuid
+        table_id:
+          type: [string, "null"]
+          format: uuid
+        source:
+          type: [string, "null"]
+          enum: [manual, product_extraction, shopify, null]
+
+    ProductAnalyticsActor:
+      type: object
+      required: [id, name, email, avatar_url, avatar_kind, avatar_config, avatar_storage_path, permission_preset, is_former_member]
+      properties:
+        id:
+          type: [string, "null"]
+          format: uuid
+        name:
+          type: string
+        email:
+          type: [string, "null"]
+          format: email
+        avatar_url:
+          type: [string, "null"]
+          format: uri
+        avatar_kind:
+          type: [string, "null"]
+          enum: [upload, boring, null]
+        avatar_config:
+          type: [object, "null"]
+          additionalProperties: true
+        avatar_storage_path:
+          type: [string, "null"]
+        permission_preset:
+          type: [string, "null"]
+          description: Current permission preset; null for system or former actors without a current membership.
+        is_former_member:
+          type: boolean
+
+    ProductAnalyticsCatalogLeaderboardRow:
+      type: object
+      required: [user, unique_products, new_products, updated_existing, total_actions]
+      properties:
+        user:
+          $ref: "#/components/schemas/ProductAnalyticsActor"
+        unique_products:
+          type: integer
+          minimum: 0
+        new_products:
+          type: integer
+          minimum: 0
+        updated_existing:
+          type: integer
+          minimum: 0
+        total_actions:
+          type: integer
+          minimum: 0
+
+    ProductAnalyticsExtractionUserRow:
+      type: object
+      required: [user, products_prepared, tables]
+      properties:
+        user:
+          $ref: "#/components/schemas/ProductAnalyticsActor"
+        products_prepared:
+          type: integer
+          minimum: 0
+        tables:
+          type: integer
+          minimum: 0
+
+    ProductAnalyticsExtractionTableRow:
+      type: object
+      required: [table_id, table_name, initiator, products_prepared]
+      properties:
+        table_id:
+          type: string
+          format: uuid
+        table_name:
+          type: string
+        initiator:
+          $ref: "#/components/schemas/ProductAnalyticsActor"
+        products_prepared:
+          type: integer
+          minimum: 0
+
+    ProductAnalyticsSummaryResponse:
+      type: object
+      required: [period, filters]
+      properties:
+        period:
+          $ref: "#/components/schemas/ProductAnalyticsPeriod"
+        filters:
+          $ref: "#/components/schemas/ProductAnalyticsFilters"
+        catalog:
+          type: object
+          required: [summary, current, daily, by_user]
+          properties:
+            summary:
+              type: object
+              required: [unique_products, new_products, updated_existing, total_actions]
+              properties:
+                unique_products: { type: integer, minimum: 0 }
+                new_products: { type: integer, minimum: 0 }
+                updated_existing: { type: integer, minimum: 0 }
+                total_actions: { type: integer, minimum: 0 }
+            current:
+              type: object
+              required: [all_live, active, draft, archived]
+              properties:
+                all_live: { type: integer, minimum: 0 }
+                active: { type: integer, minimum: 0 }
+                draft: { type: integer, minimum: 0 }
+                archived: { type: integer, minimum: 0 }
+            daily:
+              type: array
+              items:
+                type: object
+                required: [date, unique_products, new_products, updated_existing]
+                properties:
+                  date: { type: string, format: date }
+                  unique_products: { type: integer, minimum: 0 }
+                  new_products: { type: integer, minimum: 0 }
+                  updated_existing: { type: integer, minimum: 0 }
+            by_user:
+              type: array
+              items:
+                $ref: "#/components/schemas/ProductAnalyticsCatalogLeaderboardRow"
+        extraction:
+          type: object
+          required: [summary, daily, by_user, by_table]
+          properties:
+            summary:
+              type: object
+              required: [products_prepared, tables]
+              properties:
+                products_prepared: { type: integer, minimum: 0 }
+                tables: { type: integer, minimum: 0 }
+            daily:
+              type: array
+              items:
+                type: object
+                required: [date, products_prepared]
+                properties:
+                  date: { type: string, format: date }
+                  products_prepared: { type: integer, minimum: 0 }
+            by_user:
+              type: array
+              items:
+                $ref: "#/components/schemas/ProductAnalyticsExtractionUserRow"
+            by_table:
+              type: array
+              items:
+                $ref: "#/components/schemas/ProductAnalyticsExtractionTableRow"
+
+    ProductAnalyticsLeaderboardResponse:
+      type: object
+      required: [period, filters, scope, by_user]
+      properties:
+        period:
+          $ref: "#/components/schemas/ProductAnalyticsPeriod"
+        filters:
+          $ref: "#/components/schemas/ProductAnalyticsFilters"
+        scope:
+          type: string
+          enum: [catalog, extraction]
+        by_user:
+          type: array
+          items:
+            oneOf:
+              - $ref: "#/components/schemas/ProductAnalyticsCatalogLeaderboardRow"
+              - $ref: "#/components/schemas/ProductAnalyticsExtractionUserRow"
+        by_table:
+          type: array
+          description: Present only for extraction scope.
+          items:
+            $ref: "#/components/schemas/ProductAnalyticsExtractionTableRow"
+
+    ProductAnalyticsCatalogActivityItem:
+      type: object
+      required: [id, name, identity, status, source, schema_id, classification, first_activity_at, last_activity_at, action_count, contributors]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        identity: { type: [string, "null"] }
+        status: { type: string, enum: [active, draft, archived] }
+        source: { type: string, enum: [manual, product_extraction, shopify] }
+        schema_id: { type: string, format: uuid }
+        classification: { type: string, enum: [new, updated_existing] }
+        first_activity_at: { type: string, format: date-time }
+        last_activity_at: { type: string, format: date-time }
+        action_count: { type: integer, minimum: 1 }
+        contributors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductAnalyticsActor"
+
+    ProductAnalyticsExtractionActivityItem:
+      type: object
+      required: [id, name, row_index, source_file, table_id, table_name, last_activity_at, initiator]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        row_index: { type: integer, minimum: 0 }
+        source_file: { type: string }
+        table_id: { type: string, format: uuid }
+        table_name: { type: string }
+        last_activity_at: { type: string, format: date-time }
+        initiator:
+          $ref: "#/components/schemas/ProductAnalyticsActor"
+
+    ProductAnalyticsActivityResponse:
+      type: object
+      required: [scope, items, next_cursor]
+      properties:
+        scope:
+          type: string
+          enum: [catalog, extraction]
+        items:
+          type: array
+          items:
+            oneOf:
+              - $ref: "#/components/schemas/ProductAnalyticsCatalogActivityItem"
+              - $ref: "#/components/schemas/ProductAnalyticsExtractionActivityItem"
+        next_cursor:
+          type: [string, "null"]
+          description: Opaque cursor for the next page, or null when no more rows remain.
+
+    SearchResult:
+      type: object
+      properties:
+        data:
+          type: object
+          additionalProperties: true
+        source_url:
+          type: string
+        source_title:
+          type: string
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+
+    SearchResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum: [completed]
+        query:
+          type: string
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/SearchResult"
+        total_results:
+          type: integer
+        credits_used:
+          type: number
+
+    Citation:
+      type: object
+      properties:
+        url:
+          type: string
+        title:
+          type: string
+        excerpt:
+          type: string
+
+    FieldBasis:
+      type: object
+      properties:
+        field:
+          type: string
+        citations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Citation"
+        reasoning:
+          type: string
+        confidence:
+          type: string
+          enum: [high, low]
+
+    EnrichResultItem:
+      type: object
+      properties:
+        data:
+          type: object
+          additionalProperties: true
+        basis:
+          type: array
+          items:
+            $ref: "#/components/schemas/FieldBasis"
+
+    EnrichResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum: [completed]
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/EnrichResultItem"
+        credits_used:
+          type: number
+
+    CatalogAttributeExtension:
+      type: object
+      additionalProperties: false
+      required: [attribute_id, key]
+      description: An active Shared Attribute attached only to this Catalog product, without changing its Product Schema.
+      properties:
+        attribute_id:
+          type: string
+          format: uuid
+        key:
+          type: string
+          description: Current canonical Attribute key.
+
+    CatalogProduct:
+      type: object
+      additionalProperties: false
+      required: [id, company_id, schema_id, source, external_id, status, attributes, attribute_extensions, created_at, updated_at, deleted_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        company_id:
+          type: string
+          format: uuid
+        schema_id:
+          type: string
+          format: uuid
+        source:
+          type: string
+          enum: [manual, product_extraction, shopify]
+        external_id:
+          type: [string, "null"]
+        status:
+          type: string
+          enum: [draft, active, archived]
+        attributes:
+          type: object
+          additionalProperties: true
+          description: Values backed by active Shared Attributes from the base schema or attribute_extensions.
+        attribute_extensions:
+          type: array
+          maxItems: 2000
+          items:
+            $ref: "#/components/schemas/CatalogAttributeExtension"
+        relations:
+          type: object
+          additionalProperties: true
+          description: Hydrated relation values. Present on the single-product GET response.
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        deleted_at:
+          type: [string, "null"]
+          format: date-time
+      examples:
+        - id: 13adf145-d9a0-4c28-9235-3f7e17af4cf1
+          company_id: 81e2b625-e6e8-4dd5-a50f-22803806cc10
+          schema_id: 9e1c77dd-8f10-41ca-bfe8-e672b89692d1
+          source: manual
+          external_id: null
+          status: draft
+          attributes:
+            sku: A-100
+            product_name: Alpine bottle
+            price: 24.9
+          attribute_extensions:
+            - attribute_id: e683267d-2450-4ea8-a977-462d46a8f610
+              key: supplier_note
+          created_at: "2026-08-31T09:30:00.000Z"
+          updated_at: "2026-08-31T09:30:00.000Z"
+          deleted_at: null
+
+    CatalogProductCreateInput:
+      type: object
+      additionalProperties: false
+      required: [schema_id, attributes]
+      properties:
+        schema_id:
+          type: string
+          format: uuid
+        attributes:
+          type: object
+          additionalProperties: true
+        attribute_extension_ids:
+          type: array
+          maxItems: 2000
+          uniqueItems: true
+          description: Active Shared Attribute UUIDs to attach only to this product. Attributes already owned by the base schema remain schema fields and are not duplicated here.
+          items:
+            type: string
+            format: uuid
+      example:
+        schema_id: 9e1c77dd-8f10-41ca-bfe8-e672b89692d1
+        attributes:
+          sku: A-100
+          product_name: Alpine bottle
+          price: 24.9
+        attribute_extension_ids:
+          - e683267d-2450-4ea8-a977-462d46a8f610
+
+    CatalogProductUpdateInput:
+      type: object
+      additionalProperties: false
+      required: [attributes]
+      properties:
+        attributes:
+          type: object
+          additionalProperties: true
+          description: Sparse values are merged with the current public Attribute values.
+        expected_updated_at:
+          type: string
+          format: date-time
+        attribute_extension_ids:
+          type: array
+          maxItems: 2000
+          uniqueItems: true
+          description: Active Shared Attribute UUIDs to attach. Existing product-only Attributes are preserved when this field is omitted or empty.
+          items:
+            type: string
+            format: uuid
+        remove_attribute_extension_ids:
+          type: array
+          maxItems: 2000
+          uniqueItems: true
+          description: Product-only Shared Attribute UUIDs to detach. Their product values or Relation links are removed atomically; base-schema Attributes cannot be removed here.
+          items:
+            type: string
+            format: uuid
+      example:
+        attributes:
+          price: 22.9
+        expected_updated_at: "2026-08-31T09:15:00.000Z"
+        remove_attribute_extension_ids:
+          - e683267d-2450-4ea8-a977-462d46a8f610
+
+    CatalogProductListResponse:
+      type: object
+      additionalProperties: false
+      required: [products, next_cursor]
+      properties:
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/CatalogProduct"
+        next_cursor:
+          type: [string, "null"]
+
+    CatalogWebhookEvent:
+      type: string
+      enum:
+        - product.created
+        - product.updated
+        - product.deleted
+        - attribute.created
+        - attribute.updated
+        - attribute.deleted
+
+    CatalogWebhookEndpoint:
+      type: object
+      required: [id, company_id, name, url, events, enabled, created_at, updated_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        company_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        url:
+          type: string
+          format: uri
+          description: HTTPS public destination. HTTP localhost is accepted only by local development servers.
+        events:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            $ref: "#/components/schemas/CatalogWebhookEvent"
+        enabled:
+          type: boolean
+        description:
+          type: [string, "null"]
+          maxLength: 500
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CatalogWebhookCreateInput:
+      type: object
+      required: [url, events]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+          description: Optional for API clients; defaults to the destination hostname. The dashboard requires it.
+        url:
+          type: string
+          format: uri
+          maxLength: 2048
+        events:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            $ref: "#/components/schemas/CatalogWebhookEvent"
+        description:
+          type: [string, "null"]
+          maxLength: 500
+      example:
+        name: ERP product sync
+        url: https://erp.example.com/webhooks/lasso
+        events:
+          - product.created
+          - product.updated
+          - product.deleted
+        description: Synchronize Catalog changes to the ERP.
+
+    CatalogWebhookCreateResponse:
+      allOf:
+        - $ref: "#/components/schemas/CatalogWebhookEndpoint"
+        - type: object
+          required: [secret]
+          properties:
+            secret:
+              type: string
+              description: One-time signing secret. It is never returned by later reads or updates.
+
+    CatalogWebhookDelivery:
+      type: object
+      required:
+        - id
+        - endpoint_id
+        - delivery_id
+        - attempt_number
+        - event
+        - delivered_at
+        - is_test
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Delivery-attempt record identifier used by the redeliver action.
+        endpoint_id:
+          type: string
+          format: uuid
+        delivery_id:
+          type: string
+          format: uuid
+          description: Stable logical delivery identifier reused in X-Lasso-Delivery-Id across redelivery attempts.
+        attempt_number:
+          type: integer
+          minimum: 1
+        event:
+          oneOf:
+            - $ref: "#/components/schemas/CatalogWebhookEvent"
+            - type: string
+              const: webhook.test
+        status_code:
+          type: [integer, "null"]
+        error:
+          type: [string, "null"]
+          maxLength: 500
+        duration_ms:
+          type: [integer, "null"]
+          minimum: 0
+        delivered_at:
+          type: string
+          format: date-time
+        is_test:
+          type: boolean
+        redelivered_from:
+          type: [string, "null"]
+          format: uuid
+      description: Delivery metadata only. Stored payloads and signing secrets are never returned.
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Unauthorized:
+      description: Authentication error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Conflict:
+      description: Resource conflict
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    ValidationError:
+      description: Request validation error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    RateLimited:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+paths:
+  /catalog:
+    get:
+      operationId: listCatalogProducts
+      tags: [Catalog]
+      summary: List Catalog products
+      description: Returns active Shared Attribute values from each product's base schema and its own product-only Attribute extensions.
+      parameters:
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [draft, active, archived]
+        - name: source
+          in: query
+          schema:
+            type: string
+            enum: [manual, product_extraction, shopify]
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: schema_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Keyset-paginated Catalog products.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogProductListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      operationId: createCatalogProduct
+      tags: [Catalog]
+      summary: Create a Catalog product
+      description: Product-only Shared Attributes are attached by stable ID without widening the selected Product Schema.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CatalogProductCreateInput"
+      responses:
+        "201":
+          description: Catalog product created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogProduct"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+      x-codeSamples:
+        - lang: bash
+          label: cURL
+          source: |
+            curl --request POST \
+              --url https://app.productlasso.com/api/v1/catalog \
+              --header "Authorization: Bearer $LASSO_API_KEY" \
+              --header "Content-Type: application/json" \
+              --data '{
+                "schema_id": "9e1c77dd-8f10-41ca-bfe8-e672b89692d1",
+                "attributes": {"sku": "A-100", "product_name": "Alpine bottle", "price": 24.9},
+                "attribute_extension_ids": ["e683267d-2450-4ea8-a977-462d46a8f610"]
+              }'
+        - lang: typescript
+          label: TypeScript
+          source: |
+            const response = await fetch("https://app.productlasso.com/api/v1/catalog", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${process.env.LASSO_API_KEY}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                schema_id: "9e1c77dd-8f10-41ca-bfe8-e672b89692d1",
+                attributes: { sku: "A-100", product_name: "Alpine bottle", price: 24.9 },
+                attribute_extension_ids: ["e683267d-2450-4ea8-a977-462d46a8f610"],
+              }),
+            });
+
+            if (!response.ok) throw new Error(await response.text());
+            const product = await response.json();
+        - lang: python
+          label: Python
+          source: |
+            import os
+            import requests
+
+            response = requests.post(
+                "https://app.productlasso.com/api/v1/catalog",
+                headers={"Authorization": f"Bearer {os.environ['LASSO_API_KEY']}"},
+                json={
+                    "schema_id": "9e1c77dd-8f10-41ca-bfe8-e672b89692d1",
+                    "attributes": {"sku": "A-100", "product_name": "Alpine bottle", "price": 24.9},
+                    "attribute_extension_ids": ["e683267d-2450-4ea8-a977-462d46a8f610"],
+                },
+                timeout=30,
+            )
+            response.raise_for_status()
+            product = response.json()
+
+  /catalog/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: getCatalogProduct
+      tags: [Catalog]
+      summary: Get a Catalog product
+      responses:
+        "200":
+          description: Catalog product with base-schema and product-only Shared Attribute values.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogProduct"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      operationId: updateCatalogProduct
+      tags: [Catalog]
+      summary: Update a Catalog product
+      description: Attaches or detaches product-only Shared Attributes atomically with their values. Omitted existing extensions are preserved; only remove_attribute_extension_ids detaches them.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CatalogProductUpdateInput"
+      responses:
+        "200":
+          description: Catalog product updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogProduct"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+    delete:
+      operationId: deleteCatalogProduct
+      tags: [Catalog]
+      summary: Soft-delete a Catalog product
+      responses:
+        "200":
+          description: Product deletion result.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [deleted, id]
+                properties:
+                  deleted:
+                    type: boolean
+                    const: true
+                  id:
+                    type: string
+                    format: uuid
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /catalog/lookup:
+    get:
+      operationId: lookupCatalogProduct
+      tags: [Catalog]
+      summary: Look up a Catalog product by Attribute value
+      description: Returns the first active product whose stored Attribute value exactly matches the supplied value.
+      parameters:
+        - name: key
+          in: query
+          required: true
+          description: Attribute storage key. Letters, digits, underscores, and slashes are accepted.
+          schema:
+            type: string
+        - name: value
+          in: query
+          required: true
+          description: Exact Attribute value to match.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Matching Catalog product.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogProduct"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /catalog/changes:
+    get:
+      operationId: listCatalogChanges
+      tags: [Catalog]
+      summary: List Catalog products changed after a timestamp
+      description: Returns products oldest-first for incremental synchronization. Keep the first page's `sync_timestamp` for the next synchronization cycle.
+      parameters:
+        - name: since
+          in: query
+          required: true
+          description: Valid ISO 8601 timestamp. Only products updated after this instant are returned.
+          schema:
+            type: string
+            format: date-time
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+            maximum: 200
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: schema_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [draft, active, archived]
+      responses:
+        "200":
+          description: Keyset-paginated changed products.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [products, next_cursor, has_more, sync_timestamp]
+                properties:
+                  products:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/CatalogProduct"
+                  next_cursor:
+                    type: [string, "null"]
+                  has_more:
+                    type: boolean
+                  sync_timestamp:
+                    type: string
+                    format: date-time
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /catalog/webhooks:
+    get:
+      operationId: listCatalogWebhooks
+      tags: [Catalog Webhooks]
+      summary: List catalog webhook endpoints
+      responses:
+        "200":
+          description: Company webhook endpoints without signing secrets
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [webhooks]
+                properties:
+                  webhooks:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/CatalogWebhookEndpoint"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      operationId: createCatalogWebhook
+      tags: [Catalog Webhooks]
+      summary: Create a catalog webhook endpoint
+      description: Validates DNS and permits only public HTTPS destinations outside local development.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CatalogWebhookCreateInput"
+      responses:
+        "201":
+          description: Endpoint plus its one-time signing secret
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogWebhookCreateResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+      x-codeSamples:
+        - lang: bash
+          label: cURL
+          source: |
+            curl --request POST \
+              --url https://app.productlasso.com/api/v1/catalog/webhooks \
+              --header "Authorization: Bearer $LASSO_API_KEY" \
+              --header "Content-Type: application/json" \
+              --data '{
+                "name": "ERP product sync",
+                "url": "https://erp.example.com/webhooks/lasso",
+                "events": ["product.created", "product.updated", "product.deleted"]
+              }'
+        - lang: typescript
+          label: TypeScript
+          source: |
+            const response = await fetch("https://app.productlasso.com/api/v1/catalog/webhooks", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${process.env.LASSO_API_KEY}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                name: "ERP product sync",
+                url: "https://erp.example.com/webhooks/lasso",
+                events: ["product.created", "product.updated", "product.deleted"],
+              }),
+            });
+
+            if (!response.ok) throw new Error(await response.text());
+            const webhook = await response.json();
+            // Store webhook.secret now. It is returned only once.
+        - lang: python
+          label: Python
+          source: |
+            import os
+            import requests
+
+            response = requests.post(
+                "https://app.productlasso.com/api/v1/catalog/webhooks",
+                headers={"Authorization": f"Bearer {os.environ['LASSO_API_KEY']}"},
+                json={
+                    "name": "ERP product sync",
+                    "url": "https://erp.example.com/webhooks/lasso",
+                    "events": ["product.created", "product.updated", "product.deleted"],
+                },
+                timeout=30,
+            )
+            response.raise_for_status()
+            webhook = response.json()
+            # Store webhook["secret"] now. It is returned only once.
+
+  /catalog/webhooks/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: listCatalogWebhookDeliveries
+      tags: [Catalog Webhooks]
+      summary: List recent delivery attempts
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        "200":
+          description: Metadata-only delivery history
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [deliveries]
+                properties:
+                  deliveries:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/CatalogWebhookDelivery"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      operationId: updateCatalogWebhook
+      tags: [Catalog Webhooks]
+      summary: Update a catalog webhook endpoint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              minProperties: 1
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 120
+                url:
+                  type: string
+                  format: uri
+                  maxLength: 2048
+                events:
+                  type: array
+                  minItems: 1
+                  uniqueItems: true
+                  items:
+                    $ref: "#/components/schemas/CatalogWebhookEvent"
+                enabled:
+                  type: boolean
+                description:
+                  type: [string, "null"]
+                  maxLength: 500
+      responses:
+        "200":
+          description: Updated endpoint without its signing secret
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogWebhookEndpoint"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+    post:
+      operationId: actOnCatalogWebhook
+      tags: [Catalog Webhooks]
+      summary: Send a test event or redeliver a failed attempt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  required: [action]
+                  properties:
+                    action:
+                      type: string
+                      const: test
+                - type: object
+                  required: [action, delivery_record_id]
+                  properties:
+                    action:
+                      type: string
+                      const: redeliver
+                    delivery_record_id:
+                      type: string
+                      format: uuid
+                      description: Failed/non-2xx delivery-attempt `id`, not the stable logical `delivery_id`.
+      responses:
+        "200":
+          description: Recorded test or redelivery attempt
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [delivery]
+                properties:
+                  delivery:
+                    $ref: "#/components/schemas/CatalogWebhookDelivery"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+    delete:
+      operationId: deleteCatalogWebhook
+      tags: [Catalog Webhooks]
+      summary: Delete a webhook endpoint and its delivery history
+      responses:
+        "204":
+          description: Endpoint deleted
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /attributes:
+    get:
+      operationId: listAttributes
+      tags: [Attributes]
+      summary: List canonical Attributes
+      description: Returns active Attributes by default, ordered and searched by key. Set `include_archived=true` to include archived definitions.
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/LimitParam"
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Case-insensitive substring search on the Attribute key only.
+        - name: type
+          in: query
+          schema:
+            $ref: "#/components/schemas/AttributeType"
+        - name: include_archived
+          in: query
+          schema:
+            type: string
+            enum: ["true"]
+          description: Use the literal string `true` to include archived Attributes. Any other value keeps the active-only default.
+      responses:
+        "200":
+          description: Paginated Attribute list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AttributeListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+    post:
+      operationId: createOrBulkUpsertAttributes
+      tags: [Attributes]
+      summary: Create or upsert Attributes
+      description: |
+        A single payload returns a bare Attribute: `201` for a new key and `200` when
+        the existing same-type key is updated. `{ "attributes": [...] }` performs up
+        to 500 atomic database writes and returns `{ "data": [...] }`. Attribute
+        webhook effects are dispatched after the database commit and are best-effort.
+        Attribute type and relation kind are immutable for an existing key.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/AttributeInput"
+                - $ref: "#/components/schemas/AttributeBulkInput"
+            examples:
+              legacyText:
+                summary: Existing compatible payload; language and image_config are omitted
+                value:
+                  key: material
+                  label: Material
+                  type: text
+              localizedText:
+                value:
+                  key: product_name_cs
+                  label: Product name (Czech)
+                  type: text
+                  language: cs
+              canonicalImage:
+                value:
+                  key: primary_image
+                  label: Primary image
+                  type: image
+                  image_config:
+                    format: webp
+                    required_aspect_ratio: "1:1"
+                    min_width: 1200
+              bulk:
+                value:
+                  attributes:
+                    - key: brand
+                      label: Brand
+                      type: text
+                    - key: color
+                      label: Color
+                      type: enum
+                      enum_values: [black, white]
+      responses:
+        "200":
+          description: Existing single Attribute updated, or bulk upsert completed
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/Attribute"
+                  - $ref: "#/components/schemas/AttributeBulkResponse"
+        "201":
+          description: New single Attribute created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Attribute"
+        "409":
+          description: Attribute key or unresolved image-policy conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                imageMigrationLocked:
+                  value:
+                    status_code: 409
+                    error_type: conflict
+                    message: Resolve this Attribute image policy on the Attributes page before changing it here.
+                    request_id: 9de9ae63-7a89-40d0-a101-47e006ea8233
+                    code: attribute_image_migration_locked
+                    retryable: false
+                    attribute_id: 11111111-1111-4111-8111-111111111111
+                    attribute_key: primary_image
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "503":
+          description: Attribute rollout or migration inventory could not be read; no write occurred
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                rolloutReadFailed:
+                  value:
+                    status_code: 503
+                    error_type: service_unavailable
+                    message: Attribute feature state is temporarily unavailable.
+                    request_id: 9de9ae63-7a89-40d0-a101-47e006ea8233
+                    code: attribute_rollout_read_failed
+                    retryable: true
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+      x-codeSamples:
+        - lang: bash
+          label: cURL
+          source: |
+            curl --request POST \
+              --url https://app.productlasso.com/api/v1/attributes \
+              --header "Authorization: Bearer $LASSO_API_KEY" \
+              --header "Content-Type: application/json" \
+              --data '{
+                "attributes": [
+                  {"key": "brand", "label": "Brand", "type": "text"},
+                  {"key": "color", "label": "Color", "type": "enum", "enum_values": ["black", "white"]}
+                ]
+              }'
+        - lang: typescript
+          label: TypeScript
+          source: |
+            const response = await fetch("https://app.productlasso.com/api/v1/attributes", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${process.env.LASSO_API_KEY}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                attributes: [
+                  { key: "brand", label: "Brand", type: "text" },
+                  { key: "color", label: "Color", type: "enum", enum_values: ["black", "white"] },
+                ],
+              }),
+            });
+
+            if (!response.ok) throw new Error(await response.text());
+            const result = await response.json();
+        - lang: python
+          label: Python
+          source: |
+            import os
+            import requests
+
+            response = requests.post(
+                "https://app.productlasso.com/api/v1/attributes",
+                headers={"Authorization": f"Bearer {os.environ['LASSO_API_KEY']}"},
+                json={
+                    "attributes": [
+                        {"key": "brand", "label": "Brand", "type": "text"},
+                        {"key": "color", "label": "Color", "type": "enum", "enum_values": ["black", "white"]},
+                    ]
+                },
+                timeout=30,
+            )
+            response.raise_for_status()
+            result = response.json()
+
+  /attributes/{key}:
+    parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Canonical Attribute key.
+
+    get:
+      operationId: getAttribute
+      tags: [Attributes]
+      summary: Get an Attribute by key
+      description: Direct reads return active or archived Attributes.
+      responses:
+        "200":
+          description: Attribute definition
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Attribute"
+              examples:
+                archived:
+                  value:
+                    id: 11111111-1111-4111-8111-111111111111
+                    key: legacy_material
+                    label: Legacy material
+                    type: text
+                    enum_values: null
+                    tags_values: null
+                    boolean_config: null
+                    number_config: null
+                    relation_config: null
+                    description: null
+                    validation: null
+                    language: null
+                    image_config: null
+                    status: archived
+                    archived_at: "2026-07-14T08:00:00.000Z"
+                    is_reviewed: false
+                    source_id: null
+                    external_id: null
+                    source_synced_at: null
+                    created_at: "2026-07-01T00:00:00.000Z"
+                    updated_at: "2026-07-14T08:00:00.000Z"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+    put:
+      operationId: updateAttribute
+      tags: [Attributes]
+      summary: Update canonical Attribute metadata
+      description: Type is immutable and key changes use the dedicated rename operation. Relation kind is also immutable. Omitted fields remain unchanged.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AttributeUpdateInput"
+            example:
+              label: Product name
+              language: en
+              expected_updated_at: "2026-07-14T10:00:00.000Z"
+      responses:
+        "200":
+          description: Updated Attribute
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Attribute"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Stale-write or unresolved image-policy conflict; no write occurred
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                staleWrite:
+                  value:
+                    status_code: 409
+                    error_type: conflict
+                    message: Attribute was modified; refetch it before retrying
+                    request_id: 9de9ae63-7a89-40d0-a101-47e006ea8233
+                    code: stale_write
+                    retryable: false
+                    current_updated_at: "2026-07-14T10:30:00.000Z"
+                imageMigrationLocked:
+                  value:
+                    status_code: 409
+                    error_type: conflict
+                    message: Resolve this Attribute image policy on the Attributes page before changing it here.
+                    request_id: 9de9ae63-7a89-40d0-a101-47e006ea8233
+                    code: attribute_image_migration_locked
+                    retryable: false
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "503":
+          description: Attribute rollout or migration inventory could not be read; no write occurred
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                rolloutReadFailed:
+                  value:
+                    status_code: 503
+                    error_type: service_unavailable
+                    message: Attribute feature state is temporarily unavailable.
+                    request_id: 9de9ae63-7a89-40d0-a101-47e006ea8233
+                    code: attribute_rollout_read_failed
+                    retryable: true
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+    delete:
+      operationId: deleteAttribute
+      tags: [Attributes]
+      summary: Permanently delete an unused Attribute
+      description: |
+        Permanently deletes the Attribute only when it has no company dependencies.
+        No dependent schemas, tables, Catalog data, mappings, or feeds are cascaded or removed.
+        Use archive in the Dashboard when reversible removal is preferred.
+      responses:
+        "204":
+          description: Attribute permanently deleted
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Attribute is still in use and was not deleted
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Error"
+                  - type: object
+                    required: [code, key, total_count, dependencies]
+                    properties:
+                      code:
+                        type: string
+                        const: attribute_in_use
+                      key:
+                        type: string
+                      total_count:
+                        type: integer
+                        minimum: 1
+                      dependencies:
+                        type: object
+                        description: Company-wide aggregate dependency counts; private resource names and IDs are never returned.
+                        additionalProperties:
+                          type: object
+                          required: [count]
+                          properties:
+                            count:
+                              type: integer
+                              minimum: 0
+              example:
+                status_code: 409
+                error_type: conflict
+                message: Attribute is still in use
+                request_id: 9de9ae63-7a89-40d0-a101-47e006ea8233
+                code: attribute_in_use
+                key: material
+                total_count: 3
+                dependencies:
+                  schemas:
+                    count: 1
+                  jobs:
+                    count: 2
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /attributes/{key}/rename:
+    parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Existing canonical Attribute key.
+    post:
+      operationId: renameAttribute
+      tags: [Attributes]
+      summary: Rename an Attribute key and dependent data
+      description: |
+        Renames the canonical key and attempts each dependent migration. This operation
+        is not atomic across all dependent resources. A `207` response has
+        `success: false`, retains sanitized per-resource result buckets, and must be
+        inspected before the caller decides how to continue. To retry a partial rename,
+        pass the returned `attribute.id` as `attribute_id` with the same old and new keys.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [new_key]
+              properties:
+                new_key:
+                  type: string
+                  pattern: "^[a-zA-Z0-9][a-zA-Z0-9_/]*$"
+                attribute_id:
+                  type: string
+                  format: uuid
+                  description: Stable Attribute ID used to resume a previous partial rename.
+            example:
+              new_key: material_name
+      responses:
+        "200":
+          description: Rename and all dependent migrations completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AttributeRenameResponse"
+        "207":
+          description: Canonical rename completed with one or more sanitized dependent migration failures
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AttributeRenameResponse"
+              example:
+                success: false
+                partial: true
+                old_key: material
+                new_key: material_name
+                updated_count: 3
+                error_count: 1
+                attribute:
+                  id: 11111111-1111-4111-8111-111111111111
+                  key: material_name
+                  label: Material
+                  type: text
+                  enum_values: null
+                  tags_values: null
+                  boolean_config: null
+                  number_config: null
+                  relation_config: null
+                  description: null
+                  validation: null
+                  language: null
+                  image_config: null
+                  status: active
+                  archived_at: null
+                  is_reviewed: false
+                  source_id: null
+                  external_id: null
+                  source_synced_at: null
+                  created_at: "2026-07-01T00:00:00.000Z"
+                  updated_at: "2026-07-14T10:00:00.000Z"
+                results:
+                  product_schemas:
+                    updated: 2
+                    errors: [rename_failed]
+                    error_count: 1
+                    code: rename_failed
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ── Schemas ──────────────────────────────────────────────
+  /schemas:
+    get:
+      operationId: listSchemas
+      tags: [Schemas]
+      summary: List active schemas
+      description: Archived schemas are recoverable in the Dashboard but are intentionally excluded from this active public list.
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/LimitParam"
+        - $ref: "#/components/parameters/SearchParam"
+      responses:
+        "200":
+          description: List of schemas
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, pagination]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/SchemaListItem"
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+    post:
+      operationId: createSchema
+      tags: [Schemas]
+      summary: Create a new schema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, columns]
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                is_default:
+                  type: boolean
+                  default: false
+                columns:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/SchemaColumnInput"
+                  minItems: 1
+            example:
+              name: Supplier products
+              description: Core supplier feed fields
+              columns:
+                - attribute_id: 11111111-1111-4111-8111-111111111111
+                  kind: attribute
+                  key: product_name
+                  label: Product name
+                  type: text
+                - kind: helper
+                  key: source_row
+                  label: Source row
+                  type: text
+      responses:
+        "201":
+          description: Created schema
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Schema"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          description: A supplied schema column attribute_id does not belong to this company or no longer exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                status_code: 404
+                error_type: not_found
+                message: Attribute not found
+                request_id: 9de9ae63-7a89-40d0-a101-47e006ea8233
+                code: attribute_not_found
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+      x-codeSamples:
+        - lang: bash
+          label: cURL
+          source: |
+            curl --request POST \
+              --url https://app.productlasso.com/api/v1/schemas \
+              --header "Authorization: Bearer $LASSO_API_KEY" \
+              --header "Content-Type: application/json" \
+              --data '{
+                "name": "Supplier products",
+                "columns": [
+                  {"attribute_id": "11111111-1111-4111-8111-111111111111", "kind": "attribute", "key": "product_name", "label": "Product name", "type": "text"},
+                  {"kind": "helper", "key": "source_row", "label": "Source row", "type": "text"}
+                ]
+              }'
+        - lang: typescript
+          label: TypeScript
+          source: |
+            const response = await fetch("https://app.productlasso.com/api/v1/schemas", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${process.env.LASSO_API_KEY}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                name: "Supplier products",
+                columns: [
+                  { attribute_id: "11111111-1111-4111-8111-111111111111", kind: "attribute", key: "product_name", label: "Product name", type: "text" },
+                  { kind: "helper", key: "source_row", label: "Source row", type: "text" },
+                ],
+              }),
+            });
+
+            if (!response.ok) throw new Error(await response.text());
+            const schema = await response.json();
+        - lang: python
+          label: Python
+          source: |
+            import os
+            import requests
+
+            response = requests.post(
+                "https://app.productlasso.com/api/v1/schemas",
+                headers={"Authorization": f"Bearer {os.environ['LASSO_API_KEY']}"},
+                json={
+                    "name": "Supplier products",
+                    "columns": [
+                        {"attribute_id": "11111111-1111-4111-8111-111111111111", "kind": "attribute", "key": "product_name", "label": "Product name", "type": "text"},
+                        {"kind": "helper", "key": "source_row", "label": "Source row", "type": "text"},
+                    ],
+                },
+                timeout=30,
+            )
+            response.raise_for_status()
+            schema = response.json()
+
+  /schemas/{schema_id}:
+    parameters:
+      - name: schema_id
+        in: path
+        required: true
+        schema:
+          type: string
+
+    get:
+      operationId: getSchema
+      tags: [Schemas]
+      summary: Get schema details
+      responses:
+        "200":
+          description: Schema details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Schema"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    put:
+      operationId: updateSchema
+      tags: [Schemas]
+      summary: Update a schema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                is_default:
+                  type: boolean
+                columns:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/SchemaColumnInput"
+      responses:
+        "200":
+          description: Updated schema
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Schema"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          description: Schema not found, or a supplied column attribute_id does not belong to this company or no longer exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                status_code: 404
+                error_type: not_found
+                message: Attribute not found
+                request_id: 9de9ae63-7a89-40d0-a101-47e006ea8233
+                code: attribute_not_found
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+    delete:
+      operationId: deleteSchema
+      tags: [Schemas]
+      summary: Delete an unused schema
+      description: Deletes only when the schema has no extraction tables, Catalog products, mappings, views, templates, feeds, Shopify links, or Relation Attribute references. Use the Dashboard lifecycle flow to review and remove dependencies.
+      responses:
+        "204":
+          description: Schema deleted
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Schema is still in use; no dependency is changed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /schemas/generate:
+    post:
+      operationId: generateSchema
+      tags: [Schemas]
+      summary: AI-generate a schema from sample data
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sample_data:
+                  type: string
+                  description: CSV text, column headers, or free-text description of the data structure
+                name:
+                  type: string
+                  description: Optional name for the generated schema
+      responses:
+        "201":
+          description: Generated schema
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Schema"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  # ── Files ────────────────────────────────────────────────
+  /files:
+    post:
+      operationId: uploadFile
+      tags: [Files]
+      summary: Upload a file
+      description: Upload a file for use in table extraction. Max size 1GB.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "201":
+          description: Uploaded file
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/File"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+      x-codeSamples:
+        - lang: bash
+          label: cURL
+          source: |
+            curl --request POST \
+              --url https://app.productlasso.com/api/v1/files \
+              --header "Authorization: Bearer $LASSO_API_KEY" \
+              --form "file=@supplier-products.xlsx"
+        - lang: typescript
+          label: TypeScript
+          source: |
+            import { readFile } from "node:fs/promises";
+
+            const file = await readFile("supplier-products.xlsx");
+            const form = new FormData();
+            form.append(
+              "file",
+              new Blob([file], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }),
+              "supplier-products.xlsx",
+            );
+
+            const response = await fetch("https://app.productlasso.com/api/v1/files", {
+              method: "POST",
+              headers: { Authorization: `Bearer ${process.env.LASSO_API_KEY}` },
+              body: form,
+            });
+
+            if (!response.ok) throw new Error(await response.text());
+            const uploadedFile = await response.json();
+        - lang: python
+          label: Python
+          source: |
+            import os
+            import requests
+
+            with open("supplier-products.xlsx", "rb") as file:
+                response = requests.post(
+                    "https://app.productlasso.com/api/v1/files",
+                    headers={"Authorization": f"Bearer {os.environ['LASSO_API_KEY']}"},
+                    files={"file": ("supplier-products.xlsx", file)},
+                    timeout=120,
+                )
+
+            response.raise_for_status()
+            uploaded_file = response.json()
+
+    get:
+      operationId: listFiles
+      tags: [Files]
+      summary: List uploaded files
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "200":
+          description: List of files
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, pagination]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/File"
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /files/{file_id}:
+    parameters:
+      - name: file_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    delete:
+      operationId: deleteFile
+      tags: [Files]
+      summary: Delete an uploaded file
+      responses:
+        "204":
+          description: File deleted
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ── Tables ───────────────────────────────────────────────
+  /tables:
+    post:
+      operationId: createTable
+      tags: [Tables]
+      summary: Create a table and start extraction
+      description: |
+        Create a new table from files, URLs, or text. Extraction starts automatically.
+        Provide exactly one of: file_ids, file_urls, or source_text.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [schema_id, name]
+              properties:
+                schema_id:
+                  type: string
+                  description: Schema defining the column structure
+                name:
+                  type: string
+                  description: Table name
+                file_ids:
+                  type: array
+                  maxItems: 10
+                  items:
+                    type: string
+                    format: uuid
+                  description: IDs of previously uploaded files
+                file_urls:
+                  type: array
+                  maxItems: 10
+                  items:
+                    type: string
+                    format: uri
+                  description: Public URLs of files to fetch and extract
+                source_text:
+                  type: string
+                  description: Raw text containing product data
+                additional_context:
+                  type: string
+                  description: Extra instructions for the AI extraction
+                enhancement_context:
+                  type: string
+                  description: Default context for all AI enhancements on this table
+                webhook_url:
+                  type: string
+                  format: uri
+                  description: URL to notify when extraction completes or fails
+            example:
+              schema_id: 9e1c77dd-8f10-41ca-bfe8-e672b89692d1
+              name: August supplier feed
+              source_text: |-
+                SKU,Name,Price
+                A-100,Alpine bottle,24.90
+                A-101,Trail mug,18.50
+              additional_context: Prices use EUR.
+      responses:
+        "201":
+          description: Created table, extraction started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Table"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          description: The selected schema was archived before the table could be created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+      x-codeSamples:
+        - lang: bash
+          label: cURL
+          source: |
+            curl --request POST \
+              --url https://app.productlasso.com/api/v1/tables \
+              --header "Authorization: Bearer $LASSO_API_KEY" \
+              --header "Content-Type: application/json" \
+              --data '{
+                "schema_id": "9e1c77dd-8f10-41ca-bfe8-e672b89692d1",
+                "name": "August supplier feed",
+                "source_text": "SKU,Name,Price\nA-100,Alpine bottle,24.90\nA-101,Trail mug,18.50",
+                "additional_context": "Prices use EUR."
+              }'
+        - lang: typescript
+          label: TypeScript
+          source: |
+            const response = await fetch("https://app.productlasso.com/api/v1/tables", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${process.env.LASSO_API_KEY}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                schema_id: "9e1c77dd-8f10-41ca-bfe8-e672b89692d1",
+                name: "August supplier feed",
+                source_text: "SKU,Name,Price\nA-100,Alpine bottle,24.90\nA-101,Trail mug,18.50",
+                additional_context: "Prices use EUR.",
+              }),
+            });
+
+            if (!response.ok) throw new Error(await response.text());
+            const table = await response.json();
+        - lang: python
+          label: Python
+          source: |
+            import os
+            import requests
+
+            response = requests.post(
+                "https://app.productlasso.com/api/v1/tables",
+                headers={"Authorization": f"Bearer {os.environ['LASSO_API_KEY']}"},
+                json={
+                    "schema_id": "9e1c77dd-8f10-41ca-bfe8-e672b89692d1",
+                    "name": "August supplier feed",
+                    "source_text": "SKU,Name,Price\nA-100,Alpine bottle,24.90\nA-101,Trail mug,18.50",
+                    "additional_context": "Prices use EUR.",
+                },
+                timeout=30,
+            )
+            response.raise_for_status()
+            table = response.json()
+
+    get:
+      operationId: listTables
+      tags: [Tables]
+      summary: List all tables
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/LimitParam"
+        - $ref: "#/components/parameters/SearchParam"
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/TableStatus"
+      responses:
+        "200":
+          description: List of tables
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, pagination]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/TableListItem"
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /tables/{table_id}:
+    parameters:
+      - name: table_id
+        in: path
+        required: true
+        schema:
+          type: string
+
+    get:
+      operationId: getTable
+      tags: [Tables]
+      summary: Get table details
+      description: Returns full table details including status, progress, row count, and file list.
+      responses:
+        "200":
+          description: Table details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Table"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    patch:
+      operationId: updateTable
+      tags: [Tables]
+      summary: Update table metadata
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                enhancement_context:
+                  type: string
+                schema_id:
+                  type: string
+                  description: Re-map data to a different schema
+      responses:
+        "200":
+          description: Updated table
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Table"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+    delete:
+      operationId: deleteTable
+      tags: [Tables]
+      summary: Delete a table
+      description: Permanently deletes the table, all rows, and associated data. Cancels any running operations.
+      responses:
+        "204":
+          description: Table deleted
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /tables/{table_id}/columns:
+    parameters:
+      - name: table_id
+        in: path
+        required: true
+        schema:
+          type: string
+
+    get:
+      operationId: getTableColumns
+      tags: [Tables]
+      summary: Get table column definitions
+      description: |
+        Returns every column in the table's forked schema snapshot, including local helpers.
+        API visibility does not imply Catalog or scheduled-sync eligibility. Filter canonical
+        destinations to columns whose `kind` is `attribute`; a helper has `kind: helper` and
+        `attribute_id: null`.
+      responses:
+        "200":
+          description: Column definitions
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Column"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ── Rows ─────────────────────────────────────────────────
+  /tables/{table_id}/rows:
+    parameters:
+      - name: table_id
+        in: path
+        required: true
+        schema:
+          type: string
+
+    get:
+      operationId: listRows
+      tags: [Rows]
+      summary: List all rows in a table
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/LimitParam"
+        - name: sort_by
+          in: query
+          schema:
+            type: string
+          description: Column key to sort by
+        - name: sort_order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+      responses:
+        "200":
+          description: List of rows
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, pagination]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Row"
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    post:
+      operationId: createRows
+      tags: [Rows]
+      summary: Add rows to a completed table
+      description: Adds up to 1,000 rows atomically. Every object key must match a column in the table's forked schema snapshot. Mutations are rejected while the table is locked by another operation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [rows]
+              properties:
+                rows:
+                  type: array
+                  minItems: 1
+                  maxItems: 1000
+                  items:
+                    type: object
+                    additionalProperties: true
+            example:
+              rows:
+                - sku: A-102
+                  product_name: Summit flask
+                  price: 29.9
+                - sku: A-103
+                  product_name: Camp bowl
+                  price: 12.5
+      responses:
+        "201":
+          description: Rows inserted.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, inserted_count]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Row"
+                  inserted_count:
+                    type: integer
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+      x-codeSamples:
+        - lang: bash
+          label: cURL
+          source: |
+            curl --request POST \
+              --url https://app.productlasso.com/api/v1/tables/$TABLE_ID/rows \
+              --header "Authorization: Bearer $LASSO_API_KEY" \
+              --header "Content-Type: application/json" \
+              --data '{
+                "rows": [
+                  {"sku": "A-102", "product_name": "Summit flask", "price": 29.9},
+                  {"sku": "A-103", "product_name": "Camp bowl", "price": 12.5}
+                ]
+              }'
+        - lang: typescript
+          label: TypeScript
+          source: |
+            const tableId = "YOUR_TABLE_ID";
+            const response = await fetch(
+              `https://app.productlasso.com/api/v1/tables/${tableId}/rows`,
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${process.env.LASSO_API_KEY}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  rows: [
+                    { sku: "A-102", product_name: "Summit flask", price: 29.9 },
+                    { sku: "A-103", product_name: "Camp bowl", price: 12.5 },
+                  ],
+                }),
+              },
+            );
+
+            if (!response.ok) throw new Error(await response.text());
+            const result = await response.json();
+        - lang: python
+          label: Python
+          source: |
+            import os
+            import requests
+
+            table_id = "YOUR_TABLE_ID"
+            response = requests.post(
+                f"https://app.productlasso.com/api/v1/tables/{table_id}/rows",
+                headers={"Authorization": f"Bearer {os.environ['LASSO_API_KEY']}"},
+                json={
+                    "rows": [
+                        {"sku": "A-102", "product_name": "Summit flask", "price": 29.9},
+                        {"sku": "A-103", "product_name": "Camp bowl", "price": 12.5},
+                    ]
+                },
+                timeout=30,
+            )
+            response.raise_for_status()
+            result = response.json()
+
+  /tables/{table_id}/rows/{row_id}:
+    parameters:
+      - name: table_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: row_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    get:
+      operationId: getRow
+      tags: [Rows]
+      summary: Get a single row
+      responses:
+        "200":
+          description: Row details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Row"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    put:
+      operationId: updateRow
+      tags: [Rows]
+      summary: Update a row
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [data]
+              properties:
+                data:
+                  type: object
+                  additionalProperties: true
+                  description: Key-value pairs to update. Only provided keys are changed.
+      responses:
+        "200":
+          description: Updated row
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Row"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    delete:
+      operationId: deleteRow
+      tags: [Rows]
+      summary: Delete a row
+      responses:
+        "204":
+          description: Row deleted
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /tables/{table_id}/rows/bulk-update:
+    parameters:
+      - name: table_id
+        in: path
+        required: true
+        schema:
+          type: string
+
+    post:
+      operationId: bulkUpdateRows
+      tags: [Rows]
+      summary: Bulk update a column across multiple rows
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [row_ids, column_key, value]
+              properties:
+                row_ids:
+                  type: array
+                  items:
+                    type: string
+                column_key:
+                  type: string
+                value:
+                  description: The value to set for all specified rows
+      responses:
+        "200":
+          description: Rows updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  updated_count:
+                    type: integer
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /tables/{table_id}/rows/bulk-delete:
+    parameters:
+      - name: table_id
+        in: path
+        required: true
+        schema:
+          type: string
+
+    post:
+      operationId: bulkDeleteRows
+      tags: [Rows]
+      summary: Delete multiple rows
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [row_ids]
+              properties:
+                row_ids:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "200":
+          description: Rows deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted_count:
+                    type: integer
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  # ── Enhancement ──────────────────────────────────────────
+  /tables/{table_id}/enhance:
+    parameters:
+      - name: table_id
+        in: path
+        required: true
+        schema:
+          type: string
+
+    post:
+      operationId: enhance
+      tags: [Enhancement]
+      summary: Enhance cells with AI
+      description: |
+        Enhance one or more cells in a single column. Pass one row_id for a single cell,
+        or multiple row_ids to enhance the entire column.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EnhanceRequest"
+      responses:
+        "202":
+          description: Enhancement queued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnhanceResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "402":
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      x-codeSamples:
+        - lang: bash
+          label: cURL
+          source: |
+            curl --request POST \
+              --url https://app.productlasso.com/api/v1/tables/$TABLE_ID/enhance \
+              --header "Authorization: Bearer $LASSO_API_KEY" \
+              --header "Content-Type: application/json" \
+              --data '{
+                "row_ids": ["83ba2c61-8592-4614-ac46-10f43580dfb8"],
+                "column_key": "product_name_cs",
+                "prompt": "Translate {{Product name}} to Czech.",
+                "target_language": "cs",
+                "use_glossary": true
+              }'
+        - lang: typescript
+          label: TypeScript
+          source: |
+            const tableId = "YOUR_TABLE_ID";
+            const response = await fetch(
+              `https://app.productlasso.com/api/v1/tables/${tableId}/enhance`,
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${process.env.LASSO_API_KEY}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  row_ids: ["83ba2c61-8592-4614-ac46-10f43580dfb8"],
+                  column_key: "product_name_cs",
+                  prompt: "Translate {{Product name}} to Czech.",
+                  target_language: "cs",
+                  use_glossary: true,
+                }),
+              },
+            );
+
+            if (!response.ok) throw new Error(await response.text());
+            const job = await response.json();
+        - lang: python
+          label: Python
+          source: |
+            import os
+            import requests
+
+            table_id = "YOUR_TABLE_ID"
+            response = requests.post(
+                f"https://app.productlasso.com/api/v1/tables/{table_id}/enhance",
+                headers={"Authorization": f"Bearer {os.environ['LASSO_API_KEY']}"},
+                json={
+                    "row_ids": ["83ba2c61-8592-4614-ac46-10f43580dfb8"],
+                    "column_key": "product_name_cs",
+                    "prompt": "Translate {{Product name}} to Czech.",
+                    "target_language": "cs",
+                    "use_glossary": True,
+                },
+                timeout=30,
+            )
+            response.raise_for_status()
+            job = response.json()
+
+  /tables/{table_id}/enhance/bulk:
+    parameters:
+      - name: table_id
+        in: path
+        required: true
+        schema:
+          type: string
+
+    post:
+      operationId: enhanceBulk
+      tags: [Enhancement]
+      summary: Enhance multiple columns for one row
+      description: Enhances several columns for a single row in one AI call. Cheaper than individual cell enhancement (0.5 credits/column vs 2 credits/cell).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EnhanceBulkRequest"
+      responses:
+        "202":
+          description: Bulk enhancement queued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnhanceResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "402":
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      x-codeSamples:
+        - lang: bash
+          label: cURL
+          source: |
+            curl --request POST \
+              --url https://app.productlasso.com/api/v1/tables/$TABLE_ID/enhance/bulk \
+              --header "Authorization: Bearer $LASSO_API_KEY" \
+              --header "Content-Type: application/json" \
+              --data '{
+                "row_id": "83ba2c61-8592-4614-ac46-10f43580dfb8",
+                "columns": [
+                  {"key": "short_description", "prompt": "Write a concise description from {{Product name}} and {{Material}}."},
+                  {"key": "product_name_cs", "prompt": "Translate {{Product name}} to Czech.", "target_language": "cs"}
+                ]
+              }'
+        - lang: typescript
+          label: TypeScript
+          source: |
+            const tableId = "YOUR_TABLE_ID";
+            const response = await fetch(
+              `https://app.productlasso.com/api/v1/tables/${tableId}/enhance/bulk`,
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${process.env.LASSO_API_KEY}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  row_id: "83ba2c61-8592-4614-ac46-10f43580dfb8",
+                  columns: [
+                    { key: "short_description", prompt: "Write a concise description from {{Product name}} and {{Material}}." },
+                    { key: "product_name_cs", prompt: "Translate {{Product name}} to Czech.", target_language: "cs" },
+                  ],
+                }),
+              },
+            );
+
+            if (!response.ok) throw new Error(await response.text());
+            const job = await response.json();
+        - lang: python
+          label: Python
+          source: |
+            import os
+            import requests
+
+            table_id = "YOUR_TABLE_ID"
+            response = requests.post(
+                f"https://app.productlasso.com/api/v1/tables/{table_id}/enhance/bulk",
+                headers={"Authorization": f"Bearer {os.environ['LASSO_API_KEY']}"},
+                json={
+                    "row_id": "83ba2c61-8592-4614-ac46-10f43580dfb8",
+                    "columns": [
+                        {"key": "short_description", "prompt": "Write a concise description from {{Product name}} and {{Material}}."},
+                        {"key": "product_name_cs", "prompt": "Translate {{Product name}} to Czech.", "target_language": "cs"},
+                    ],
+                },
+                timeout=30,
+            )
+            response.raise_for_status()
+            job = response.json()
+
+  /tables/{table_id}/enhance/cancel:
+    parameters:
+      - name: table_id
+        in: path
+        required: true
+        schema:
+          type: string
+
+    post:
+      operationId: cancelEnhancement
+      tags: [Enhancement]
+      summary: Cancel running enhancements
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                column_key:
+                  type: string
+                  description: Cancel enhancements for a specific column. Omit to cancel all.
+      responses:
+        "200":
+          description: Enhancement cancelled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cancelled_count:
+                    type: integer
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /tables/{table_id}/enhance/status:
+    parameters:
+      - name: table_id
+        in: path
+        required: true
+        schema:
+          type: string
+
+    get:
+      operationId: getEnhancementStatus
+      tags: [Enhancement]
+      summary: Get enhancement status
+      description: Returns per-column enhancement progress across all rows.
+      responses:
+        "200":
+          description: Enhancement status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnhanceStatusResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /tables/{table_id}/rows/{row_id}/traces:
+    parameters:
+      - name: table_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: row_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    get:
+      operationId: getRowTraces
+      tags: [Enhancement]
+      summary: Get AI traces for a row
+      description: Returns the AI reasoning chain, tool calls, and sources for each enhanced column in this row.
+      parameters:
+        - name: column_key
+          in: query
+          schema:
+            type: string
+          description: Filter traces for a specific column
+      responses:
+        "200":
+          description: AI traces
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Trace"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ── Export ───────────────────────────────────────────────
+  /tables/{table_id}/export:
+    parameters:
+      - name: table_id
+        in: path
+        required: true
+        schema:
+          type: string
+
+    get:
+      operationId: exportTable
+      tags: [Export]
+      summary: Export table data
+      parameters:
+        - name: format
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [csv, xlsx, json, images]
+        - name: columns
+          in: query
+          schema:
+            type: string
+          description: Comma-separated column keys to include. Omit for all columns.
+      responses:
+        "200":
+          description: Exported file
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        "404":
+          $ref: "#/components/responses/NotFound"
+      x-codeSamples:
+        - lang: bash
+          label: cURL
+          source: |
+            curl --request GET \
+              --url "https://app.productlasso.com/api/v1/tables/$TABLE_ID/export?format=xlsx&columns=sku,product_name,price" \
+              --header "Authorization: Bearer $LASSO_API_KEY" \
+              --output products.xlsx
+        - lang: typescript
+          label: TypeScript
+          source: |
+            import { writeFile } from "node:fs/promises";
+
+            const tableId = "YOUR_TABLE_ID";
+            const params = new URLSearchParams({
+              format: "xlsx",
+              columns: "sku,product_name,price",
+            });
+            const response = await fetch(
+              `https://app.productlasso.com/api/v1/tables/${tableId}/export?${params}`,
+              { headers: { Authorization: `Bearer ${process.env.LASSO_API_KEY}` } },
+            );
+
+            if (!response.ok) throw new Error(await response.text());
+            await writeFile("products.xlsx", Buffer.from(await response.arrayBuffer()));
+        - lang: python
+          label: Python
+          source: |
+            import os
+            import requests
+
+            table_id = "YOUR_TABLE_ID"
+            response = requests.get(
+                f"https://app.productlasso.com/api/v1/tables/{table_id}/export",
+                headers={"Authorization": f"Bearer {os.environ['LASSO_API_KEY']}"},
+                params={"format": "xlsx", "columns": "sku,product_name,price"},
+                timeout=120,
+            )
+            response.raise_for_status()
+
+            with open("products.xlsx", "wb") as file:
+                file.write(response.content)
+
+  # ── Glossary ─────────────────────────────────────────────
+  /glossary:
+    get:
+      operationId: listGlossaryTerms
+      tags: [Glossary]
+      summary: List glossary terms
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/LimitParam"
+        - $ref: "#/components/parameters/SearchParam"
+      responses:
+        "200":
+          description: List of glossary terms
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, pagination]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/GlossaryTerm"
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+    post:
+      operationId: createGlossaryTerm
+      tags: [Glossary]
+      summary: Create a glossary term
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [term, type]
+              properties:
+                term:
+                  type: string
+                type:
+                  type: string
+                  enum: [do_not_translate, specific_translation, context_dependent]
+                case_sensitive:
+                  type: boolean
+                  default: false
+                category:
+                  type: string
+                translations:
+                  type: object
+                  additionalProperties:
+                    type: string
+      responses:
+        "201":
+          description: Created glossary term
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GlossaryTerm"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /glossary/{term_id}:
+    parameters:
+      - name: term_id
+        in: path
+        required: true
+        schema:
+          type: string
+
+    put:
+      operationId: updateGlossaryTerm
+      tags: [Glossary]
+      summary: Update a glossary term
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                term:
+                  type: string
+                type:
+                  type: string
+                  enum: [do_not_translate, specific_translation, context_dependent]
+                case_sensitive:
+                  type: boolean
+                category:
+                  type: string
+                translations:
+                  type: object
+                  additionalProperties:
+                    type: string
+      responses:
+        "200":
+          description: Updated glossary term
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GlossaryTerm"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    delete:
+      operationId: deleteGlossaryTerm
+      tags: [Glossary]
+      summary: Delete a glossary term
+      responses:
+        "204":
+          description: Glossary term deleted
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ── Credits ──────────────────────────────────────────────
+  /credits/balance:
+    get:
+      operationId: getCreditBalance
+      tags: [Credits]
+      summary: Get current credit balance
+      responses:
+        "200":
+          description: Credit balance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreditBalance"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /credits/usage:
+    get:
+      operationId: getCreditUsage
+      tags: [Credits]
+      summary: Get credit usage history
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/LimitParam"
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Start date filter
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date
+          description: End date filter
+        - name: service
+          in: query
+          schema:
+            type: string
+            enum: [product_import, pdf_extraction, ai_field, ai_field_bulk, ai_image_generation]
+      responses:
+        "200":
+          description: Credit usage history
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, pagination, total_used]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/CreditUsageEntry"
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+                  total_used:
+                    type: number
+                    description: Total credits used in the filtered period
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /credits/stats:
+    get:
+      operationId: getCreditStats
+      tags: [Credits]
+      summary: Get aggregated credit usage statistics
+      description: Returns company credit usage for an inclusive date range together with the equally sized preceding period. The maximum range is 1,830 days.
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Inclusive start date in YYYY-MM-DD format.
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Inclusive end date in YYYY-MM-DD format.
+      responses:
+        "200":
+          description: Aggregated credit usage statistics.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreditStats"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+      x-codeSamples:
+        - lang: bash
+          label: cURL
+          source: |
+            curl --request GET \
+              --url "https://app.productlasso.com/api/v1/credits/stats?from=2026-08-01&to=2026-08-31" \
+              --header "Authorization: Bearer $LASSO_API_KEY"
+        - lang: typescript
+          label: TypeScript
+          source: |
+            const params = new URLSearchParams({ from: "2026-08-01", to: "2026-08-31" });
+            const response = await fetch(
+              `https://app.productlasso.com/api/v1/credits/stats?${params}`,
+              { headers: { Authorization: `Bearer ${process.env.LASSO_API_KEY}` } },
+            );
+
+            if (!response.ok) throw new Error(await response.text());
+            const stats = await response.json();
+        - lang: python
+          label: Python
+          source: |
+            import os
+            import requests
+
+            response = requests.get(
+                "https://app.productlasso.com/api/v1/credits/stats",
+                headers={"Authorization": f"Bearer {os.environ['LASSO_API_KEY']}"},
+                params={"from": "2026-08-01", "to": "2026-08-31"},
+                timeout=30,
+            )
+            response.raise_for_status()
+            stats = response.json()
+
+  # ── Product analytics ───────────────────────────────────
+  /analytics/products/summary:
+    get:
+      operationId: getProductAnalyticsSummary
+      tags: [Analytics]
+      summary: Get Catalog and Lasso product analytics
+      description: |
+        Returns Catalog business outcomes and Lasso workflow volume for an inclusive date range.
+        Catalog current totals are snapshots and therefore do not change with the date or user filter.
+      parameters:
+        - $ref: "#/components/parameters/ProductAnalyticsFromParam"
+        - $ref: "#/components/parameters/ProductAnalyticsToParam"
+        - name: scope
+          in: query
+          schema:
+            type: string
+            enum: [all, catalog, extraction]
+            default: all
+        - $ref: "#/components/parameters/ProductAnalyticsCatalogStatusParam"
+        - $ref: "#/components/parameters/ProductAnalyticsUserParam"
+        - $ref: "#/components/parameters/ProductAnalyticsSchemaParam"
+        - $ref: "#/components/parameters/ProductAnalyticsTableParam"
+        - $ref: "#/components/parameters/ProductAnalyticsSourceParam"
+      responses:
+        "200":
+          description: Product analytics summary. Sections outside the selected scope are omitted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductAnalyticsSummaryResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+      x-codeSamples:
+        - lang: bash
+          label: cURL
+          source: |
+            curl --request GET \
+              --url "https://app.productlasso.com/api/v1/analytics/products/summary?from=2026-08-01&to=2026-08-31&scope=all" \
+              --header "Authorization: Bearer $LASSO_API_KEY"
+        - lang: typescript
+          label: TypeScript
+          source: |
+            const params = new URLSearchParams({
+              from: "2026-08-01",
+              to: "2026-08-31",
+              scope: "all",
+            });
+            const response = await fetch(
+              `https://app.productlasso.com/api/v1/analytics/products/summary?${params}`,
+              { headers: { Authorization: `Bearer ${process.env.LASSO_API_KEY}` } },
+            );
+
+            if (!response.ok) throw new Error(await response.text());
+            const summary = await response.json();
+        - lang: python
+          label: Python
+          source: |
+            import os
+            import requests
+
+            response = requests.get(
+                "https://app.productlasso.com/api/v1/analytics/products/summary",
+                headers={"Authorization": f"Bearer {os.environ['LASSO_API_KEY']}"},
+                params={"from": "2026-08-01", "to": "2026-08-31", "scope": "all"},
+                timeout=30,
+            )
+            response.raise_for_status()
+            summary = response.json()
+
+  /analytics/products/leaderboard:
+    get:
+      operationId: getProductAnalyticsLeaderboard
+      tags: [Analytics]
+      summary: Get the Catalog or Lasso leaderboard
+      parameters:
+        - $ref: "#/components/parameters/ProductAnalyticsFromParam"
+        - $ref: "#/components/parameters/ProductAnalyticsToParam"
+        - name: scope
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [catalog, extraction]
+        - $ref: "#/components/parameters/ProductAnalyticsCatalogStatusParam"
+        - $ref: "#/components/parameters/ProductAnalyticsUserParam"
+        - $ref: "#/components/parameters/ProductAnalyticsSchemaParam"
+        - $ref: "#/components/parameters/ProductAnalyticsTableParam"
+        - $ref: "#/components/parameters/ProductAnalyticsSourceParam"
+      responses:
+        "200":
+          description: Contributor leaderboard; extraction scope also includes tables.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductAnalyticsLeaderboardResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /analytics/products/activity:
+    get:
+      operationId: getProductAnalyticsActivity
+      tags: [Analytics]
+      summary: List the exact products or result rows behind a metric
+      parameters:
+        - $ref: "#/components/parameters/ProductAnalyticsFromParam"
+        - $ref: "#/components/parameters/ProductAnalyticsToParam"
+        - name: scope
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [catalog, extraction]
+        - $ref: "#/components/parameters/ProductAnalyticsCatalogStatusParam"
+        - $ref: "#/components/parameters/ProductAnalyticsUserParam"
+        - $ref: "#/components/parameters/ProductAnalyticsSchemaParam"
+        - $ref: "#/components/parameters/ProductAnalyticsTableParam"
+        - $ref: "#/components/parameters/ProductAnalyticsSourceParam"
+        - name: cursor
+          in: query
+          description: Opaque `next_cursor` returned by the previous page.
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 25
+      responses:
+        "200":
+          description: Keyset-paginated Catalog products or Lasso result rows.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductAnalyticsActivityResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ── Search ───────────────────────────────────────────────
+  /search:
+    post:
+      operationId: searchProducts
+      tags: [Search]
+      summary: Search for products
+      description: |
+        Search Lasso's product database for products matching a natural language query and return
+        structured data. Filters should be embedded in the query (e.g. "Sony earbuds under $200").
+        Optionally provide a schema_id or inline columns to control the output shape.
+        If neither is provided, a default product schema is used.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [query]
+              properties:
+                query:
+                  type: string
+                  description: Natural language search objective
+                schema_id:
+                  type: string
+                  description: ID of an existing schema. Mutually exclusive with columns.
+                columns:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/InlineColumn"
+                  description: Inline column definitions. Mutually exclusive with schema_id.
+                max_results:
+                  type: integer
+                  default: 7
+                  minimum: 1
+                  maximum: 7
+                model:
+                  type: string
+                  default: auto
+                webhook_url:
+                  type: string
+                  format: uri
+                  description: If provided, results are delivered via webhook and 202 is returned immediately.
+            example:
+              query: Sony wireless earbuds under $200 with USB-C charging
+              columns:
+                - key: product_name
+                  label: Product name
+                  type: text
+                - key: price
+                  label: Price
+                  type: number
+              max_results: 3
+      responses:
+        "200":
+          description: Search results (sync mode)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchResponse"
+              example:
+                id: 6caa3d91-4ba7-4c14-8b31-9a7d92693ac9
+                status: completed
+                query: Sony wireless earbuds under $200 with USB-C charging
+                results:
+                  - data:
+                      product_name: Sony WF-C700N
+                      price: 119.99
+                    source_url: https://example.com/products/sony-wf-c700n
+                    source_title: Sony WF-C700N product page
+                    confidence: 0.94
+                total_results: 1
+                credits_used: 5
+        "202":
+          description: Search queued (async / webhook mode)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  status:
+                    type: string
+                    enum: [processing]
+                  estimated_credits:
+                    type: number
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+      x-codeSamples:
+        - lang: bash
+          label: cURL
+          source: |
+            curl --request POST \
+              --url https://app.productlasso.com/api/v1/search \
+              --header "Authorization: Bearer $LASSO_API_KEY" \
+              --header "Content-Type: application/json" \
+              --data '{
+                "query": "Sony wireless earbuds under $200 with USB-C charging",
+                "columns": [
+                  {"key": "product_name", "label": "Product name", "type": "text"},
+                  {"key": "price", "label": "Price", "type": "number"}
+                ],
+                "max_results": 3
+              }'
+        - lang: typescript
+          label: TypeScript
+          source: |
+            const response = await fetch("https://app.productlasso.com/api/v1/search", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${process.env.LASSO_API_KEY}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                query: "Sony wireless earbuds under $200 with USB-C charging",
+                columns: [
+                  { key: "product_name", label: "Product name", type: "text" },
+                  { key: "price", label: "Price", type: "number" },
+                ],
+                max_results: 3,
+              }),
+            });
+
+            if (!response.ok) throw new Error(await response.text());
+            const result = await response.json();
+        - lang: python
+          label: Python
+          source: |
+            import os
+            import requests
+
+            response = requests.post(
+                "https://app.productlasso.com/api/v1/search",
+                headers={"Authorization": f"Bearer {os.environ['LASSO_API_KEY']}"},
+                json={
+                    "query": "Sony wireless earbuds under $200 with USB-C charging",
+                    "columns": [
+                        {"key": "product_name", "label": "Product name", "type": "text"},
+                        {"key": "price", "label": "Price", "type": "number"},
+                    ],
+                    "max_results": 3,
+                },
+                timeout=120,
+            )
+            response.raise_for_status()
+            result = response.json()
+
+  # ── Enrich ───────────────────────────────────────────────
+  /enrich:
+    post:
+      operationId: enrichProducts
+      tags: [Enrich]
+      summary: Enrich partial product data
+      description: |
+        Take partial product records and return enriched data with missing fields filled in.
+        Lasso researches each product and fills in missing attributes. Each enriched field includes
+        a basis with citations, reasoning, and confidence. Optionally provide a schema_id or inline columns.
+        If neither is provided, a default product schema is used.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [items]
+              properties:
+                items:
+                  type: array
+                  maxItems: 50
+                  items:
+                    type: object
+                    required: [data]
+                    properties:
+                      data:
+                        type: object
+                        additionalProperties: true
+                        description: Key-value pairs of known product data
+                schema_id:
+                  type: string
+                  description: ID of an existing schema. Mutually exclusive with columns.
+                columns:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/InlineColumn"
+                  description: Inline column definitions. Mutually exclusive with schema_id.
+                context:
+                  type: string
+                  description: Additional context for the AI enrichment
+                model:
+                  type: string
+                  default: auto
+                use_glossary:
+                  type: boolean
+                  default: false
+                web_search:
+                  type: boolean
+                  default: true
+                  description: Whether to use web search for enrichment. When false, the AI fills fields from its own knowledge and no basis/citations are returned.
+                thinking:
+                  type: string
+                  enum: [hard, medium, low]
+                  default: medium
+                  description: |
+                    Controls the depth of AI reasoning.
+                    hard — most capable model, best for complex or ambiguous products.
+                    medium — balanced speed and quality (default).
+                    low — fastest, suitable for straightforward lookups.
+                webhook_url:
+                  type: string
+                  format: uri
+                  description: If provided, results are delivered via webhook and 202 is returned immediately.
+            example:
+              items:
+                - data:
+                    sku: WH-1000XM5-B
+                    product_name: Sony WH-1000XM5
+              columns:
+                - key: brand
+                  label: Brand
+                  type: text
+                - key: color
+                  label: Color
+                  type: text
+              thinking: medium
+              web_search: true
+      responses:
+        "200":
+          description: Enrichment results (sync mode)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnrichResponse"
+              example:
+                id: 47af2c6b-3429-4da5-b8ea-6580bc13acd4
+                status: completed
+                items:
+                  - data:
+                      sku: WH-1000XM5-B
+                      product_name: Sony WH-1000XM5
+                      brand: Sony
+                      color: Black
+                    basis:
+                      - field: color
+                        citations:
+                          - url: https://example.com/products/sony-wh-1000xm5
+                            title: Sony WH-1000XM5 product page
+                            excerpt: Available in black.
+                        reasoning: The product page identifies the black variant.
+                        confidence: high
+                credits_used: 2
+        "202":
+          description: Enrichment queued (async / webhook mode)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  status:
+                    type: string
+                    enum: [processing]
+                  estimated_credits:
+                    type: number
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+      x-codeSamples:
+        - lang: bash
+          label: cURL
+          source: |
+            curl --request POST \
+              --url https://app.productlasso.com/api/v1/enrich \
+              --header "Authorization: Bearer $LASSO_API_KEY" \
+              --header "Content-Type: application/json" \
+              --data '{
+                "items": [{"data": {"sku": "WH-1000XM5-B", "product_name": "Sony WH-1000XM5"}}],
+                "columns": [
+                  {"key": "brand", "label": "Brand", "type": "text"},
+                  {"key": "color", "label": "Color", "type": "text"}
+                ],
+                "thinking": "medium",
+                "web_search": true
+              }'
+        - lang: typescript
+          label: TypeScript
+          source: |
+            const response = await fetch("https://app.productlasso.com/api/v1/enrich", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${process.env.LASSO_API_KEY}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                items: [{ data: { sku: "WH-1000XM5-B", product_name: "Sony WH-1000XM5" } }],
+                columns: [
+                  { key: "brand", label: "Brand", type: "text" },
+                  { key: "color", label: "Color", type: "text" },
+                ],
+                thinking: "medium",
+                web_search: true,
+              }),
+            });
+
+            if (!response.ok) throw new Error(await response.text());
+            const result = await response.json();
+        - lang: python
+          label: Python
+          source: |
+            import os
+            import requests
+
+            response = requests.post(
+                "https://app.productlasso.com/api/v1/enrich",
+                headers={"Authorization": f"Bearer {os.environ['LASSO_API_KEY']}"},
+                json={
+                    "items": [{"data": {"sku": "WH-1000XM5-B", "product_name": "Sony WH-1000XM5"}}],
+                    "columns": [
+                        {"key": "brand", "label": "Brand", "type": "text"},
+                        {"key": "color", "label": "Color", "type": "text"},
+                    ],
+                    "thinking": "medium",
+                    "web_search": True,
+                },
+                timeout=120,
+            )
+            response.raise_for_status()
+            result = response.json()

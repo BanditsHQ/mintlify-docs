@@ -1,34 +1,5 @@
 ---
-title: 'Delete schema'
-api: "DELETE /schemas/{schema_id}"
-description: 'Permanently delete a schema.'
+title: "Delete an unused schema"
+description: "Deletes only when the schema has no extraction tables, Catalog products, mappings, views, templates, feeds, Shopify links, or Relation Attribute references. Use the Dashboard lifecycle flow to review and remove dependencies."
+openapi: "openapi.yaml DELETE /schemas/{schema_id}"
 ---
-
-## Path parameters
-
-<ParamField path="schema_id" type="string" required>
-  The unique identifier of the schema to delete.
-</ParamField>
-
-## Response
-
-Returns `204 No Content` on success.
-
-<Warning>
-  Deleting a schema does not delete tables that were created with it. Those tables retain their column definitions.
-</Warning>
-
-<RequestExample>
-```typescript TypeScript
-await client.schemas.delete("schema_abc123");
-```
-
-```python Python
-client.schemas.delete("schema_abc123")
-```
-
-```bash cURL
-curl -X DELETE "https://hub.banditshq.com/api/v1/schemas/schema_abc123" \
-  -H "Authorization: Bearer lasso_..."
-```
-</RequestExample>

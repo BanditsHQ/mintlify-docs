@@ -1,0 +1,20 @@
+---
+title: "API produktové analytiky"
+description: "Měřte výsledky Katalogu a objem extrakce v Lasso."
+---
+
+Produktová analytika kombinuje výsledky Katalogu s objemem práce v extrakčních tabulkách Lasso. Společnost se vždy odvodí z API klíče.
+
+## Období a filtry
+
+Všechny tři operace vyžadují inkluzivní `from` a `to` ve formátu `YYYY-MM-DD`. Období může mít nejvýše 1 830 dní.
+
+Podle operace a rozsahu lze filtrovat `catalog_status`, `user_id`, `schema_id`, `table_id` a zdroj Katalogu. Filtr `source` vyžaduje `scope=catalog`.
+
+## Operace
+
+- [Souhrn](/cs/api-reference/analytics/summary) vrací KPI Katalogu, aktuální inventář, denní trend a žebříček spolu s KPI, uživateli a tabulkami Lasso.
+- [Žebříček](/cs/api-reference/analytics/leaderboard) vyžaduje `scope=catalog` nebo `scope=extraction`.
+- [Aktivita](/cs/api-reference/analytics/activity) vrací přesné produkty nebo řádky, ze kterých se metrika počítá.
+
+Aktuální celkový počet produktů Katalogu je snapshot. Filtry data a uživatele ho nemění, ale filtr stavu, schématu a zdroje ano. Počet produktů připravených v Lasso je počet řádků extrakce vytvořených v období a přiřazených iniciátorovi tabulky.

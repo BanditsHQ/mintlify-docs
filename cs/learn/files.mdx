@@ -18,7 +18,7 @@ Lasso přijímá řadu formátů souborů jako zdrojová data pro extrakci. Nejp
 
 <Steps>
   <Step title="Nahrajte soubor">
-    Odešlete soubor jako `multipart/form-data` na `POST /v1/files`. Maximální velikost je 1 GB.
+    Odešlete soubor jako `multipart/form-data` na `POST /files`. Endpoint pro nahrání přijímá soubory do 1 GB.
   </Step>
   <Step title="Získejte ID souboru">
     Odpověď obsahuje pole `id`. Uložte si ho pro další krok.
@@ -27,6 +27,21 @@ Lasso přijímá řadu formátů souborů jako zdrojová data pro extrakci. Nejp
     Předejte ID souboru v poli `file_ids` při vytváření tabulky.
   </Step>
 </Steps>
+
+## Limity extrakce
+
+Při vytváření tabulky platí přísnější limity zdrojů než při samotném nahrání:
+
+| Typ zdroje | Maximální velikost |
+|---|---:|
+| PPTX | 20 MB |
+| DOCX | 50 MB |
+| XML, HTML, HTM nebo TXT | 64 MB |
+| JPG, JPEG, PNG nebo WebP | 100 MB |
+| Ostatní typy souborů | 256 MB |
+| Všechny vybrané soubory dohromady | 512 MB |
+
+API odmítne duplicitní názvy zdrojových souborů v jednom požadavku na tabulku.
 
 ## Příklad
 

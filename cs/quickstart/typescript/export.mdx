@@ -13,13 +13,25 @@ console.log(data); // [{ product_name: "...", price: 29.99 }, ...]
 ## Export jako CSV
 
 ```typescript
-const csv = await client.export.csv("tbl_abc123");
+const response = await fetch(
+  "https://app.productlasso.com/api/v1/tables/tbl_abc123/export?format=csv",
+  { headers: { Authorization: `Bearer ${process.env.LASSO_API_KEY}` } },
+);
+if (!response.ok) throw new Error(await response.text());
+const csv = await response.text();
 ```
 
 ## Export jako XLSX
 
 ```typescript
-const xlsx = await client.export.xlsx("tbl_abc123");
+import { writeFile } from "node:fs/promises";
+
+const response = await fetch(
+  "https://app.productlasso.com/api/v1/tables/tbl_abc123/export?format=xlsx",
+  { headers: { Authorization: `Bearer ${process.env.LASSO_API_KEY}` } },
+);
+if (!response.ok) throw new Error(await response.text());
+await writeFile("export.xlsx", Buffer.from(await response.arrayBuffer()));
 ```
 
 ## Export obrázků
@@ -27,7 +39,14 @@ const xlsx = await client.export.xlsx("tbl_abc123");
 Stáhněte všechny obrázky ze sloupců s obrázky jako ZIP:
 
 ```typescript
-const images = await client.export.images("tbl_abc123");
+import { writeFile } from "node:fs/promises";
+
+const response = await fetch(
+  "https://app.productlasso.com/api/v1/tables/tbl_abc123/export?format=images",
+  { headers: { Authorization: `Bearer ${process.env.LASSO_API_KEY}` } },
+);
+if (!response.ok) throw new Error(await response.text());
+await writeFile("images.zip", Buffer.from(await response.arrayBuffer()));
 ```
 
 ## Výběr konkrétních sloupců

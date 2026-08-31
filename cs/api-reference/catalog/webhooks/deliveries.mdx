@@ -1,0 +1,11 @@
+---
+title: "Přehled doručení webhooku"
+description: "Získejte poslední pokusy o doručení bez dat událostí a podpisových tajemství."
+openapi: "openapi.yaml GET /catalog/webhooks/{id}"
+---
+
+## Poznámky k použití
+
+Odpověď obsahuje pouze metadata doručení. Nikdy nevrací uložené payloady událostí ani podpisová tajemství.
+
+Každý opakovaný pokus má nové `id` a vyšší `attempt_number`. Pokusy pro stejnou logickou událost sdílejí `delivery_id`. Při požadavku na opakované doručení použijte `id` konkrétního pokusu.

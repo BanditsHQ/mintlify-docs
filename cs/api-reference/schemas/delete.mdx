@@ -1,34 +1,5 @@
 ---
 title: 'Smazat schéma'
-api: "DELETE /schemas/{schema_id}"
-description: 'Trvalé smazání schématu.'
+openapi: "openapi.yaml DELETE /schemas/{schema_id}"
+description: 'Trvalé smazání schématu pouze v případě, že nemá žádné závislosti.'
 ---
-
-## Parametry cesty
-
-<ParamField path="schema_id" type="string" required>
-  Jedinečný identifikátor schématu ke smazání.
-</ParamField>
-
-## Odpověď
-
-Při úspěchu vrací `204 No Content`.
-
-<Warning>
-  Smazání schématu nesmaže tabulky, které s ním byly vytvořeny. Tyto tabulky si zachovají své definice sloupců.
-</Warning>
-
-<RequestExample>
-```typescript TypeScript
-await client.schemas.delete("schema_abc123");
-```
-
-```python Python
-client.schemas.delete("schema_abc123")
-```
-
-```bash cURL
-curl -X DELETE "https://hub.banditshq.com/api/v1/schemas/schema_abc123" \
-  -H "Authorization: Bearer lasso_..."
-```
-</RequestExample>

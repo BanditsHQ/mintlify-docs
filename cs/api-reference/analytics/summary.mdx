@@ -1,0 +1,15 @@
+---
+title: "Přehled produktové analytiky"
+description: "Získejte výsledky Katalogu a objem práce v Lasso za zadané období."
+openapi: "openapi.yaml GET /analytics/products/summary"
+---
+
+## Význam metrik
+
+- `from` a `to` jsou včetně krajních dat. `scope` má výchozí hodnotu `all`; při užším rozsahu se ostatní části odpovědi vynechají.
+- Jedinečné produkty Katalogu počítají živé produkty s alespoň jedním významným zápisem pole v období. Opakované úpravy jednoho produktu se počítají jednou.
+- `new_products` a `updated_existing` v Katalogu se vzájemně vylučují a jejich součet odpovídá počtu jedinečných produktů.
+- Aktuální součty Katalogu jsou snapshot inventáře. Filtry data a uživatele je nemění; filtry stavu, schématu a zdroje ano.
+- Připravené produkty v Lasso počítají řádky výsledků extrakce vytvořené v období a přiřazují je iniciátorovi tabulky.
+
+`source` je filtr pouze pro Katalog a vyžaduje `scope=catalog`.

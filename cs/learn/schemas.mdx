@@ -23,6 +23,17 @@ Každý sloupec má klíč, popisek a typ:
 - **type** -- Datový typ, který má Lasso extrahovat. Viz níže.
 - **required** -- Zda musí mít tento sloupec hodnotu v každém řádku.
 
+## Sdílené atributy a pomocné sloupce
+
+Čtení schématu a tabulky vrací pro každý sloupec `attribute_id` a `kind`:
+
+- `kind: "attribute"` označuje kanonický sdílený atribut se stabilním UUID.
+- `kind: "helper"` označuje pomocný sloupec lokální pro schéma nebo tabulku. Jeho `attribute_id` je `null`.
+
+Katalog a trvalé nebo plánované synchronizační cíle přijímají pouze kanonické sloupce s `kind == "attribute"`.
+
+Kvůli kompatibilitě lze při vytvoření nebo aktualizaci schématu obě pole identity vynechat. Server vytvoří nebo připojí sdílený atribut podle klíče. Pro lokální pomocný sloupec odešlete `kind: "helper"`. Při úplné aktualizaci schématu zachovejte serverem vydané `id` použití sloupce.
+
 ## Typy sloupců
 
 | Typ | Popis | Příklad hodnoty |
@@ -34,11 +45,15 @@ Každý sloupec má klíč, popisek a typ:
 | `date` | Datum nebo datum a čas | `"2025-03-10"` |
 | `boolean` | Pravda nebo nepravda | `true` |
 | `richtext` | HTML nebo markdown | `"<p>Description</p>"` |
+| `format` | Výsledek formule s určeným `format_output_type` | `42` |
 | `enum` | Jedna z předdefinovaných hodnot | `"electronics"` |
 | `tags` | Pole řetězců | `["wireless", "bluetooth"]` |
 | `image` | URL jednoho obrázku | `"https://cdn.example.com/img.jpg"` |
 | `images` | Pole URL obrázků | `["https://...1.jpg", "https://...2.jpg"]` |
+| `file` | Jeden soubor | `"https://.../manual.pdf"` |
+| `files` | Více souborů | `["https://.../a.pdf", "https://.../b.pdf"]` |
 | `json` | Libovolný JSON | `{"specs": {"weight": "187g"}}` |
+| `relation` | Odkaz na jeden nebo více produktů Katalogu | UUID produktu nebo pole UUID |
 
 ## Automaticky generovaná schémata
 
@@ -68,4 +83,6 @@ AI analyzuje váš vzorek a odvodí vhodné klíče sloupců, popisky a typy.
 
 ## Opětovné použití schémat
 
-Schémata lze opakovaně používat ve více tabulkách. Vytvořte schéma jednou a pak na něj odkazujte pomocí ID při vytváření nových tabulek. Schéma můžete kdykoliv aktualizovat -- existující tabulky si zachovají své původní definice sloupců.
+Schémata lze opakovaně používat ve více tabulkách. Existující tabulky používají vlastní snapshot a po změně zdrojového schématu si zachovají původní definice sloupců.
+
+Trvalé smazání uspěje jen tehdy, když schéma nemá extrakční tabulky, produkty Katalogu, mapování, pohledy, šablony, feedy, Shopify vazby ani odkazy z relačních atributů. Konflikt závislostí vrátí `409` a žádný zdroj nezmění.

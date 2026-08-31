@@ -1,0 +1,11 @@
+---
+title: "Aktivita produktové analytiky"
+description: "Vypište produkty nebo řádky extrakce, ze kterých se metrika počítá."
+openapi: "openapi.yaml GET /analytics/products/activity"
+---
+
+## Poznámky k použití
+
+Tento endpoint použijte pro přechod z agregované metriky na konkrétní produkty Katalogu nebo řádky výsledků Lasso, ze kterých se počítá. Zachovejte stejný rozsah dat, `scope` a filtry jako u přehledu nebo žebříčku.
+
+Odpověď používá kurzorové stránkování. `next_cursor` předejte beze změny do dalšího požadavku. Kurzory sami neinterpretujte ani nevytvářejte.

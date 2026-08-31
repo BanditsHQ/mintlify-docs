@@ -3,7 +3,7 @@ title: 'Attributes'
 description: 'Manage your company attribute dictionary — canonical field definitions shared across schemas and catalog.'
 ---
 
-The **attribute dictionary** is your company's canonical registry of product fields. Each attribute defines a stable `key`, human-readable `label`, and `type` (text, enum, number, etc.). Schemas reference these keys so the same field definition is reused across tables, catalog families, and exports.
+The **Attribute dictionary** is your company's canonical registry of product fields. Each Shared Attribute has a stable UUID, a current `key`, a `label`, and a `type`. Product Schemas and Catalog products attach the UUID so a key rename does not change identity.
 
 ## Why attributes matter
 
@@ -11,7 +11,13 @@ The **attribute dictionary** is your company's canonical registry of product fie
 - **Sync** — External PIMs and supplier feeds can upsert attributes via the API to stay aligned with Lasso.
 - **Catalog** — Product `attributes` in the catalog use the same keys as your dictionary.
 
-## Synced vs manual attributes
+## Identity and lifecycle
+
+API responses expose `id`, `key`, `type`, `language`, type-specific configuration, `status`, `archived_at`, and revision timestamps. `GET /attributes` returns active Attributes by default. Set `include_archived=true` to include archived definitions. Direct reads can return either lifecycle state.
+
+Attribute and relation types are immutable for an existing key. Use `expected_updated_at` on updates to detect stale writes. A stale update returns `409` with `code: "stale_write"` and `current_updated_at`.
+
+## Synced vs manual Attributes
 
 Attributes imported from an external source may have `source_id` set. Synced attributes cannot edit label or enum values until you **detach** them (`detach: true` on update), which clears sync metadata and makes the attribute editable again.
 
@@ -21,21 +27,17 @@ Use the [Attributes API](/api-reference/attributes/list) to list, create, update
 
 <CodeGroup>
 ```typescript TypeScript
-await client.attributes.bulkUpsert({
-  attributes: [
+await client.attributes.bulk([
     { key: "color", label: "Color", type: "enum", enum_values: ["Red", "Blue"] },
     { key: "weight_kg", label: "Weight (kg)", type: "number" },
-  ],
-});
+]);
 ```
 
 ```python Python
-client.attributes.bulk_upsert(
-    attributes=[
+client.attributes.bulk([
         {"key": "color", "label": "Color", "type": "enum", "enum_values": ["Red", "Blue"]},
         {"key": "weight_kg", "label": "Weight (kg)", "type": "number"},
-    ],
-)
+])
 ```
 </CodeGroup>
 
@@ -43,6 +45,12 @@ client.attributes.bulk_upsert(
 
 Subscribe to `attribute.created`, `attribute.updated`, and `attribute.deleted` via [Catalog Webhooks](/api-reference/catalog/webhooks/create) to react when your dictionary changes.
 
-<Warning>
-  Deleting or renaming an attribute cascades across schemas, catalog products, feeds, and mappings — the same behavior as in the dashboard attribute dictionary.
-</Warning>
+## Rename and deletion safety
+
+Renaming changes the canonical key and then attempts each dependent migration. It is not atomic across every dependent resource. A `207` response means the canonical rename succeeded but at least one dependent migration failed. Inspect every `results` bucket before continuing. Retry a partial rename with the returned `attribute.id` as `attribute_id` and the same old and new keys.
+
+Permanent deletion is dependency-safe. `DELETE /attributes/{key}` returns `409 attribute_in_use` when schemas, tables, Catalog data, mappings, or feeds still depend on the Attribute. It never cascades or removes those dependencies. Use the Dashboard archive flow when you need reversible removal.
+
+## Product-only Catalog extensions
+
+A Catalog product can attach up to 2,000 active Shared Attributes without widening its base Product Schema. Send their UUIDs in `attribute_extension_ids`. Catalog responses list the attached identities in `attribute_extensions`.

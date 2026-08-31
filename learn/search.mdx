@@ -15,13 +15,15 @@ Lasso Search lets you find products using natural language. Describe what you're
 
 You control the output shape with three options:
 
-- **Use an existing schema** -- Pass a `schema_id` from a schema you've already created via `POST /v1/schemas`.
+- **Use an existing schema** -- Pass a `schema_id` from a schema you've already created via `POST /schemas`.
 - **Define columns inline** -- Pass a `columns` array directly in the request.
 - **Use the default** -- Omit both and Lasso uses a standard product schema (name, brand, price, description, category, image_url, url, features).
 
 ## Sync vs async
 
-By default, search is synchronous — you send a request and get results back in the same call. For large or slow queries, pass a `webhook_url` to switch to async mode: Lasso returns `202` immediately and delivers results via webhook when ready.
+By default, search is synchronous — you send a request and get results back in the same call. Pass a `webhook_url` to switch to async mode: Lasso returns `202` immediately and delivers results to that URL when ready.
+
+`max_results` defaults to `7` and accepts values from `1` through `7`.
 
 ## Example
 
@@ -35,7 +37,7 @@ const results = await client.search({
     { key: "price", label: "Price", type: "number" },
     { key: "protein_per_serving", label: "Protein (g)", type: "number" },
   ],
-  max_results: 10,
+  max_results: 7,
 });
 
 console.log(`Found ${results.total_results} products`);
@@ -53,7 +55,7 @@ results = client.search(
         {"key": "price", "label": "Price", "type": "number"},
         {"key": "protein_per_serving", "label": "Protein (g)", "type": "number"},
     ],
-    max_results=10,
+    max_results=7,
 )
 
 print(f"Found {results['total_results']} products")

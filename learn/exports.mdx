@@ -14,29 +14,53 @@ Once your table is complete, you can export the data in several formats.
 | **XLSX** | Excel spreadsheet | Business users, reporting |
 | **Images** | ZIP archive of all images | Asset management, media libraries |
 
-## Exporting via SDK
+## Exporting data
+
+The SDK's JSON helper returns parsed data. With the TypeScript SDK v0.2, fetch CSV, XLSX, and image ZIP exports from the endpoint so you can read the raw response body.
 
 <CodeGroup>
 ```typescript TypeScript
-// JSON -- returns data directly
+import { writeFile } from "node:fs/promises";
+
+// JSON returns parsed data through the SDK.
 const data = await client.export.json("tbl_abc123");
 
-// CSV -- returns raw CSV string
-const csv = await client.export.csv("tbl_abc123");
+async function fetchExport(format: "csv" | "xlsx" | "images") {
+  const url = new URL(
+    "https://app.productlasso.com/api/v1/tables/tbl_abc123/export",
+  );
+  url.searchParams.set("format", format);
 
-// XLSX -- returns binary buffer
-const xlsx = await client.export.xlsx("tbl_abc123");
+  const response = await fetch(url, {
+    headers: { Authorization: `Bearer ${process.env.LASSO_API_KEY}` },
+  });
+  if (!response.ok) throw new Error(await response.text());
+  return response;
+}
 
-// Images -- returns ZIP buffer
-const images = await client.export.images("tbl_abc123");
+const csv = await (await fetchExport("csv")).text();
+const xlsx = Buffer.from(await (await fetchExport("xlsx")).arrayBuffer());
+const images = Buffer.from(await (await fetchExport("images")).arrayBuffer());
+
+await writeFile("export.xlsx", xlsx);
+await writeFile("images.zip", images);
 ```
 
 ```python Python
+import httpx
+import os
+
 # JSON -- returns list of dicts
 data = client.export.json("tbl_abc123")
 
-# CSV -- returns raw CSV string
-csv = client.export.csv("tbl_abc123")
+# Fetch CSV as text from the endpoint.
+response = httpx.get(
+    "https://app.productlasso.com/api/v1/tables/tbl_abc123/export",
+    params={"format": "csv"},
+    headers={"Authorization": f"Bearer {os.environ['LASSO_API_KEY']}"},
+)
+response.raise_for_status()
+csv = response.text
 
 # XLSX -- save directly to file
 client.export.xlsx("tbl_abc123", path="export.xlsx")

@@ -29,20 +29,21 @@ Data k extrakci můžete poskytnout třemi způsoby:
 Tabulka prochází těmito stavy:
 
 ```
-queued → processing → completed
-                    → failed
+queued / queued_for_processing → processing / processing_by_worker → completed
+                                                               ↘ error / cancelled
 ```
 
-- **queued** -- Úloha čeká na zpracování.
-- **processing** -- Extrakce aktivně běží. Pole `progress` (0-100) sleduje průběh.
+- **queued** nebo **queued_for_processing** -- Úloha čeká na pracovní proces.
+- **processing** nebo **processing_by_worker** -- Extrakce aktivně běží. Pole `progress` (0-100) sleduje průběh.
 - **completed** -- Všechny řádky byly extrahovány a jsou připraveny k dotazování.
-- **failed** -- Něco se pokazilo. Podrobnosti najdete v `error_message`.
+- **error** -- Něco se pokazilo. Podrobnosti najdete v `error_message`.
+- **cancelled** -- Zpracování bylo zrušeno.
 
 ## Polling vs webhooky
 
 Máte dvě možnosti, jak zjistit, kdy extrakce skončí:
 
-- **Polling** -- Použijte `client.tables.waitForCompletion()` (SDK) nebo opakovaně dotazujte `GET /v1/tables/{id}`, dokud stav nebude `completed`.
+- **Polling** -- Opakovaně dotazujte `GET /tables/{table_id}`, dokud stav nebude `completed`, `error` nebo `cancelled`.
 - **Webhooky** -- Při vytváření tabulky předejte `webhook_url`. Lasso odešle HTTP POST po dokončení zpracování.
 
 ## Práce s řádky

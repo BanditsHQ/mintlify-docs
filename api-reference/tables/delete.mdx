@@ -1,34 +1,5 @@
 ---
-title: 'Delete table'
-api: 'DELETE /tables/{table_id}'
-description: 'Permanently delete a table and all its rows.'
+title: "Delete a table"
+description: "Permanently deletes the table, all rows, and associated data. Cancels any running operations."
+openapi: "openapi.yaml DELETE /tables/{table_id}"
 ---
-
-## Path parameters
-
-<ParamField path="table_id" type="string" required>
-  The unique identifier of the table to delete.
-</ParamField>
-
-## Response
-
-Returns `204 No Content` on success. The table, all its rows, and the associated job are permanently removed.
-
-<Warning>
-  This action is irreversible. All extracted data for this table is permanently deleted.
-</Warning>
-
-<RequestExample>
-```typescript TypeScript
-await client.tables.delete("tbl_abc123");
-```
-
-```python Python
-client.tables.delete("tbl_abc123")
-```
-
-```bash cURL
-curl -X DELETE "https://hub.banditshq.com/api/v1/tables/tbl_abc123" \
-  -H "Authorization: Bearer lasso_..."
-```
-</RequestExample>

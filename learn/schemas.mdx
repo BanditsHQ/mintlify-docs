@@ -23,6 +23,17 @@ Each column has a key, label, and type:
 - **type** -- The data type Lasso should extract. See below.
 - **required** -- Whether this column must have a value for every row.
 
+## Shared Attributes and helpers
+
+Schema and table reads return `attribute_id` and `kind` for every column:
+
+- `kind: "attribute"` identifies a canonical Shared Attribute. `attribute_id` is its stable UUID.
+- `kind: "helper"` identifies a schema- or table-local helper. Its `attribute_id` is `null`.
+
+Catalog and persistent or scheduled sync destinations accept canonical Attribute-backed columns only. Filter for `kind == "attribute"`; API visibility alone does not make a helper eligible.
+
+For compatibility, schema create and update requests can omit both identity fields. The server creates or attaches the Shared Attribute for the supplied key. Send `kind: "helper"` to create a local helper, or send an existing `attribute_id` with `kind: "attribute"` to attach that Attribute. Retain the server-issued column `id` when you round-trip a complete schema update.
+
 ## Column types
 
 | Type | Description | Example value |
@@ -34,11 +45,15 @@ Each column has a key, label, and type:
 | `date` | Date or datetime | `"2025-03-10"` |
 | `boolean` | True or false | `true` |
 | `richtext` | HTML or markdown | `"<p>Description</p>"` |
+| `format` | Formula result with a declared `format_output_type` | `42` |
 | `enum` | One of predefined values | `"electronics"` |
 | `tags` | Array of strings | `["wireless", "bluetooth"]` |
 | `image` | Single image URL | `"https://cdn.example.com/img.jpg"` |
 | `images` | Array of image URLs | `["https://...1.jpg", "https://...2.jpg"]` |
+| `file` | Single file value | `"https://.../manual.pdf"` |
+| `files` | Multiple file values | `["https://.../a.pdf", "https://.../b.pdf"]` |
 | `json` | Arbitrary JSON | `{"specs": {"weight": "187g"}}` |
+| `relation` | Link to one or more Catalog products | Product UUID or UUID array |
 
 ## Auto-generated schemas
 
@@ -68,4 +83,6 @@ The AI analyzes your sample and infers appropriate column keys, labels, and type
 
 ## Reusing schemas
 
-Schemas are reusable across multiple tables. Create a schema once, then reference it by ID when creating new tables. You can update a schema at any time -- existing tables retain their original column definitions.
+Schemas are reusable across multiple tables. Create a schema once, then reference it by ID when creating new tables. Existing tables use a forked schema snapshot and retain their original column definitions when the source schema changes.
+
+Permanent deletion succeeds only when the schema has no extraction tables, Catalog products, mappings, views, templates, feeds, Shopify links, or Relation Attribute references. A dependency conflict returns `409` without changing those resources.

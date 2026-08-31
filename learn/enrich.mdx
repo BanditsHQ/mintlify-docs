@@ -100,11 +100,13 @@ for item in enriched["items"]:
 
 Credit cost depends on the **thinking** level you choose:
 
-| Thinking | Model | Credits/item | Best for |
-|----------|-------|-------------|----------|
-| `hard` | Gemini 3.1 Pro | **4** | Complex or ambiguous products |
-| `medium` | Gemini 3.1 Lite | **2** | General-purpose enrichment *(default)* |
-| `low` | Gemini 2.0 | **1** | Fast, straightforward lookups |
+| Thinking | Credits/item | Best for |
+|----------|-------------|----------|
+| `hard` | **4** | Complex or ambiguous products |
+| `medium` | **2** | Balanced speed and quality *(default)* |
+| `low` | **1** | Fast, straightforward lookups |
+
+The service controls the model behind each thinking level. Treat the level and credit price as the public contract instead of depending on a specific model name.
 
 ## Web search
 

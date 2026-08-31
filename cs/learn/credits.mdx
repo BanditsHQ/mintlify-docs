@@ -38,22 +38,32 @@ Zobrazte historii kreditových transakcí s volitelnými filtry:
 const usage = await client.credits.usage({
   from: "2025-01-01T00:00:00Z",
   to: "2025-03-31T23:59:59Z",
-  service: "enhancement",
+  service: "ai_field",
 });
 
 console.log(`Total used: ${usage.total_used} credits`);
 ```
 
 ```python Python
-usage = client.credits.usage(
-    from_="2025-01-01T00:00:00Z",
-    to="2025-03-31T23:59:59Z",
-    service="enhancement",
-)
+usage = client.credits.usage(**{
+    "from": "2025-01-01T00:00:00Z",
+    "to": "2025-03-31T23:59:59Z",
+    "service": "ai_field",
+})
 
 print(f"Total used: {usage['total_used']} credits")
 ```
 </CodeGroup>
+
+## Agregované statistiky
+
+`GET /credits/stats` vrací denní přehledy a souhrny podle modulu, služby, uživatele a tabulky Lasso za inkluzivní období `YYYY-MM-DD`. Zahrnuje také stejně dlouhé předchozí období, měsíční příděl a nakonfigurované náklady na kredit. Maximální období je 1 830 dní.
+
+```bash
+curl --request GET \
+  --url "https://app.productlasso.com/api/v1/credits/stats?from=2026-08-01&to=2026-08-31" \
+  --header "Authorization: Bearer $LASSO_API_KEY"
+```
 
 ## Nedostatečné kredity
 

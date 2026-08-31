@@ -27,8 +27,19 @@
     }
   },
   "api": {
+    "openapi": "openapi.yaml",
+    "examples": {
+      "languages": [
+        "curl",
+        "typescript",
+        "python"
+      ],
+      "defaults": "required",
+      "prefill": true,
+      "autogenerate": true
+    },
     "mdx": {
-      "server": "https://hub.banditshq.com/api/v1",
+      "server": "https://app.productlasso.com/api/v1",
       "auth": {
         "method": "bearer"
       }
@@ -79,6 +90,8 @@
                 "pages": [
                   "learn/search",
                   "learn/enrich",
+                  "learn/catalog",
+                  "learn/product-analytics",
                   "learn/tables",
                   "learn/schemas",
                   "learn/attributes",
@@ -199,6 +212,14 @@
                 ]
               },
               {
+                "group": "Product analytics",
+                "pages": [
+                  "api-reference/analytics/summary",
+                  "api-reference/analytics/leaderboard",
+                  "api-reference/analytics/activity"
+                ]
+              },
+              {
                 "group": "Catalog",
                 "pages": [
                   "api-reference/catalog/list",
@@ -215,6 +236,8 @@
                 "pages": [
                   "api-reference/catalog/webhooks/list",
                   "api-reference/catalog/webhooks/create",
+                  "api-reference/catalog/webhooks/deliveries",
+                  "api-reference/catalog/webhooks/actions",
                   "api-reference/catalog/webhooks/update",
                   "api-reference/catalog/webhooks/delete"
                 ]
@@ -261,6 +284,8 @@
                 "pages": [
                   "cs/learn/search",
                   "cs/learn/enrich",
+                  "cs/learn/catalog",
+                  "cs/learn/product-analytics",
                   "cs/learn/tables",
                   "cs/learn/schemas",
                   "cs/learn/attributes",
@@ -381,6 +406,14 @@
                 ]
               },
               {
+                "group": "Produktová analytika",
+                "pages": [
+                  "cs/api-reference/analytics/summary",
+                  "cs/api-reference/analytics/leaderboard",
+                  "cs/api-reference/analytics/activity"
+                ]
+              },
+              {
                 "group": "Katalog",
                 "pages": [
                   "cs/api-reference/catalog/list",
@@ -397,6 +430,8 @@
                 "pages": [
                   "cs/api-reference/catalog/webhooks/list",
                   "cs/api-reference/catalog/webhooks/create",
+                  "cs/api-reference/catalog/webhooks/deliveries",
+                  "cs/api-reference/catalog/webhooks/actions",
                   "cs/api-reference/catalog/webhooks/update",
                   "cs/api-reference/catalog/webhooks/delete"
                 ]
@@ -417,13 +452,13 @@
     "links": [
       {
         "label": "Sign In",
-        "href": "https://hub.banditshq.com/login"
+        "href": "https://app.productlasso.com/login"
       }
     ],
     "primary": {
       "type": "button",
       "label": "Get Started",
-      "href": "https://hub.banditshq.com/onboarding/product_extraction"
+      "href": "https://app.productlasso.com/onboarding/product_extraction"
     }
   },
   "contextual": {

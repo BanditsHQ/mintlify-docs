@@ -1,115 +1,50 @@
 ---
-title: 'Webhooks'
-description: 'Receive real-time notifications when asynchronous operations complete.'
+title: "Webhooks"
+description: "Choose between one-off asynchronous callbacks and managed Catalog webhook subscriptions."
 ---
 
-Instead of polling for status changes, you can configure a webhook URL when creating a table. The API sends HTTP POST requests to your endpoint when events occur.
+Lasso exposes two webhook models with different delivery behavior.
 
-## Configuring a webhook
+## Asynchronous operation callbacks
 
-Pass a `webhook_url` when creating a table.
+Search, enrichment, table creation, and enhancement requests can accept a `webhook_url` where shown in their endpoint contract. These callbacks deliver the result of that operation. The table callback implementation times out each attempt after 10 seconds and retries three times after 30 seconds, 5 minutes, and 30 minutes.
 
-<CodeGroup>
-```bash cURL
-curl -X POST "https://hub.banditshq.com/api/v1/tables" \
-  -H "Authorization: Bearer lasso_..." \
-  -H "Content-Type: application/json" \
-  -d '{
-    "schema_id": "schema_abc123",
-    "name": "Product catalog",
-    "file_ids": ["file_xyz"],
-    "webhook_url": "https://your-server.com/webhooks/lasso"
-  }'
-```
+Use the exact callback fields documented on the endpoint. Do not assume Catalog webhook management, delivery history, test events, or redelivery applies to one-off operation callbacks.
 
-```typescript TypeScript
-await client.tables.create({
-  schema_id: "schema_abc123",
-  name: "Product catalog",
-  file_ids: ["file_xyz"],
-  webhook_url: "https://your-server.com/webhooks/lasso",
-});
-```
+## Catalog webhook subscriptions
 
-```python Python
-client.tables.create(
-    schema_id="schema_abc123",
-    name="Product catalog",
-    file_ids=["file_xyz"],
-    webhook_url="https://your-server.com/webhooks/lasso",
-)
-```
-</CodeGroup>
+Create a managed subscription with `POST /catalog/webhooks`. It can subscribe to:
 
-## Webhook payload
+- `product.created`, `product.updated`, and `product.deleted`
+- `attribute.created`, `attribute.updated`, and `attribute.deleted`
 
-Each delivery is a JSON POST request with the following structure.
+Production endpoints must use public HTTPS destinations. Redirects are not followed. Each automatic delivery makes one attempt with a 10-second timeout and records metadata. Use [List webhook deliveries](/api-reference/catalog/webhooks/deliveries) to inspect attempts and [Test or redeliver a webhook](/api-reference/catalog/webhooks/actions) to send a test or retry a failed attempt.
 
-```json
-{
-  "event": "table.completed",
-  "timestamp": "2025-03-12T14:30:00.000Z",
-  "data": {
-    "table_id": "tbl_abc123",
-    "status": "completed",
-    "total_rows": 42
-  }
-}
-```
+## Signatures
 
-## Headers
+Catalog subscription deliveries include:
 
-Every webhook request includes these headers:
+| Header | Value |
+| --- | --- |
+| `Content-Type` | `application/json` |
+| `User-Agent` | `Lasso-Webhook/1.0` |
+| `X-Lasso-Event` | Event name |
+| `X-Lasso-Delivery-Id` | Stable logical delivery UUID |
+| `X-Lasso-Signature` | `sha256=` plus the lowercase HMAC-SHA256 hex digest |
 
-| Header | Description |
-|---|---|
-| `Content-Type` | Always `application/json`. |
-| `X-Lasso-Event` | The event type (e.g., `table.completed`). |
-| `X-Lasso-Delivery-Id` | A unique identifier for this delivery attempt. |
-| `X-Lasso-Signature` | HMAC-SHA256 signature of the request body (if a secret is configured). |
-
-## Verifying signatures
-
-If you provide a webhook secret, the API signs each payload using HMAC-SHA256. The signature is sent in the `X-Lasso-Signature` header with a `sha256=` prefix.
+The create response returns the signing secret once. Verify the signature against the exact raw request body before parsing JSON.
 
 ```python
-import hmac
 import hashlib
+import hmac
 
-def verify_signature(payload: bytes, signature: str, secret: str) -> bool:
+def verify_lasso_signature(body: bytes, signature: str, secret: str) -> bool:
     expected = "sha256=" + hmac.new(
-        secret.encode(), payload, hashlib.sha256
+        secret.encode("utf-8"), body, hashlib.sha256
     ).hexdigest()
     return hmac.compare_digest(expected, signature)
 ```
 
-## Retry policy
-
-If your endpoint does not respond with a `2xx` status code within 10 seconds, the API retries with exponential backoff:
-
-| Attempt | Delay |
-|---|---|
-| 1st retry | 30 seconds |
-| 2nd retry | 5 minutes |
-| 3rd retry | 30 minutes |
-
-After 3 failed retries, the delivery is abandoned. You can check the table status via the API at any time.
-
-## Catalog and attribute webhooks
-
-For catalog products and attribute dictionary changes, subscribe via [Catalog Webhooks](/api-reference/catalog/webhooks/create). Supported events:
-
-| Event | Description |
-|---|---|
-| `product.created` | A catalog product was created |
-| `product.updated` | A catalog product was updated |
-| `product.deleted` | A catalog product was deleted |
-| `attribute.created` | An attribute dictionary entry was created |
-| `attribute.updated` | An attribute was updated or renamed |
-| `attribute.deleted` | An attribute was deleted |
-
-Attribute webhook payloads include `attribute_id` and the full attribute object in `data`.
-
-## Custom auth headers
-
-You can include a custom authentication header on webhook deliveries by setting `webhook_auth_header_name` and `webhook_auth_header_value` in your table creation input data.
+<Warning>
+  Store the signing secret when you create the endpoint. Later reads and updates never return it, and delivery-history responses never return stored payloads.
+</Warning>

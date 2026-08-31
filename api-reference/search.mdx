@@ -1,142 +1,20 @@
 ---
-title: 'Search products'
-description: "Search Lasso's product database and get back structured data matching your schema."
-api: "POST /search"
+title: "Search for products"
+description: "Search Lasso's product database for products matching a natural language query and return structured data. Filters should be embedded in the query (e.g. \"Sony earbuds under $200\"). Optionally provide a schema_id or inline columns to control the output shape. If neither is provided, a default product schema is used."
+openapi: "openapi.yaml POST /search"
 ---
 
-Search Lasso's product database for products matching a natural language query. Lasso finds matching products and structures the results into your schema — returning typed, normalized data with source URLs and confidence scores.
+import SearchExamples from "/snippets/api/search-examples.mdx";
 
-No tables or files needed. One call in, structured product data out.
+## Usage notes
 
-## Request body
+- Send either `schema_id` or `columns`, not both. Lasso uses the default Product Schema when you omit both.
+- `max_results` accepts `1` through `7` and defaults to `7`.
+- A search costs 5 credits, independent of the number of returned products.
+- Without `webhook_url`, the request waits for a `200` response. With `webhook_url`, Lasso returns `202` and posts the completed result to your URL.
 
-<ParamField body="query" type="string" required>
-  Natural language search query. Embed any filters directly in the text, e.g. `"Sony noise cancelling wireless earbuds"`.
-</ParamField>
+Put product filters directly in `query`, for example `Sony earbuds under $200 with USB-C charging`.
 
-<ParamField body="schema_id" type="string">
-  Reference an existing schema created via `POST /v1/schemas`. The endpoint loads the schema's column definitions. Mutually exclusive with `columns`.
-</ParamField>
+## Examples
 
-<ParamField body="columns" type="object[]">
-  Inline column definitions describing the output shape. Mutually exclusive with `schema_id`. If neither is provided, Lasso uses a default product schema (name, brand, price, description, category, image_url, url, features).
-  <Expandable>
-    <ParamField body="columns[].key" type="string" required>Unique column key.</ParamField>
-    <ParamField body="columns[].label" type="string" required>Display label.</ParamField>
-    <ParamField body="columns[].type" type="string" required>Column type (`text`, `number`, `url`, `tags`, etc.).</ParamField>
-  </Expandable>
-</ParamField>
-
-<ParamField body="max_results" type="integer" default="7">
-  Maximum number of products to return (1–7).
-</ParamField>
-
-<ParamField body="model" type="string" default="auto">
-  AI model to use for structuring results.
-</ParamField>
-
-<ParamField body="webhook_url" type="string">
-  If provided, Lasso returns `202` immediately and delivers results via webhook when ready.
-</ParamField>
-
-## Response
-
-<ResponseField name="id" type="string">Search job identifier.</ResponseField>
-<ResponseField name="status" type="string">`completed` for sync, `processing` for async.</ResponseField>
-<ResponseField name="query" type="string">The original search query.</ResponseField>
-<ResponseField name="results" type="object[]">
-  Array of structured product results.
-  <Expandable>
-    <ResponseField name="results[].data" type="object">Product data matching your schema columns.</ResponseField>
-    <ResponseField name="results[].source_url" type="string">URL where the product was found.</ResponseField>
-    <ResponseField name="results[].source_title" type="string">Title of the source page.</ResponseField>
-    <ResponseField name="results[].confidence" type="number">AI confidence score (0–1).</ResponseField>
-  </Expandable>
-</ResponseField>
-<ResponseField name="total_results" type="integer">Number of products returned.</ResponseField>
-<ResponseField name="credits_used" type="number">Credits consumed (5 per search).</ResponseField>
-
-<RequestExample>
-```typescript TypeScript
-const results = await client.search({
-  query: "Sony noise cancelling wireless earbuds",
-  max_results: 3,
-});
-
-for (const product of results.results) {
-  console.log(product.data.name, product.data.price);
-  console.log("  Source:", product.source_url);
-}
-```
-
-```python Python
-results = client.search(
-    query="Sony noise cancelling wireless earbuds",
-    max_results=3,
-)
-
-for product in results["results"]:
-    print(product["data"]["name"], product["data"]["price"])
-    print("  Source:", product["source_url"])
-```
-
-```bash cURL
-curl -X POST "https://hub.banditshq.com/api/v1/search" \
-  -H "Authorization: Bearer lasso_..." \
-  -H "Content-Type: application/json" \
-  -d '{
-    "query": "Sony noise cancelling wireless earbuds",
-    "max_results": 3
-  }'
-```
-</RequestExample>
-
-<ResponseExample>
-```json Response
-{
-  "id": "search_abc123",
-  "status": "completed",
-  "query": "Sony noise cancelling wireless earbuds",
-  "results": [
-    {
-      "data": {
-        "name": "Sony WF-1000XM5",
-        "brand": "Sony",
-        "price": 249.99,
-        "description": "Premium truly wireless noise cancelling earbuds with Dynamic Driver X, LDAC codec support, and up to 24 hours total battery life with charging case.",
-        "features": ["active noise cancelling", "LDAC", "Bluetooth 5.3", "IPX4", "multipoint"]
-      },
-      "source_url": "https://electronics.sony.com/audio/headphones/all-headphones/p/wf1000xm5-s",
-      "source_title": "Sony WF-1000XM5 Wireless Noise Cancelling Earbuds",
-      "confidence": 0.96
-    },
-    {
-      "data": {
-        "name": "Sony WF-1000XM4",
-        "brand": "Sony",
-        "price": 179.99,
-        "description": "Truly wireless earbuds with integrated noise cancelling processor V1, LDAC support, and up to 24 hours total battery life.",
-        "features": ["active noise cancelling", "LDAC", "Bluetooth 5.2", "IPX4", "speak-to-chat"]
-      },
-      "source_url": "https://electronics.sony.com/audio/headphones/truly-wireless-earbuds/p/wf1000m4-Black",
-      "source_title": "Sony WF-1000XM4 Noise Cancelling In-Ear Headphones",
-      "confidence": 0.93
-    },
-    {
-      "data": {
-        "name": "Sony WF-C700N",
-        "brand": "Sony",
-        "price": 119.99,
-        "description": "Noise cancelling truly wireless earbuds with ergonomic design, ambient sound mode, and up to 10 hours battery life.",
-        "features": ["noise cancelling", "Bluetooth 5.2", "IPX4", "multipoint", "ambient sound"]
-      },
-      "source_url": "https://electronics.sony.com/audio/headphones/truly-wireless-earbuds/p/wfc700n-b",
-      "source_title": "Sony WF-C700N Noise Canceling Truly Wireless Earbuds",
-      "confidence": 0.91
-    }
-  ],
-  "total_results": 3,
-  "credits_used": 5
-}
-```
-</ResponseExample>
+<SearchExamples />

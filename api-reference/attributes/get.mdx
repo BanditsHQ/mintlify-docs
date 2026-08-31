@@ -1,16 +1,5 @@
 ---
-title: 'Get attribute'
-api: "GET /attributes/{key}"
-description: 'Retrieve a single attribute by key.'
+title: "Get an Attribute by key"
+description: "Direct reads return active or archived Attributes."
+openapi: "openapi.yaml GET /attributes/{key}"
 ---
-
-<ParamField path="key" type="string" required>
-  The attribute key (URL-encoded if needed).
-</ParamField>
-
-<RequestExample>
-```bash cURL
-curl -X GET "https://hub.banditshq.com/api/v1/attributes/color" \
-  -H "Authorization: Bearer lasso_..."
-```
-</RequestExample>

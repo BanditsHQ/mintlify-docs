@@ -1,66 +1,20 @@
 ---
 title: 'Vyhledávání produktů'
 description: 'Vyhledávejte v databázi Lasso a získejte strukturovaná data odpovídající vašemu schématu.'
-api: "POST /search"
+openapi: "openapi.yaml POST /search"
 ---
 
-Vyhledávejte v databázi Lasso produkty odpovídající dotazu v přirozeném jazyce. Lasso najde odpovídající produkty a strukturuje výsledky do vašeho schématu — vrací typovaná, normalizovaná data se zdrojovými URL a skóre spolehlivosti.
+import SearchExamples from "/snippets/api/search-examples.mdx";
 
-Není potřeba žádná tabulka ani soubory. Jedno volání, strukturovaná produktová data zpět.
+## Poznámky k použití
 
-## Tělo požadavku
+- Odešlete buď `schema_id`, nebo `columns`, nikdy obojí. Když vynecháte obě pole, Lasso použije výchozí Product Schema.
+- `max_results` přijímá hodnoty `1` až `7` a výchozí hodnota je `7`.
+- Jedno vyhledávání stojí 5 kreditů bez ohledu na počet vrácených produktů.
+- Bez `webhook_url` požadavek čeká na odpověď `200`. S `webhook_url` Lasso vrátí `202` a dokončený výsledek odešle na vaši URL.
 
-<ParamField body="query" type="string" required>
-  Vyhledávací dotaz v přirozeném jazyce. Filtry vložte přímo do textu, např. `"Sony bezdrátová sluchátka s potlačením hluku do 5000 Kč"`.
-</ParamField>
+Filtry produktů zapisujte přímo do `query`, například `Sony sluchátka do 5 000 Kč s nabíjením USB-C`.
 
-<ParamField body="schema_id" type="string">
-  Odkaz na existující schéma vytvořené přes `POST /v1/schemas`. Vzájemně se vylučuje s `columns`.
-</ParamField>
+## Příklady
 
-<ParamField body="columns" type="object[]">
-  Inline definice sloupců popisující výstupní tvar. Vzájemně se vylučuje se `schema_id`. Pokud není zadáno ani jedno, Lasso použije výchozí produktové schéma.
-</ParamField>
-
-<ParamField body="max_results" type="integer" default="7">
-  Maximální počet produktů k vrácení (1–7).
-</ParamField>
-
-<ParamField body="model" type="string" default="auto">
-  AI model pro strukturování výsledků.
-</ParamField>
-
-<ParamField body="webhook_url" type="string">
-  Pokud je zadáno, Lasso vrátí `202` okamžitě a výsledky doručí přes webhook.
-</ParamField>
-
-## Odpověď
-
-<ResponseField name="id" type="string">Identifikátor vyhledávací úlohy.</ResponseField>
-<ResponseField name="status" type="string">`completed` pro synchronní, `processing` pro asynchronní režim.</ResponseField>
-<ResponseField name="results" type="object[]">Pole strukturovaných produktových výsledků.</ResponseField>
-<ResponseField name="total_results" type="integer">Počet vrácených produktů.</ResponseField>
-<ResponseField name="credits_used" type="number">Spotřebované kredity (5 za vyhledávání).</ResponseField>
-
-<RequestExample>
-```typescript TypeScript
-const results = await client.search({
-  query: "Sony bezdrátová sluchátka s potlačením hluku",
-  max_results: 3,
-});
-```
-
-```python Python
-results = client.search(
-    query="Sony bezdrátová sluchátka s potlačením hluku",
-    max_results=3,
-)
-```
-
-```bash cURL
-curl -X POST "https://hub.banditshq.com/api/v1/search" \
-  -H "Authorization: Bearer lasso_..." \
-  -H "Content-Type: application/json" \
-  -d '{ "query": "Sony bezdrátová sluchátka s potlačením hluku", "max_results": 3 }'
-```
-</RequestExample>
+<SearchExamples />

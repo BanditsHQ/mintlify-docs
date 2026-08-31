@@ -13,7 +13,16 @@ print(data)  # [{"product_name": "...", "price": 29.99}, ...]
 ## Export as CSV
 
 ```python
-csv_data = client.export.csv("tbl_abc123")
+import httpx
+import os
+
+response = httpx.get(
+    "https://app.productlasso.com/api/v1/tables/tbl_abc123/export",
+    params={"format": "csv"},
+    headers={"Authorization": f"Bearer {os.environ['LASSO_API_KEY']}"},
+)
+response.raise_for_status()
+csv_data = response.text
 ```
 
 ## Export as XLSX

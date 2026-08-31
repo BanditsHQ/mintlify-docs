@@ -1,82 +1,55 @@
 ---
-title: 'Errors'
-description: 'Understand how the Lasso API communicates errors.'
+title: "Errors"
+description: "Handle the Lasso API error envelope, stable detail codes, and retry metadata."
 ---
 
-The API uses standard HTTP status codes and returns a consistent JSON error body for all error responses.
-
-## Error response format
+Error responses use one JSON envelope. Four fields are always present:
 
 ```json
 {
-  "status_code": 422,
-  "error_type": "validation_error",
-  "message": "Missing required field: name",
-  "request_id": "550e8400-e29b-41d4-a716-446655440000"
+  "status_code": 409,
+  "error_type": "conflict",
+  "message": "Attribute was modified; refetch it before retrying",
+  "request_id": "550e8400-e29b-41d4-a716-446655440000",
+  "code": "stale_write",
+  "retryable": false,
+  "current_updated_at": "2026-08-30T12:45:00.000Z"
 }
 ```
 
-<ResponseField name="status_code" type="integer">
-  The HTTP status code.
+<ResponseField name="status_code" type="integer" required>
+  HTTP status code.
 </ResponseField>
 
-<ResponseField name="error_type" type="string">
-  A machine-readable error type. See the table below.
+<ResponseField name="error_type" type="string" required>
+  Broad machine-readable category.
 </ResponseField>
 
-<ResponseField name="message" type="string">
-  A human-readable explanation of what went wrong.
+<ResponseField name="message" type="string" required>
+  Human-readable explanation.
 </ResponseField>
 
-<ResponseField name="request_id" type="string">
-  A unique identifier for the request. Include this when contacting support.
+<ResponseField name="request_id" type="string" required>
+  Request identifier to include in support reports.
 </ResponseField>
+
+The API can also include `code`, `retryable`, `details`, `current_updated_at`, `attribute_id`, or `attribute_key`. Treat `code` as the stable detail discriminator when it is present. Keep the complete raw payload because endpoint-specific errors can add fields.
 
 ## Error types
 
-| Error type | Status code | Description |
-|---|---|---|
-| `invalid_request` | 400 | The request is malformed or uses an unsupported HTTP method. |
-| `unauthenticated` | 401 | Missing, invalid, or deactivated API key. |
-| `insufficient_credits` | 402 | Your account does not have enough credits for this operation. |
-| `forbidden` | 403 | The API key does not have permission for this action. |
-| `not_found` | 404 | The requested resource does not exist or does not belong to your company. |
-| `conflict` | 409 | The request conflicts with the current state of the resource. |
-| `validation_error` | 422 | The request body is missing required fields or contains invalid values. |
-| `rate_limited` | 429 | Too many requests. Back off and retry after a delay. |
-| `internal_error` | 500 | An unexpected error occurred on the server. |
+| Error type | Typical status | Meaning |
+| --- | --- | --- |
+| `invalid_request` | `400` | Malformed request, invalid query value, or unsupported method. |
+| `unauthenticated` | `401` | Missing, invalid, or inactive API key. |
+| `insufficient_credits` | `402` | Not enough credits for the operation. |
+| `forbidden` | `403` | The authenticated actor cannot perform the action. |
+| `not_found` | `404` | The resource does not exist in the key's company scope. |
+| `conflict` | `409` | The requested mutation conflicts with current state or dependencies. |
+| `validation_error` | `422` | A body field or value failed validation. |
+| `rate_limited` | `429` | The request exceeded a rate or cooldown limit. |
+| `service_unavailable` | `503` | A required rollout or dependency read was unavailable. Check `retryable`. |
+| `internal_error` | `500` | The server could not complete the request. |
 
-## Handling errors with the SDK
+## SDK errors
 
-<CodeGroup>
-```typescript TypeScript
-import LassoClient, { LassoError } from "@lasso-ai/sdk";
-
-const client = new LassoClient({ apiKey: "lasso_..." });
-
-try {
-  await client.tables.get("nonexistent_id");
-} catch (err) {
-  if (err instanceof LassoError) {
-    console.log(err.statusCode);  // 404
-    console.log(err.errorType);   // "not_found"
-    console.log(err.message);     // "Table not found"
-    console.log(err.requestId);   // "550e8400-..."
-  }
-}
-```
-
-```python Python
-from lasso import LassoClient, LassoError
-
-client = LassoClient(api_key="lasso_...")
-
-try:
-    client.tables.get("nonexistent_id")
-except LassoError as err:
-    print(err.status_code)   # 404
-    print(err.error_type)    # "not_found"
-    print(err.args[0])       # "Table not found"
-    print(err.request_id)    # "550e8400-..."
-```
-</CodeGroup>
+TypeScript `LassoError` exposes `statusCode`, `errorType`, `requestId`, `code`, `retryable`, `currentUpdatedAt`, `details`, and `rawPayload`. Python `LassoError` exposes the corresponding snake_case fields and `raw_payload`.

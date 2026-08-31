@@ -29,20 +29,21 @@ You can provide data to extract from in three ways:
 A table moves through these statuses:
 
 ```
-queued → processing → completed
-                    → failed
+queued / queued_for_processing → processing / processing_by_worker → completed
+                                                               ↘ error / cancelled
 ```
 
-- **queued** -- The job is waiting to be picked up.
-- **processing** -- Extraction is actively running. The `progress` field (0-100) tracks completion.
+- **queued** or **queued_for_processing** -- The job is waiting for a worker.
+- **processing** or **processing_by_worker** -- Extraction is actively running. The `progress` field (0-100) tracks completion.
 - **completed** -- All rows have been extracted and are ready to query.
-- **failed** -- Something went wrong. Check `error_message` for details.
+- **error** -- Something went wrong. Check `error_message` for details.
+- **cancelled** -- Processing was cancelled.
 
 ## Polling vs webhooks
 
 You have two options to know when extraction finishes:
 
-- **Polling** -- Use `client.tables.waitForCompletion()` (SDK) or poll `GET /v1/tables/{id}` until status is `completed`.
+- **Polling** -- Poll `GET /tables/{table_id}` until status is `completed`, `error`, or `cancelled`.
 - **Webhooks** -- Pass a `webhook_url` when creating the table. Lasso sends an HTTP POST when processing completes.
 
 ## Working with rows

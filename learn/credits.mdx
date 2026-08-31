@@ -38,22 +38,32 @@ View your credit transaction history with optional filters:
 const usage = await client.credits.usage({
   from: "2025-01-01T00:00:00Z",
   to: "2025-03-31T23:59:59Z",
-  service: "enhancement",
+  service: "ai_field",
 });
 
 console.log(`Total used: ${usage.total_used} credits`);
 ```
 
 ```python Python
-usage = client.credits.usage(
-    from_="2025-01-01T00:00:00Z",
-    to="2025-03-31T23:59:59Z",
-    service="enhancement",
-)
+usage = client.credits.usage(**{
+    "from": "2025-01-01T00:00:00Z",
+    "to": "2025-03-31T23:59:59Z",
+    "service": "ai_field",
+})
 
 print(f"Total used: {usage['total_used']} credits")
 ```
 </CodeGroup>
+
+## Aggregated statistics
+
+`GET /credits/stats` returns daily, module, service, user, and Lasso-table aggregates for an inclusive `YYYY-MM-DD` date range. It also returns the equally sized preceding period, monthly allocation, and configured cost-per-credit data. The maximum range is 1,830 days.
+
+```bash
+curl --request GET \
+  --url "https://app.productlasso.com/api/v1/credits/stats?from=2026-08-01&to=2026-08-31" \
+  --header "Authorization: Bearer $LASSO_API_KEY"
+```
 
 ## Insufficient credits
 

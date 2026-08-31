@@ -1,100 +1,19 @@
 ---
 title: 'Obohacení produktů'
 description: 'Předejte částečná produktová data a získejte zpět obohacené záznamy s vyplněnými chybějícími poli.'
-api: "POST /enrich"
+openapi: "openapi.yaml POST /enrich"
 ---
 
-Obohacení vezme částečné produktové záznamy a vyplní chybějící pole pomocí produktové inteligence Lasso. Každé obohacené pole obsahuje **basis** — citace, zdůvodnění a úroveň spolehlivosti.
+import EnrichExamples from "/snippets/api/enrich-examples.mdx";
 
-Není potřeba žádná tabulka ani soubory. Předejte co máte, získejte kompletní produktové záznamy.
+## Poznámky k použití
 
-## Tělo požadavku
+- Odešlete buď `schema_id`, nebo `columns`, nikdy obojí. Když vynecháte obě pole, Lasso použije výchozí Product Schema.
+- Požadavek může obsahovat nejvýše 50 produktů. Požadavky s nejvýše 5 produkty běží synchronně, pokud nenastavíte `webhook_url`; větší požadavky běží asynchronně.
+- `thinking` stojí 4 kredity za produkt pro `hard`, 2 pro `medium` a 1 pro `low`.
+- S `web_search: false` Lasso používá znalosti modelu a v poli `basis` nevrací citace.
+- Pole `context` použijte pro pokyny, které platí pro všechny položky požadavku.
 
-<ParamField body="items" type="object[]" required>
-  Pole částečných produktových záznamů k obohacení (max 50).
-  <Expandable>
-    <ParamField body="items[].data" type="object" required>
-      Páry klíč-hodnota známých produktových dat.
-    </ParamField>
-  </Expandable>
-</ParamField>
+## Příklady
 
-<ParamField body="schema_id" type="string">
-  Odkaz na existující schéma. Vzájemně se vylučuje s `columns`.
-</ParamField>
-
-<ParamField body="columns" type="object[]">
-  Inline definice sloupců. Vzájemně se vylučuje se `schema_id`. Pokud není zadáno ani jedno, Lasso použije výchozí produktové schéma.
-</ParamField>
-
-<ParamField body="context" type="string">
-  Dodatečný kontext pro AI obohacení.
-</ParamField>
-
-<ParamField body="model" type="string" default="auto">
-  AI model k použití.
-</ParamField>
-
-<ParamField body="use_glossary" type="boolean" default="false">
-  Použít firemní glosář pro konzistentní terminologii.
-</ParamField>
-
-<ParamField body="web_search" type="boolean" default="true">
-  Zda použít webové vyhledávání při obohacení. Když `false`, AI vyplní pole ze svých vlastních znalostí a **v odpovědi se nevrací basis/citace**. Vhodné pro rychlé, levnější obohacení bez nutnosti zdrojování.
-</ParamField>
-
-<ParamField body="thinking" type="string" default="medium">
-  Ovládá hloubku AI uvažování. Ovlivňuje kvalitu i cenu kreditů za položku.
-
-  - `hard` — Nejschopnější model, nejlepší pro složité nebo nejednoznačné produkty. **4 kredity/položku.**
-  - `medium` — Vyvážená rychlost a kvalita. **2 kredity/položku.** *(výchozí)*
-  - `low` — Nejrychlejší, vhodný pro jednoduché vyhledání. **1 kredit/položku.**
-</ParamField>
-
-<ParamField body="webhook_url" type="string">
-  Pokud je zadáno, Lasso vrátí `202` okamžitě a výsledky doručí přes webhook.
-</ParamField>
-
-## Odpověď
-
-<ResponseField name="id" type="string">Identifikátor úlohy obohacení.</ResponseField>
-<ResponseField name="status" type="string">`completed` pro synchronní, `processing` pro asynchronní režim.</ResponseField>
-<ResponseField name="items" type="object[]">Pole obohacených produktových záznamů s `data` a `basis` (basis pouze pokud `web_search` je `true`).</ResponseField>
-<ResponseField name="credits_used" type="number">Spotřebované kredity. Cena za položku závisí na `thinking`: `hard` = 4, `medium` = 2, `low` = 1.</ResponseField>
-
-<RequestExample>
-```typescript TypeScript
-const result = await client.enrich({
-  items: [
-    { data: { name: "Sony WF-1000XM5", sku: "WF1000XM5/B" } },
-  ],
-  columns: [
-    { key: "name", label: "Název produktu", type: "text" },
-    { key: "brand", label: "Značka", type: "text" },
-    { key: "price", label: "Cena", type: "number" },
-  ],
-});
-```
-
-```python Python
-result = client.enrich(
-    items=[
-        {"data": {"name": "Sony WF-1000XM5", "sku": "WF1000XM5/B"}},
-    ],
-    columns=[
-        {"key": "name", "label": "Název produktu", "type": "text"},
-        {"key": "brand", "label": "Značka", "type": "text"},
-        {"key": "price", "label": "Cena", "type": "number"},
-    ],
-)
-```
-
-```bash cURL
-curl -X POST "https://hub.banditshq.com/api/v1/enrich" \
-  -H "Authorization: Bearer lasso_..." \
-  -H "Content-Type: application/json" \
-  -d '{
-    "items": [{ "data": { "name": "Sony WF-1000XM5" } }]
-  }'
-```
-</RequestExample>
+<EnrichExamples />

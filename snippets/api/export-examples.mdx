@@ -1,0 +1,42 @@
+<CodeGroup>
+```bash cURL
+curl --request GET \
+  --url "https://app.productlasso.com/api/v1/tables/$TABLE_ID/export?format=xlsx&columns=sku,product_name,price" \
+  --header "Authorization: Bearer $LASSO_API_KEY" \
+  --output products.xlsx
+```
+
+```typescript TypeScript
+import { writeFile } from "node:fs/promises";
+
+const tableId = "YOUR_TABLE_ID";
+const params = new URLSearchParams({
+  format: "xlsx",
+  columns: "sku,product_name,price",
+});
+const response = await fetch(
+  `https://app.productlasso.com/api/v1/tables/${tableId}/export?${params}`,
+  { headers: { Authorization: `Bearer ${process.env.LASSO_API_KEY}` } },
+);
+
+if (!response.ok) throw new Error(await response.text());
+await writeFile("products.xlsx", Buffer.from(await response.arrayBuffer()));
+```
+
+```python Python
+import os
+import requests
+
+table_id = "YOUR_TABLE_ID"
+response = requests.get(
+    f"https://app.productlasso.com/api/v1/tables/{table_id}/export",
+    headers={"Authorization": f"Bearer {os.environ['LASSO_API_KEY']}"},
+    params={"format": "xlsx", "columns": "sku,product_name,price"},
+    timeout=120,
+)
+response.raise_for_status()
+
+with open("products.xlsx", "wb") as file:
+    file.write(response.content)
+```
+</CodeGroup>

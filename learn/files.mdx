@@ -18,7 +18,7 @@ Lasso accepts a variety of file formats as source data for extraction. Upload fi
 
 <Steps>
   <Step title="Upload the file">
-    Send the file as `multipart/form-data` to `POST /v1/files`. Maximum size is 1 GB.
+    Send the file as `multipart/form-data` to `POST /files`. The upload endpoint accepts files up to 1 GB.
   </Step>
   <Step title="Get the file ID">
     The response includes an `id` field. Store this for the next step.
@@ -27,6 +27,21 @@ Lasso accepts a variety of file formats as source data for extraction. Upload fi
     Pass the file ID in the `file_ids` array when creating a table.
   </Step>
 </Steps>
+
+## Extraction limits
+
+Creating a table applies stricter source limits than uploading a file:
+
+| Source type | Maximum size |
+|---|---:|
+| PPTX | 20 MB |
+| DOCX | 50 MB |
+| XML, HTML, HTM, or TXT | 64 MB |
+| JPG, JPEG, PNG, or WebP | 100 MB |
+| Other file types | 256 MB |
+| All selected files combined | 512 MB |
+
+The API rejects duplicate source file names in the same table request.
 
 ## Example
 

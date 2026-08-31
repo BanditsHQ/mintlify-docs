@@ -1,34 +1,5 @@
 ---
 title: 'Smazat řádek'
 description: 'Smazání jednoho řádku z tabulky.'
-api: "DELETE /tables/{table_id}/rows/{row_id}"
+openapi: "openapi.yaml DELETE /tables/{table_id}/rows/{row_id}"
 ---
-
-## Parametry cesty
-
-<ParamField path="table_id" type="string" required>
-  Jedinečný identifikátor tabulky.
-</ParamField>
-
-<ParamField path="row_id" type="string" required>
-  Jedinečný identifikátor řádku.
-</ParamField>
-
-## Odpověď
-
-Při úspěchu vrací `204 No Content`.
-
-<RequestExample>
-```typescript TypeScript
-await client.tables.deleteRow("tbl_abc123", "row_xyz789");
-```
-
-```python Python
-client.tables.delete_row("tbl_abc123", "row_xyz789")
-```
-
-```bash cURL
-curl -X DELETE "https://hub.banditshq.com/api/v1/tables/tbl_abc123/rows/row_xyz789" \
-  -H "Authorization: Bearer lasso_..."
-```
-</RequestExample>

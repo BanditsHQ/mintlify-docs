@@ -1,9 +1,5 @@
 ---
 title: 'Smazat atribut'
-api: "DELETE /attributes/{key}"
-description: 'Smazání atributu s propagací do schémat a katalogu.'
+openapi: "openapi.yaml DELETE /attributes/{key}"
+description: 'Trvalé smazání atributu pouze v případě, že nemá žádné závislosti.'
 ---
-
-<Warning>
-  Destruktivní operace — odstraní klíč ze schémat, produktů katalogu, feedů a mapování.
-</Warning>

@@ -1,0 +1,14 @@
+---
+title: "Žebříček produktové analytiky"
+description: "Seřaďte přispěvatele do Katalogu nebo přispěvatele a tabulky v Lasso."
+openapi: "openapi.yaml GET /analytics/products/leaderboard"
+---
+
+## Poznámky k použití
+
+Vyberte právě jedno `scope`:
+
+- `catalog` řadí přispěvatele podle aktivity doručování produktů.
+- `extraction` vrací žebříček uživatelů i tabulek podle řádků připravených v Lasso.
+
+Řádky Katalogu jsou jedinečné pro každého přispěvatele, ne pro celou společnost. Produkt upravený dvěma přispěvateli se objeví u obou, takže součet žebříčku může překročit celkový počet jedinečných produktů společnosti.

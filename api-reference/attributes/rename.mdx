@@ -1,36 +1,14 @@
 ---
-title: 'Rename attribute'
-api: "POST /attributes/{key}/rename"
-description: 'Rename an attribute key with cascade across schemas and catalog.'
+title: "Rename an Attribute key and dependent data"
+description: "Renames the canonical key and attempts each dependent migration. This operation is not atomic across all dependent resources. A `207` response has `success: false`, retains sanitized per-resource result buckets, and must be inspected before the caller decides how to continue. To retry a partial rename, pass the returned `attribute.id` as `attribute_id` with the same old and new keys."
+openapi: "openapi.yaml POST /attributes/{key}/rename"
 ---
 
-Renames the attribute key everywhere it is referenced: product schemas, catalog products, feeds, mappings, and the dictionary.
+## Handle partial completion
 
-<ParamField path="key" type="string" required>
-  Current attribute key.
-</ParamField>
+This operation first renames the canonical Attribute and then migrates dependent resources. Those dependent writes are not one atomic transaction.
 
-<ParamField body="new_key" type="string" required>
-  New key (must start with a letter; letters, digits, underscores only).
-</ParamField>
-
-<RequestExample>
-```bash cURL
-curl -X POST "https://hub.banditshq.com/api/v1/attributes/color/rename" \
-  -H "Authorization: Bearer lasso_..." \
-  -H "Content-Type: application/json" \
-  -d '{"new_key": "product_color"}'
-```
-</RequestExample>
-
-<ResponseExample>
-```json Response
-{
-  "success": true,
-  "old_key": "color",
-  "new_key": "product_color",
-  "attribute": { "key": "product_color", "label": "Color", "type": "enum", ... },
-  "results": { ... }
-}
-```
-</ResponseExample>
+- `200` means every migration completed.
+- `207` means the canonical rename completed but at least one dependent migration failed. Inspect `results` before continuing.
+- To resume a partial rename, call the same endpoint with the same old and new keys and pass the returned `attribute.id` as `attribute_id`.
+- `errors` contains stable sanitized codes. It never exposes private resource IDs or raw database errors.

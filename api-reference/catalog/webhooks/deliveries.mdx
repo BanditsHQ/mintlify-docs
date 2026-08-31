@@ -1,0 +1,11 @@
+---
+title: "List recent delivery attempts"
+description: "List recent delivery attempts."
+openapi: "openapi.yaml GET /catalog/webhooks/{id}"
+---
+
+## Usage notes
+
+The response contains delivery metadata only. It never returns stored event payloads or signing secrets.
+
+Each retry has a new attempt `id` and an incremented `attempt_number`. Attempts for the same logical event share `delivery_id`. Use the attempt `id` when requesting a redelivery.

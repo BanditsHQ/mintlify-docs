@@ -1,0 +1,22 @@
+---
+title: "Catalog API"
+description: "Vytvářejte, synchronizujte a rozšiřujte produkty Katalogu přes veřejné API."
+---
+
+Catalog API ukládá firemní produkty podle základního produktového schématu. Veřejné odpovědi vrací hodnoty aktivních sdílených atributů, zdroj, stav, časová razítka a rozšíření konkrétního produktu.
+
+## Rozšíření konkrétního produktu
+
+Pokud produkt potřebuje aktivní sdílený atribut mimo základní schéma, odešlete jeho UUID v `attribute_extension_ids`. API přijímá nejvýše 2 000 unikátních UUID.
+
+Při vytvoření se rozšíření připojí. Patch zachová existující rozšíření, pokud `attribute_extension_ids` vynecháte nebo odešlete prázdné. Pomocí `remove_attribute_extension_ids` odpojíte rozšíření a atomicky odstraníte jeho hodnotu nebo relační vazbu. Atribut základního schématu takto odpojit nelze.
+
+## Souběh a validace
+
+Zápisy validují hodnoty podle aktivních sdílených atributů. Chybějící, cizí nebo archivované UUID selže bez odhalení inventáře jiné společnosti. Parametr `expected_updated_at` odmítne zastaralý zápis chybou `409`.
+
+## Seznam a synchronizace
+
+`GET /catalog` používá kurzorové stránkování. `GET /catalog/changes` vrací změněné produkty od nejstaršího. Pro další cyklus si uložte `sync_timestamp` z první stránky.
+
+Spravované webhooky Katalogu podporují historii doručení, test a ruční opakování neúspěšného pokusu.

@@ -1,0 +1,12 @@
+---
+title: "Send a test event or redeliver a failed attempt"
+description: "Send a test event or redeliver a failed attempt."
+openapi: "openapi.yaml POST /catalog/webhooks/{id}"
+---
+
+## Actions
+
+- Send `{ "action": "test" }` to record and deliver a synthetic `webhook.test` event.
+- Send `{ "action": "redeliver", "delivery_record_id": "..." }` to retry a failed or non-2xx delivery attempt.
+
+Use the attempt record's `id` as `delivery_record_id`, not the stable logical `delivery_id`. Redelivery creates a new attempt and keeps the logical delivery identifier in the `X-Lasso-Delivery-Id` header.

@@ -54,19 +54,28 @@ table = client.tables.create(
 )
 
 print(table["id"])      # "tbl_..."
-print(table["status"])  # "processing"
+print(table["status"])  # "queued_for_processing"
 ```
 
 ## 4. Wait for results
 
-The SDK includes a polling helper that waits for extraction to complete.
+Poll the table endpoint and handle every terminal status.
 
 ```python
-completed = client.tables.wait_for_completion(
-    table["id"],
-    interval_s=3,
-    timeout_s=300,
-)
+import time
+
+completed = None
+for _ in range(100):
+    current = client.tables.get(table["id"])
+    if current["status"] == "completed":
+        completed = current
+        break
+    if current["status"] in ("error", "cancelled"):
+        raise RuntimeError(current.get("error_message") or f"Extraction {current['status']}")
+    time.sleep(3)
+
+if completed is None:
+    raise TimeoutError("Timed out waiting for extraction")
 
 print(completed["status"])      # "completed"
 print(completed["total_rows"])  # 42

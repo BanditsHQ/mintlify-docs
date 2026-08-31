@@ -1,5 +1,3 @@
-> **Customize this file**: Tailor this template to your project by noting specific contribution types you're looking for, adding a Code of Conduct, or adjusting the writing guidelines to match your style.
-
 # Contribute to the documentation
 
 Thank you for your interest in contributing to our documentation! This guide will help you get started.
@@ -14,15 +12,16 @@ Thank you for your interest in contributing to our documentation! This guide wil
 
 ### Option 2: Local development
 
-1. Fork and clone this repository
-2. Install the Mintlify CLI: `npm i -g mint`
-3. Create a branch for your changes
-4. Make changes
-5. Navigate to the docs directory and run `mint dev`
-6. Preview your changes at `http://localhost:3000`
-7. Commit your changes and submit a pull request
+1. Fork and clone this repository.
+2. Install the Mintlify CLI: `npm i -g mint`.
+3. Create a branch for your changes.
+4. Make changes.
+5. Run `mint dev` from the documentation root.
+6. Preview your changes at `http://localhost:3000`.
+7. Run `npx mintlify@latest validate` and `npx mintlify@latest broken-links`.
+8. Commit your changes and submit a pull request.
 
-For more details on local development, see our [development guide](development.mdx).
+For API changes, use the `bandits_dashboard` `stage` branch as the source of truth. Compare `api-spec/openapi.yaml` with the public handlers under `api/v1`, and keep English and Czech endpoint coverage identical.
 
 ## Writing guidelines
 
