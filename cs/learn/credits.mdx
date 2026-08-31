@@ -11,9 +11,10 @@ Lasso používá kreditový systém pro operace extrakce a obohacení.
 |---|---|
 | **Extrakce tabulky** | Liší se podle velikosti souboru a složitosti |
 | **Obohacení jedné buňky** | ~2 kredity za buňku |
-| **Hromadné obohacení** | ~0,5 kreditu za sloupec |
+| **Hromadné obohacení, běžný sloupec** | ~0,5 kreditu za sloupec |
+| **Hromadné obohacení, obrázek Gallery Max** | 16 kreditů za sloupec |
 
-Odhady kreditů se vrátí při vytvoření úlohy obohacení, takže znáte náklady ještě před zahájením zpracování.
+Odpověď enhancementu obsahuje odhad. Veřejný bulk handler aktuálně počítá každý sloupec jako 0,5 kreditu i tehdy, když snapshot tabulky nastavuje obrázkový sloupec Gallery Max. Pro takový sloupec použijte sazbu výše.
 
 ## Kontrola zůstatku
 
@@ -67,4 +68,9 @@ curl --request GET \
 
 ## Nedostatečné kredity
 
-Pokud nemáte dostatek kreditů pro operaci, API vrátí chybu `402` s `error_type: "insufficient_credits"`. Zkontrolujte svůj zůstatek před spuštěním rozsáhlých úloh obohacení.
+Veřejné handlery aktuálně nevracejí nedostatek kreditů jednotně jako `402`:
+
+- Synchronní Search a Enrich vrátí HTTP `200` s polem `error` a bez výsledků.
+- Enhancement vrátí `202` před rezervací kreditů. Dotčené buňky později přejdou do stavu `error`.
+
+Před velkou operací zkontrolujte `GET /credits/balance` a sledujte výsledek operace nebo stav enhancementu.

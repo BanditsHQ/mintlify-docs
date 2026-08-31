@@ -23,11 +23,11 @@ SDK helper pro JSON vrací parsovaná data. V TypeScript SDK v0.2 načítejte CS
 import { writeFile } from "node:fs/promises";
 
 // JSON returns parsed data through the SDK.
-const data = await client.export.json("tbl_abc123");
+const data = await client.export.json("d2b3dbe0-c77d-40d8-a5d2-480722489c64");
 
 async function fetchExport(format: "csv" | "xlsx" | "images") {
   const url = new URL(
-    "https://app.productlasso.com/api/v1/tables/tbl_abc123/export",
+    "https://app.productlasso.com/api/v1/tables/d2b3dbe0-c77d-40d8-a5d2-480722489c64/export",
   );
   url.searchParams.set("format", format);
 
@@ -51,11 +51,11 @@ import httpx
 import os
 
 # JSON -- returns list of dicts
-data = client.export.json("tbl_abc123")
+data = client.export.json("d2b3dbe0-c77d-40d8-a5d2-480722489c64")
 
 # Fetch CSV as text from the endpoint.
 response = httpx.get(
-    "https://app.productlasso.com/api/v1/tables/tbl_abc123/export",
+    "https://app.productlasso.com/api/v1/tables/d2b3dbe0-c77d-40d8-a5d2-480722489c64/export",
     params={"format": "csv"},
     headers={"Authorization": f"Bearer {os.environ['LASSO_API_KEY']}"},
 )
@@ -63,10 +63,10 @@ response.raise_for_status()
 csv = response.text
 
 # XLSX -- save directly to file
-client.export.xlsx("tbl_abc123", path="export.xlsx")
+client.export.xlsx("d2b3dbe0-c77d-40d8-a5d2-480722489c64", path="export.xlsx")
 
 # Images -- save ZIP to file
-client.export.images("tbl_abc123", path="images.zip")
+client.export.images("d2b3dbe0-c77d-40d8-a5d2-480722489c64", path="images.zip")
 ```
 </CodeGroup>
 
@@ -76,13 +76,13 @@ Ve výchozím nastavení se exportují všechny sloupce. Pro export pouze konkr�
 
 <CodeGroup>
 ```typescript TypeScript
-const data = await client.export.json("tbl_abc123", {
+const data = await client.export.json("d2b3dbe0-c77d-40d8-a5d2-480722489c64", {
   columns: "product_name,price,image_url",
 });
 ```
 
 ```python Python
-data = client.export.json("tbl_abc123", columns="product_name,price,image_url")
+data = client.export.json("d2b3dbe0-c77d-40d8-a5d2-480722489c64", columns="product_name,price,image_url")
 ```
 </CodeGroup>
 
@@ -91,7 +91,7 @@ data = client.export.json("tbl_abc123", columns="product_name,price,image_url")
 Python SDK obsahuje pomocnou funkci pro načtení všech řádků jako pandas DataFrame:
 
 ```python
-df = client.tables.results_as_dataframe("tbl_abc123")
+df = client.tables.results_as_dataframe("d2b3dbe0-c77d-40d8-a5d2-480722489c64")
 
 # Filter, analyze, or export further
 expensive = df[df["price"] > 100]

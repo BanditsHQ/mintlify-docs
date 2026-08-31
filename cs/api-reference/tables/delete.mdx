@@ -1,5 +1,7 @@
 ---
 title: 'Smazat tabulku'
 openapi: "openapi.yaml DELETE /tables/{table_id}"
-description: 'Trvalé smazání tabulky a všech jejích řádků.'
+description: 'Trvale smaže odemčenou tabulku, její řádky a související data. Zamčená tabulka vrátí 409.'
 ---
+
+Před smazáním dokončete nebo zrušte aktivní práci. Handler zamčenou tabulku odmítne a aktivní operaci sám nezruší.

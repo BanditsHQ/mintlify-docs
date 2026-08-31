@@ -1,5 +1,7 @@
 ---
 title: "Delete a table"
-description: "Permanently deletes the table, all rows, and associated data. Cancels any running operations."
+description: "Permanently deletes an unlocked table, its rows, and associated data. A locked table returns 409; this endpoint does not cancel the active operation."
 openapi: "openapi.yaml DELETE /tables/{table_id}"
 ---
+
+Cancel or finish active work before deleting the table. The handler rejects a locked table instead of cancelling its operation.

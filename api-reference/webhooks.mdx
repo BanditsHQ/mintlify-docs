@@ -7,7 +7,7 @@ Lasso exposes two webhook models with different delivery behavior.
 
 ## Asynchronous operation callbacks
 
-Search, enrichment, table creation, and enhancement requests can accept a `webhook_url` where shown in their endpoint contract. These callbacks deliver the result of that operation. The table callback implementation times out each attempt after 10 seconds and retries three times after 30 seconds, 5 minutes, and 30 minutes.
+Search, Enrich, and table creation accept `webhook_url` as documented on their endpoint contracts. Table enhancement endpoints do not accept it. These callbacks deliver the result of that operation. The table callback implementation times out each attempt after 10 seconds and retries three times after 30 seconds, 5 minutes, and 30 minutes.
 
 Use the exact callback fields documented on the endpoint. Do not assume Catalog webhook management, delivery history, test events, or redelivery applies to one-off operation callbacks.
 

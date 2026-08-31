@@ -1,6 +1,6 @@
 ---
 title: "Enrich partial product data"
-description: "Take partial product records and return enriched data with missing fields filled in. Lasso researches each product and fills in missing attributes. Each enriched field includes a basis with citations, reasoning, and confidence. Optionally provide a schema_id or inline columns. If neither is provided, a default product schema is used."
+description: "Research target fields in partial product records. Successful researched values include basis metadata when web search is enabled; fields can remain unchanged when no value is found."
 openapi: "openapi.yaml POST /enrich"
 ---
 
@@ -9,10 +9,16 @@ import EnrichExamples from "/snippets/api/enrich-examples.mdx";
 ## Usage notes
 
 - Send either `schema_id` or `columns`, not both. Lasso uses the default Product Schema when you omit both.
-- A request may contain up to 50 products. Requests with 5 or fewer products run synchronously unless you set `webhook_url`; larger requests run asynchronously.
+- A request may contain up to 50 products. Send 1 to 5 products for a synchronous response. For 6 to 50 products, you must provide `webhook_url` because there is no public endpoint for retrieving an Enrich job result.
 - `thinking` costs 4 credits per product for `hard`, 2 for `medium`, and 1 for `low`.
 - With `web_search: false`, Lasso uses model knowledge and does not return citations in `basis`.
 - Use `context` for instructions that apply to every item in the request.
+- `model` is a deprecated compatibility field. The service ignores it; `thinking` selects the service-controlled model tier.
+- In synchronous mode, insufficient credits currently produce HTTP `200` with `error: "Insufficient credits"`, no enriched items, and `credits_used: 0`.
+
+<Warning>
+  Do not send more than 5 items without `webhook_url`. The current handler accepts the request and returns `202`, but it exposes no result-retrieval route for that job ID.
+</Warning>
 
 ## Examples
 

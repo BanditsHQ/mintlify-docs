@@ -8,17 +8,17 @@ description: 'Použijte AI ke generování obsahu, překladu textu a obohacení 
 Použijte AI ke generování nebo obohacení hodnot pro konkrétní sloupec ve vybraných řádcích.
 
 ```python
-rows = client.tables.rows("tbl_abc123", limit=100)
+rows = client.tables.rows("d2b3dbe0-c77d-40d8-a5d2-480722489c64", limit=100)
 
 job = client.enhance.cells(
-    "tbl_abc123",
+    "d2b3dbe0-c77d-40d8-a5d2-480722489c64",
     row_ids=[r["id"] for r in rows["data"]],
     column_key="description",
-    prompt="Write a compelling product description based on the product name and specifications.",
+    prompt="Write a compelling product description from {{product_name}} and {{price}}.",
     web_search=True,
 )
 
-print(job["id"])                 # "enhance_..."
+print(job["id"])                 # "b672c561-236d-47e4-b9ec-7c4219454aa8"
 print(job["status"])             # "queued"
 print(job["estimated_credits"])  # 84
 ```
@@ -26,7 +26,7 @@ print(job["estimated_credits"])  # 84
 ## Kontrola průběhu obohacení
 
 ```python
-status = client.enhance.status("tbl_abc123")
+status = client.enhance.status("d2b3dbe0-c77d-40d8-a5d2-480722489c64")
 
 for column, stats in status["columns"].items():
     print(f"{column}: {stats['completed']}/{stats['total']} done")
@@ -38,12 +38,12 @@ Obohaťte několik sloupců jednoho řádku v jednom požadavku:
 
 ```python
 client.enhance.bulk(
-    "tbl_abc123",
-    row_id="row_xyz789",
+    "d2b3dbe0-c77d-40d8-a5d2-480722489c64",
+    row_id="83ba2c61-8592-4614-ac46-10f43580dfb8",
     columns=[
-        {"key": "description", "prompt": "Write a product description."},
-        {"key": "seo_title", "prompt": "Generate an SEO-optimized title."},
-        {"key": "description_de", "prompt": "Translate the description to German."},
+        {"key": "description", "prompt": "Write a product description from {{product_name}} and {{price}}."},
+        {"key": "seo_title", "prompt": "Generate an SEO-optimized title from {{product_name}}."},
+        {"key": "description_de", "prompt": "Translate {{description}} to German."},
     ],
 )
 ```
@@ -51,7 +51,7 @@ client.enhance.bulk(
 ## Zrušení obohacení
 
 ```python
-result = client.enhance.cancel("tbl_abc123")
+result = client.enhance.cancel("d2b3dbe0-c77d-40d8-a5d2-480722489c64")
 print(result["cancelled_count"])
 ```
 

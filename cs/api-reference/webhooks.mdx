@@ -7,7 +7,7 @@ Lasso poskytuje dva modely webhooků s odlišným chováním.
 
 ## Callbacky asynchronních operací
 
-Vyhledávání, obohacení, vytvoření tabulky a enhancement požadavky mohou přijímat `webhook_url`, pokud ho uvádí kontrakt endpointu. Tyto callbacky doručují výsledek konkrétní operace. Implementace callbacku tabulky ukončí pokus po 10 sekundách a zopakuje ho třikrát po 30 sekundách, 5 minutách a 30 minutách.
+Search, Enrich a vytvoření tabulky přijímají `webhook_url` podle kontraktu endpointu. Endpointy pro enhancement tabulky ho nepřijímají. Callbacky doručují výsledek konkrétní operace. Implementace callbacku tabulky ukončí pokus po 10 sekundách a zopakuje ho třikrát po 30 sekundách, 5 minutách a 30 minutách.
 
 ## Webhooky Katalogu
 

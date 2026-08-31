@@ -3,3 +3,5 @@ title: "Delete a row"
 description: "Delete a row."
 openapi: "openapi.yaml DELETE /tables/{table_id}/rows/{row_id}"
 ---
+
+For an existing completed table, deletion is idempotent: the handler returns `204` when the row was deleted and when it was already absent. It does not return a row-level `404`.

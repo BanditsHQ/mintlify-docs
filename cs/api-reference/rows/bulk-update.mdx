@@ -6,6 +6,6 @@ openapi: "openapi.yaml POST /tables/{table_id}/rows/bulk-update"
 
 ## Poznámky k použití
 
-Tabulka musí být `completed` a nesmí být uzamčená. `column_key` musí existovat ve snapshotu Product Schema tabulky a každé `row_id` musí patřit do této tabulky.
+Tabulka musí být `completed` a nesmí být uzamčená. Aktuální handler neověřuje `column_key` proti snapshotu Product Schema. Neznámý klíč uloží do odpovídajících řádků, proto před zápisem načtěte sloupce tabulky a klíč ověřte v klientovi.
 
-Lasso nastaví stejnou `value` na všech odpovídajících řádcích a v `updated_count` vrátí skutečný počet změněných řádků.
+Lasso nastaví stejnou `value` na řádcích, jejichž ID patří do tabulky. Neznámá ID a ID z jiné tabulky ignoruje místo odmítnutí celého požadavku. `updated_count` vrací skutečný počet změněných řádků.

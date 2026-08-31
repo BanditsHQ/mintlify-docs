@@ -3,3 +3,5 @@ title: 'Aktualizovat tabulku'
 openapi: "openapi.yaml PATCH /tables/{table_id}"
 description: 'Aktualizace názvu, kontextu obohacení nebo schématu existující tabulky.'
 ---
+
+Změna `schema_id` nahradí snapshot Product Schema tabulky pro další operace. Klíče v existujících řádcích nepřejmenuje, neodstraní ani nepřemapuje.

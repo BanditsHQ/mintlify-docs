@@ -1,14 +1,14 @@
 ---
 title: 'Přejmenovat atribut'
 openapi: "openapi.yaml POST /attributes/{key}/rename"
-description: 'Přejmenování klíče atributu a pokus o migraci všech závislých dat.'
+description: 'Atomicky přejmenuje klíč atributu a podporovaná závislá data.'
 ---
 
-## Zpracování částečného dokončení
+## Atomické chování
 
-Operace nejprve přejmenuje kanonický Attribute a potom migruje závislé zdroje. Tyto závislé zápisy netvoří jednu atomickou transakci.
+Handler nejprve vyhodnotí dotčené zdroje a potom provede změnu klíče a podporované závislé migrace v jedné databázové operaci.
 
-- `200` znamená, že se dokončily všechny migrace.
-- `207` znamená, že se kanonické přejmenování dokončilo, ale alespoň jedna závislá migrace selhala. Před pokračováním zkontrolujte `results`.
-- Částečné přejmenování obnovíte voláním stejného endpointu se stejným starým a novým klíčem a s vráceným `attribute.id` v `attribute_id`.
-- `errors` obsahuje stabilní sanitizované kódy. Nikdy neodhaluje soukromá ID zdrojů ani surové databázové chyby.
+- `200` znamená, že atomické přejmenování proběhlo. Úspěšné části `results` mají `code: "ok"`, `error_count: 0` a prázdné pole `errors`.
+- `409` znamená, že se neprovedla žádná částečná migrace. Detailní kódy zahrnují konflikt klíče, `rename_busy`, blokující závislosti a `stale_preview`.
+- Při opakování požadavku s nejistým výsledkem předejte `attribute_id`. Handler tak najde stejný Attribute i po změně klíče.
+- Většina klientů má `expected_impact_revision` vynechat. Zastaralá hodnota vrátí `409 stale_preview`.

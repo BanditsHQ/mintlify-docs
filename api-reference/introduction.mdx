@@ -25,7 +25,7 @@ API keys start with `lasso_` and grant access to one company. See [Authenticatio
 
 ## API contract
 
-The [OpenAPI 3.1 contract](/openapi.yaml) contains all 59 public operations on the current Stage API, including request schemas, response schemas, errors, and examples. The endpoint pages in this reference are generated from that contract.
+The [OpenAPI 3.1 contract](/openapi.yaml) contains all 59 public operations in the current API, including request schemas, response schemas, errors, and examples. The endpoint pages in this reference are generated from that contract.
 
 The main resource groups are:
 
@@ -51,7 +51,6 @@ curl --request GET \
 | `201` | A resource was created. |
 | `202` | Asynchronous processing was accepted. |
 | `204` | The request succeeded without a response body. |
-| `207` | An Attribute rename completed with one or more dependent migration failures. Inspect the response before continuing. |
 
 See [Errors](/api-reference/errors) for the error envelope and retry metadata.
 
@@ -61,7 +60,7 @@ The API uses page-based, cursor-based, and offset-based pagination depending on 
 
 ## SDKs
 
-The Stage repository contains TypeScript and Python SDKs at version `0.2.0`.
+The API repository contains TypeScript and Python SDKs at version `0.2.0`.
 
 <CodeGroup>
 ```bash npm

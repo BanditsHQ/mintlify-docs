@@ -3,3 +3,5 @@ title: 'Seznam pojmů ve slovníku'
 openapi: "openapi.yaml GET /glossary"
 description: 'Načtení stránkovaného seznamu vašich pojmů ve slovníku.'
 ---
+
+Handler podporuje `page` a `limit`. TypeScript a Python SDK aktuálně nabízejí argument `search`, ale API ho ignoruje; vrácené stránky filtrujte v klientovi.

@@ -14,6 +14,8 @@ schema = client.schemas.create(
         {"key": "product_name", "label": "Product Name", "type": "text", "required": True},
         {"key": "price", "label": "Price", "type": "number"},
         {"key": "description", "label": "Description", "type": "text"},
+        {"key": "seo_title", "label": "SEO title", "type": "text"},
+        {"key": "description_de", "label": "German description", "type": "text"},
         {"key": "image_url", "label": "Image", "type": "image"},
     ],
 )
@@ -39,7 +41,7 @@ Upload a PDF, spreadsheet, or image to extract data from.
 ```python
 uploaded = client.files.upload("/path/to/catalog.pdf")
 
-print(uploaded["id"])  # "file_abc123"
+print(uploaded["id"])  # "4be9e43c-f03a-4309-938c-d2e9482752cf"
 ```
 
 ## 3. Create a table
@@ -53,7 +55,7 @@ table = client.tables.create(
     file_ids=[uploaded["id"]],
 )
 
-print(table["id"])      # "tbl_..."
+print(table["id"])      # "d2b3dbe0-c77d-40d8-a5d2-480722489c64"
 print(table["status"])  # "queued_for_processing"
 ```
 

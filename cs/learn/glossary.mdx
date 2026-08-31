@@ -72,10 +72,10 @@ client.glossary.create(
 Pro aplikaci slovníku během obohacení nastavte `use_glossary: true`:
 
 ```typescript
-await client.enhance.cells("tbl_abc123", {
-  row_ids: ["row_1", "row_2"],
+await client.enhance.cells("d2b3dbe0-c77d-40d8-a5d2-480722489c64", {
+  row_ids: ["83ba2c61-8592-4614-ac46-10f43580dfb8", "2f98bfb5-820e-488e-b92f-3f4559a4a788"],
   column_key: "description_de",
-  prompt: "Translate the description to German.",
+  prompt: "Translate {{description}} to German.",
   target_language: "de",
   use_glossary: true,
 });

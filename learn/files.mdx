@@ -10,9 +10,10 @@ Lasso accepts a variety of file formats as source data for extraction. Upload fi
 | Format | Extensions | Notes |
 |---|---|---|
 | PDF | `.pdf` | Scanned and text-based PDFs are both supported. |
-| Spreadsheets | `.xlsx`, `.xls`, `.csv` | Each sheet or file is parsed for product data. |
-| Images | `.jpg`, `.png`, `.webp` | OCR extracts text from images. |
-| Documents | `.docx`, `.doc` | Word documents are parsed for content. |
+| Spreadsheets | `.xlsx`, `.xls`, `.xlsm`, `.csv` | Each sheet or file is parsed for product data. |
+| Images | `.jpg`, `.jpeg`, `.png`, `.webp` | OCR extracts text from images. |
+| Documents | `.docx`, `.pptx` | Word and PowerPoint documents are parsed for content. |
+| Text and markup | `.txt`, `.xml`, `.html`, `.htm` | Text content is decoded and parsed. |
 
 ## Upload flow
 
@@ -51,7 +52,7 @@ const file = new File([buffer], "catalog.pdf", { type: "application/pdf" });
 const uploaded = await client.files.upload(file, "catalog.pdf");
 
 const table = await client.tables.create({
-  schema_id: "schema_abc",
+  schema_id: "9e1c77dd-8f10-41ca-bfe8-e672b89692d1",
   name: "My Catalog",
   file_ids: [uploaded.id],
 });
@@ -61,7 +62,7 @@ const table = await client.tables.create({
 uploaded = client.files.upload("/path/to/catalog.pdf")
 
 table = client.tables.create(
-    schema_id="schema_abc",
+    schema_id="9e1c77dd-8f10-41ca-bfe8-e672b89692d1",
     name="My Catalog",
     file_ids=[uploaded["id"]],
 )
@@ -70,10 +71,7 @@ table = client.tables.create(
 
 ## Alternative sources
 
-If you do not want to upload files, you can also provide:
-
-- **URLs** -- Pass `file_urls` with publicly accessible URLs. Lasso downloads and processes them server-side.
-- **Text** -- Pass `source_text` with raw text content for extraction.
+If you do not want to upload a file, pass raw text in `source_text`. For a remote file, download it first and upload it through `POST /files`; direct `file_urls` ingestion is not supported by the extraction worker.
 
 ## Managing files
 

@@ -6,7 +6,9 @@ description: 'Načtení stránkované historie kreditových transakcí.'
 
 ## Poznámky k použití
 
-`from` a `to` jsou filtry podle data. `service` přijímá přesné veřejné hodnoty uvedené ve schématu parametru. `total_used` se počítá za celé filtrované období, ne jen za aktuální stránku.
+`from` a `to` filtrují čas transakce. `service` je přesný surový `service_type`, nikoli uzavřený enum. Aktuální hodnoty zahrnují `product_import`, `pdf_extraction`, `ai_field`, `ai_field_bulk`, `product_search`, `product_enrich`, `image_gallery_max`, `ai_image_generation`, `ai_image_generation_flash` a `richtext_alt_text`. `total_used` se počítá za celé filtrované období, ne jen za aktuální stránku.
+
+Pole odpovědi `table_id` se plní z metadat transakce `job_id`. Podle služby může identifikovat tabulku, enhancement úlohu, Search úlohu nebo Enrich úlohu.
 
 <Note>
   V Python SDK `0.2` předejte rezervovaný název dotazu jako `client.credits.usage(**{"from": "2026-08-01", "to": "2026-08-31"})`. Pomocný název `from_` se na `from` nepřekládá.

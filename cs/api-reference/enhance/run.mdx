@@ -10,5 +10,6 @@ openapi: "openapi.yaml POST /tables/{table_id}/enhance"
 - Odešlete jedno `row_id` pro jednu buňku nebo nejvýše 1 000 ID řádků pro jeden sloupec. Duplicitní ID se zpracují jednou.
 - Na jiný sloupec odkazujte pomocí jeho klíče, například `Přelož {{product_name}} do češtiny`.
 - Operace stojí 2 kredity za každý zařazený řádek a vždy vrací `202`.
+- `model` je zastaralé kompatibilní pole. Služba ho ignoruje a používá nakonfigurovaný Gemini provider.
 
-Průběh sledujte přes `GET /tables/{table_id}/enhance/status`. Vygenerovanou hodnotu získáte novým načtením řádku.
+Worker kontroluje kredity až po odpovědi `202`. Pokud je nemůže rezervovat, dotčené buňky přejdou do stavu `error`; požadavek nevrátí `402`. Průběh sledujte přes `GET /tables/{table_id}/enhance/status` a vygenerovanou hodnotu získejte novým načtením řádku.

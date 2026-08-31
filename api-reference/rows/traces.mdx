@@ -1,5 +1,7 @@
 ---
 title: "Get AI traces for a row"
-description: "Returns the AI reasoning chain, tool calls, and sources for each enhanced column in this row."
+description: "Returns recorded enhancement execution data, including prompts, response text, tool calls, sources, and an optional summarized thought. It does not expose a private chain of thought."
 openapi: "openapi.yaml GET /tables/{table_id}/rows/{row_id}/traces"
 ---
+
+Use this trace to inspect inputs, tools, sources, and the generated response. `thought_summary` is a bounded summary when available, not the model's private reasoning chain.

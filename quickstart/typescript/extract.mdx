@@ -14,6 +14,8 @@ const schema = await client.schemas.create({
     { key: "product_name", label: "Product Name", type: "text", required: true },
     { key: "price", label: "Price", type: "number" },
     { key: "description", label: "Description", type: "text" },
+    { key: "seo_title", label: "SEO title", type: "text" },
+    { key: "description_de", label: "German description", type: "text" },
     { key: "image_url", label: "Image", type: "image" },
   ],
 });
@@ -40,7 +42,7 @@ Upload a PDF, spreadsheet, or image to extract data from.
 const file = new File([buffer], "catalog.pdf", { type: "application/pdf" });
 const uploaded = await client.files.upload(file, "catalog.pdf");
 
-console.log(uploaded.id); // "file_abc123"
+console.log(uploaded.id); // "4be9e43c-f03a-4309-938c-d2e9482752cf"
 ```
 
 ## 3. Create a table
@@ -54,7 +56,7 @@ const table = await client.tables.create({
   file_ids: [uploaded.id],
 });
 
-console.log(table.id);     // "tbl_..."
+console.log(table.id);     // "d2b3dbe0-c77d-40d8-a5d2-480722489c64"
 console.log(table.status); // "queued_for_processing"
 ```
 

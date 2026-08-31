@@ -16,13 +16,14 @@ Když vytvoříte tabulku, Lasso zpracuje vaše zdrojové soubory prostřednictv
 
 ## Typy zdrojů
 
-Data k extrakci můžete poskytnout třemi způsoby:
+Data k extrakci můžete poskytnout dvěma podporovanými způsoby:
 
 | Zdroj | Popis |
 |---|---|
 | **Soubory** | Nahrajte PDF, tabulky, obrázky nebo dokumenty přes [Files API](/cs/api-reference/files/upload). |
-| **URL** | Při vytváření tabulky předejte veřejně přístupné URL adresy. |
 | **Text** | Poskytněte surový textový obsah k extrakci. |
+
+Vzdálený soubor nejprve stáhněte a nahrajte přes `POST /files`. Přímé použití `file_urls` extrakční worker nepodporuje.
 
 ## Životní cyklus tabulky
 

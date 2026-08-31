@@ -18,16 +18,16 @@ Enhancement lets you use AI to fill in, improve, or transform column values afte
 
 Generate new content based on existing data:
 
-```
-"Write a compelling product description based on the product name and specifications."
+```text
+"Write a compelling product description from {{product_name}} and {{specifications}}."
 ```
 
 ### Translation
 
 Translate content to another language, optionally using your glossary:
 
-```
-"Translate the description to German."
+```text
+"Translate {{description}} to German."
 ```
 
 Set `target_language` and `use_glossary: true` to apply your glossary terms during translation.
@@ -36,7 +36,7 @@ Set `target_language` and `use_glossary: true` to apply your glossary terms duri
 
 Enable `web_search: true` to let the AI search the web for additional information:
 
-```
+```text
 "Find the current retail price for this product from major retailers."
 ```
 
@@ -51,7 +51,7 @@ Enhancement runs asynchronously. Check progress with:
 
 <CodeGroup>
 ```typescript TypeScript
-const status = await client.enhance.status("tbl_abc123");
+const status = await client.enhance.status("d2b3dbe0-c77d-40d8-a5d2-480722489c64");
 
 for (const [column, stats] of Object.entries(status.columns)) {
   console.log(`${column}: ${stats.completed}/${stats.total} done`);
@@ -59,7 +59,7 @@ for (const [column, stats] of Object.entries(status.columns)) {
 ```
 
 ```python Python
-status = client.enhance.status("tbl_abc123")
+status = client.enhance.status("d2b3dbe0-c77d-40d8-a5d2-480722489c64")
 
 for column, stats in status["columns"].items():
     print(f"{column}: {stats['completed']}/{stats['total']} done")
@@ -68,8 +68,8 @@ for column, stats in status["columns"].items():
 
 ## Credits
 
-Each enhancement consumes credits. The estimated cost is returned when you start an enhancement job. Check your balance at any time via the [Credits API](/api-reference/credits/balance).
+Each enhancement consumes credits. Regular single-column enhancement costs 2 credits per row; regular bulk enhancement costs 0.5 credits per column. Gallery Max image columns use a separate 16-credit rate, which the current bulk estimate does not reflect. Check your balance via the [Credits API](/api-reference/credits/balance).
 
 ## Traces
 
-Every AI-generated value has a trace showing the prompt, model used, confidence score, and sources. See [Row traces](/api-reference/rows/traces) for details.
+Recorded traces can include the prompt, configured model, confidence score, tool calls, sources, response text, and a summarized thought. They do not expose private chain of thought. See [Row traces](/api-reference/rows/traces) for details.

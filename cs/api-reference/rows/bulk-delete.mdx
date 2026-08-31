@@ -3,3 +3,5 @@ title: 'Hromadné smazání řádků'
 description: 'Smazání více řádků z tabulky najednou.'
 openapi: "openapi.yaml POST /tables/{table_id}/rows/bulk-delete"
 ---
+
+Handler smaže řádky, jejichž ID patří do tabulky. Neznámá ID a ID z jiné tabulky ignoruje. `deleted_count` vrací počet skutečně odstraněných řádků.

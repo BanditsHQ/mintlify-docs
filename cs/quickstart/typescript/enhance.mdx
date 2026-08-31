@@ -8,16 +8,16 @@ description: 'Použijte AI ke generování obsahu, překladu textu a obohacení 
 Použijte AI ke generování nebo obohacení hodnot pro konkrétní sloupec ve vybraných řádcích.
 
 ```typescript
-const rows = await client.tables.rows("tbl_abc123", { limit: 100 });
+const rows = await client.tables.rows("d2b3dbe0-c77d-40d8-a5d2-480722489c64", { limit: 100 });
 
-const job = await client.enhance.cells("tbl_abc123", {
+const job = await client.enhance.cells("d2b3dbe0-c77d-40d8-a5d2-480722489c64", {
   row_ids: rows.data.map((r) => r.id),
   column_key: "description",
-  prompt: "Write a compelling product description based on the product name and specifications.",
+  prompt: "Write a compelling product description from {{product_name}} and {{price}}.",
   web_search: true,
 });
 
-console.log(job.id);                // "enhance_..."
+console.log(job.id);                // "b672c561-236d-47e4-b9ec-7c4219454aa8"
 console.log(job.status);            // "queued"
 console.log(job.estimated_credits); // 84
 ```
@@ -25,7 +25,7 @@ console.log(job.estimated_credits); // 84
 ## Kontrola průběhu obohacení
 
 ```typescript
-const status = await client.enhance.status("tbl_abc123");
+const status = await client.enhance.status("d2b3dbe0-c77d-40d8-a5d2-480722489c64");
 
 for (const [column, stats] of Object.entries(status.columns)) {
   console.log(`${column}: ${stats.completed}/${stats.total} done`);
@@ -37,12 +37,12 @@ for (const [column, stats] of Object.entries(status.columns)) {
 Obohaťte několik sloupců jednoho řádku v jednom požadavku:
 
 ```typescript
-await client.enhance.bulk("tbl_abc123", {
-  row_id: "row_xyz789",
+await client.enhance.bulk("d2b3dbe0-c77d-40d8-a5d2-480722489c64", {
+  row_id: "83ba2c61-8592-4614-ac46-10f43580dfb8",
   columns: [
-    { key: "description", prompt: "Write a product description." },
-    { key: "seo_title", prompt: "Generate an SEO-optimized title." },
-    { key: "description_de", prompt: "Translate the description to German." },
+    { key: "description", prompt: "Write a product description from {{product_name}} and {{price}}." },
+    { key: "seo_title", prompt: "Generate an SEO-optimized title from {{product_name}}." },
+    { key: "description_de", prompt: "Translate {{description}} to German." },
   ],
 });
 ```
@@ -50,7 +50,7 @@ await client.enhance.bulk("tbl_abc123", {
 ## Zrušení obohacení
 
 ```typescript
-const result = await client.enhance.cancel("tbl_abc123");
+const result = await client.enhance.cancel("d2b3dbe0-c77d-40d8-a5d2-480722489c64");
 console.log(result.cancelled_count);
 ```
 

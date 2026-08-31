@@ -18,16 +18,16 @@ Obohacení vám umožňuje pomocí AI doplnit, zlepšit nebo transformovat hodno
 
 Generujte nový obsah na základě existujících dat:
 
-```
-"Write a compelling product description based on the product name and specifications."
+```text
+"Write a compelling product description from {{product_name}} and {{specifications}}."
 ```
 
 ### Překlad
 
 Přeložte obsah do jiného jazyka, volitelně s využitím vašeho slovníku:
 
-```
-"Translate the description to German."
+```text
+"Translate {{description}} to German."
 ```
 
 Nastavte `target_language` a `use_glossary: true` pro aplikaci vašich termínů ze slovníku během překladu.
@@ -36,7 +36,7 @@ Nastavte `target_language` a `use_glossary: true` pro aplikaci vašich termínů
 
 Povolte `web_search: true`, aby AI mohla vyhledávat na webu další informace:
 
-```
+```text
 "Find the current retail price for this product from major retailers."
 ```
 
@@ -51,7 +51,7 @@ Obohacení běží asynchronně. Kontrolujte průběh pomocí:
 
 <CodeGroup>
 ```typescript TypeScript
-const status = await client.enhance.status("tbl_abc123");
+const status = await client.enhance.status("d2b3dbe0-c77d-40d8-a5d2-480722489c64");
 
 for (const [column, stats] of Object.entries(status.columns)) {
   console.log(`${column}: ${stats.completed}/${stats.total} done`);
@@ -59,7 +59,7 @@ for (const [column, stats] of Object.entries(status.columns)) {
 ```
 
 ```python Python
-status = client.enhance.status("tbl_abc123")
+status = client.enhance.status("d2b3dbe0-c77d-40d8-a5d2-480722489c64")
 
 for column, stats in status["columns"].items():
     print(f"{column}: {stats['completed']}/{stats['total']} done")
@@ -68,8 +68,8 @@ for column, stats in status["columns"].items():
 
 ## Kredity
 
-Každé obohacení spotřebuje kredity. Odhadovaná cena se vrátí při spuštění úlohy obohacení. Svůj zůstatek můžete kdykoliv zkontrolovat prostřednictvím [Credits API](/cs/api-reference/credits/balance).
+Každý enhancement spotřebuje kredity. Běžný enhancement jednoho sloupce stojí 2 kredity za řádek a běžný bulk 0,5 kreditu za sloupec. Obrázkové sloupce Gallery Max mají sazbu 16 kreditů, kterou aktuální bulk odhad nezohledňuje. Zůstatek zkontrolujte přes [Credits API](/cs/api-reference/credits/balance).
 
 ## Trasování
 
-Každá AI-generovaná hodnota má trasování zobrazující prompt, použitý model, skóre spolehlivosti a zdroje. Podrobnosti najdete v [Row traces](/cs/api-reference/rows/traces).
+Zaznamenané trasování může obsahovat prompt, nakonfigurovaný model, skóre spolehlivosti, volání nástrojů, zdroje, text odpovědi a shrnutí úvahy. Soukromý chain of thought nezpřístupňuje. Podrobnosti najdete v [Row traces](/cs/api-reference/rows/traces).

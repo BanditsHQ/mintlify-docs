@@ -1,24 +1,24 @@
 ---
 title: 'Data enrichment'
-description: 'Turn partial product data into complete, sourced records with Lasso Enrich.'
+description: 'Research and fill target fields in partial product records with Lasso Enrich.'
 ---
 
-Lasso Enrich takes partial product records — as little as a product name or SKU — and fills in every missing field with sourced, cited data. Each value comes with a **basis** showing exactly where the information came from.
+Lasso Enrich takes partial product records—as little as a product name or SKU—and researches the target fields in your schema. A field remains unchanged when the worker cannot determine a value. With web search enabled, returned researched fields include **basis** metadata.
 
 ## How it works
 
 1. **Pass in what you have** -- Provide one or more items with whatever data you already know (name, SKU, brand, etc.).
 2. **Define the target schema** -- Tell Lasso what fields you want filled in (or use the default product schema).
-3. **Lasso researches each product** -- The AI searches Lasso's database, finds the product, and extracts structured data.
-4. **Get back complete records** -- Every field is filled in with citations, reasoning, and confidence scores.
+3. **Lasso researches each product** -- The AI uses web tools when `web_search` is enabled and structures the information it finds.
+4. **Receive the available values** -- Successful researched fields include citations, a reasoning summary, and a confidence label. Fields the worker cannot determine stay unchanged.
 
 ## The basis
 
-Every enriched field includes a `basis` that tells you:
+When web search is enabled, each target field receives a `basis` entry that contains:
 
 - **citations** -- The sources used (URL, title, excerpt)
 - **reasoning** -- How the AI determined the value
-- **confidence** -- `high` or `low`
+- **confidence** -- `high`, `medium`, or `low`
 
 This transparency is critical for product data quality. You can verify values, filter by confidence, or show sources to your users.
 
@@ -29,7 +29,9 @@ Same as Search — use `schema_id`, inline `columns`, or omit both for the defau
 ## Sync vs async
 
 - **Sync** (default): For up to 5 items, Lasso processes and returns results in the same request.
-- **Async**: For larger batches (>5 items) or when you pass `webhook_url`, Lasso returns `202` immediately and delivers results via webhook.
+- **Async**: Pass `webhook_url` for 6 to 50 items or whenever you want webhook delivery. Lasso returns `202` immediately.
+
+Do not send more than 5 items without `webhook_url`. Although the current handler returns `202`, it exposes no public route for retrieving that job's result.
 
 ## Example: Search then Enrich
 
@@ -62,7 +64,7 @@ const enriched = await client.enrich({
 });
 
 for (const item of enriched.items) {
-  console.log(`${item.data.name} — ${item.data.price}g, ${item.data.dpi} DPI`);
+  console.log(`${item.data.name} — ${item.data.weight} g, ${item.data.dpi} DPI`);
 }
 ```
 
@@ -92,7 +94,7 @@ enriched = client.enrich(
 )
 
 for item in enriched["items"]:
-    print(f"{item['data']['name']} — {item['data']['price']}g, {item['data']['dpi']} DPI")
+    print(f"{item['data']['name']} — {item['data']['weight']} g, {item['data']['dpi']} DPI")
 ```
 </CodeGroup>
 
@@ -106,11 +108,11 @@ Credit cost depends on the **thinking** level you choose:
 | `medium` | **2** | Balanced speed and quality *(default)* |
 | `low` | **1** | Fast, straightforward lookups |
 
-The service controls the model behind each thinking level. Treat the level and credit price as the public contract instead of depending on a specific model name.
+The service controls the model behind each thinking level. The legacy `model` input is ignored; treat the thinking level and credit price as the public contract.
 
 ## Web search
 
-By default, Lasso uses web search to research each product and provides a `basis` with citations for every enriched field. You can disable this with `web_search: false` — the AI will fill fields from its own knowledge without citations, which is faster and still accurate for well-known products.
+By default, Lasso uses web search and returns `basis` metadata for target fields. With `web_search: false`, the worker uses model knowledge and omits `basis`; verify those uncited values independently.
 
 ## Next steps
 

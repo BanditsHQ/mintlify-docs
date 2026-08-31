@@ -6,7 +6,9 @@ openapi: "openapi.yaml GET /credits/usage"
 
 ## Usage notes
 
-`from` and `to` are date filters. `service` accepts the exact public service values shown in the parameter schema. `total_used` is calculated over the full filtered period, not only the current page.
+`from` and `to` filter the ledger timestamp. `service` is an exact raw `service_type`, not a closed enum. Current values include `product_import`, `pdf_extraction`, `ai_field`, `ai_field_bulk`, `product_search`, `product_enrich`, `image_gallery_max`, `ai_image_generation`, `ai_image_generation_flash`, and `richtext_alt_text`. `total_used` is calculated over the full filtered period, not only the current page.
+
+The response field named `table_id` is populated from transaction metadata `job_id`. Depending on the service, it can identify a table, enhancement job, Search job, or Enrich job.
 
 <Note>
   In Python SDK `0.2`, pass the reserved query name with `client.credits.usage(**{"from": "2026-08-01", "to": "2026-08-31"})`. The convenience name `from_` is not translated to `from`.

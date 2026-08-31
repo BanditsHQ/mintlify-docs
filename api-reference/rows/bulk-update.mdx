@@ -6,6 +6,6 @@ openapi: "openapi.yaml POST /tables/{table_id}/rows/bulk-update"
 
 ## Usage notes
 
-The table must be `completed` and unlocked. `column_key` must exist in the table's Product Schema snapshot, and every `row_id` must belong to the table.
+The table must be `completed` and unlocked. The current handler does not validate `column_key` against the table's Product Schema snapshot. It stores an unknown key in matching rows, so retrieve the table columns and validate the key in your client before writing.
 
-Lasso sets the same `value` on every matching row and returns the actual number of changed rows in `updated_count`.
+Lasso sets the same `value` on rows whose IDs match the table. Unknown IDs and IDs from another table are ignored rather than rejecting the whole request. `updated_count` is the actual number of changed rows.

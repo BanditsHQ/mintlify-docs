@@ -1,6 +1,6 @@
 ---
 title: 'Tables & extraction'
-description: 'Understand how Lasso extracts structured data from your source files.'
+description: 'Understand how Lasso extracts structured data from uploaded files or raw text.'
 ---
 
 Tables are the core resource in Lasso. A table represents an extraction job that takes unstructured source data and produces structured rows of product information.
@@ -16,13 +16,14 @@ When you create a table, Lasso processes your source files through an AI pipelin
 
 ## Source types
 
-You can provide data to extract from in three ways:
+You can provide data to extract in two supported ways:
 
 | Source | Description |
 |---|---|
 | **Files** | Upload PDFs, spreadsheets, images, or documents via the [Files API](/api-reference/files/upload). |
-| **URLs** | Pass publicly accessible URLs directly when creating a table. |
 | **Text** | Provide raw text content for extraction. |
+
+For a remote file, download it and upload it through `POST /files` before creating the table. The extraction worker does not support direct `file_urls` ingestion.
 
 ## Table lifecycle
 

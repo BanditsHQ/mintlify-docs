@@ -1,6 +1,6 @@
 ---
 title: "Search for products"
-description: "Search Lasso's product database for products matching a natural language query and return structured data. Filters should be embedded in the query (e.g. \"Sony earbuds under $200\"). Optionally provide a schema_id or inline columns to control the output shape. If neither is provided, a default product schema is used."
+description: "Search the web for products matching a natural language query and structure the results. Optionally provide a schema_id or inline columns to control the output shape."
 openapi: "openapi.yaml POST /search"
 ---
 
@@ -12,6 +12,8 @@ import SearchExamples from "/snippets/api/search-examples.mdx";
 - `max_results` accepts `1` through `7` and defaults to `7`.
 - A search costs 5 credits, independent of the number of returned products.
 - Without `webhook_url`, the request waits for a `200` response. With `webhook_url`, Lasso returns `202` and posts the completed result to your URL.
+- `model` is a deprecated compatibility field. The service ignores its value and uses the configured Gemini provider.
+- In synchronous mode, insufficient credits currently produce HTTP `200` with `error: "Insufficient credits"`, an empty `results` array, and `credits_used: 0`.
 
 Put product filters directly in `query`, for example `Sony earbuds under $200 with USB-C charging`.
 

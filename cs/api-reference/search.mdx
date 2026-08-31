@@ -1,6 +1,6 @@
 ---
 title: 'Vyhledávání produktů'
-description: 'Vyhledávejte v databázi Lasso a získejte strukturovaná data odpovídající vašemu schématu.'
+description: 'Vyhledávejte produkty na webu a strukturujte výsledky podle svého schématu.'
 openapi: "openapi.yaml POST /search"
 ---
 
@@ -12,6 +12,8 @@ import SearchExamples from "/snippets/api/search-examples.mdx";
 - `max_results` přijímá hodnoty `1` až `7` a výchozí hodnota je `7`.
 - Jedno vyhledávání stojí 5 kreditů bez ohledu na počet vrácených produktů.
 - Bez `webhook_url` požadavek čeká na odpověď `200`. S `webhook_url` Lasso vrátí `202` a dokončený výsledek odešle na vaši URL.
+- `model` je zastaralé kompatibilní pole. Služba jeho hodnotu ignoruje a používá nakonfigurovaný Gemini provider.
+- Při nedostatku kreditů synchronní režim aktuálně vrátí HTTP `200` s `error: "Insufficient credits"`, prázdným polem `results` a `credits_used: 0`.
 
 Filtry produktů zapisujte přímo do `query`, například `Sony sluchátka do 5 000 Kč s nabíjením USB-C`.
 

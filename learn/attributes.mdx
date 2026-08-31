@@ -47,7 +47,7 @@ Subscribe to `attribute.created`, `attribute.updated`, and `attribute.deleted` v
 
 ## Rename and deletion safety
 
-Renaming changes the canonical key and then attempts each dependent migration. It is not atomic across every dependent resource. A `207` response means the canonical rename succeeded but at least one dependent migration failed. Inspect every `results` bucket before continuing. Retry a partial rename with the returned `attribute.id` as `attribute_id` and the same old and new keys.
+Renaming changes the canonical key and supported dependent data atomically. A blocked, conflicting, busy, or stale rename returns `409` without partial completion. When retrying an uncertain outcome, pass the returned Attribute ID as `attribute_id` so the handler can resolve the same identity after a key change.
 
 Permanent deletion is dependency-safe. `DELETE /attributes/{key}` returns `409 attribute_in_use` when schemas, tables, Catalog data, mappings, or feeds still depend on the Attribute. It never cascades or removes those dependencies. Use the Dashboard archive flow when you need reversible removal.
 

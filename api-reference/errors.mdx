@@ -1,9 +1,9 @@
 ---
 title: "Errors"
-description: "Handle the Lasso API error envelope, stable detail codes, and retry metadata."
+description: "Handle the standard Lasso API error envelope and endpoint-specific error payloads."
 ---
 
-Error responses use one JSON envelope. Four fields are always present:
+Most public handlers use this standard JSON envelope:
 
 ```json
 {
@@ -17,23 +17,34 @@ Error responses use one JSON envelope. Four fields are always present:
 }
 ```
 
-<ResponseField name="status_code" type="integer" required>
+<ResponseField name="status_code" type="integer">
   HTTP status code.
 </ResponseField>
 
-<ResponseField name="error_type" type="string" required>
+<ResponseField name="error_type" type="string">
   Broad machine-readable category.
 </ResponseField>
 
-<ResponseField name="message" type="string" required>
+<ResponseField name="message" type="string">
   Human-readable explanation.
 </ResponseField>
 
-<ResponseField name="request_id" type="string" required>
+<ResponseField name="request_id" type="string">
   Request identifier to include in support reports.
 </ResponseField>
 
-The API can also include `code`, `retryable`, `details`, `current_updated_at`, `attribute_id`, or `attribute_key`. Treat `code` as the stable detail discriminator when it is present. Keep the complete raw payload because endpoint-specific errors can add fields.
+The standard envelope can also include `code`, `retryable`, `details`, `current_updated_at`, `attribute_id`, or `attribute_key`. Treat `code` as the stable detail discriminator when it is present.
+
+## Endpoint-specific payloads
+
+Some handlers bypass the standard helper. Do not assume the four standard fields exist on every non-2xx response.
+
+- Catalog validation can return `{ "error_type": "validation_error", "errors": [...] }`.
+- A stale Catalog write can return `{ "code": "stale_write", "current_updated_at": "..." }`.
+- Blocked exports and schema-dependency conflicts return endpoint-specific fields documented on those operations.
+- Search and Enrich can report insufficient credits inside an HTTP `200` result. Enhancement requests return `202` before the worker checks the balance; poll enhancement status for the eventual error.
+
+Keep the HTTP status and complete raw payload. The SDK error classes preserve nonstandard payloads in `rawPayload` or `raw_payload` when they receive a non-2xx response.
 
 ## Error types
 
@@ -41,7 +52,6 @@ The API can also include `code`, `retryable`, `details`, `current_updated_at`, `
 | --- | --- | --- |
 | `invalid_request` | `400` | Malformed request, invalid query value, or unsupported method. |
 | `unauthenticated` | `401` | Missing, invalid, or inactive API key. |
-| `insufficient_credits` | `402` | Not enough credits for the operation. |
 | `forbidden` | `403` | The authenticated actor cannot perform the action. |
 | `not_found` | `404` | The resource does not exist in the key's company scope. |
 | `conflict` | `409` | The requested mutation conflicts with current state or dependencies. |
@@ -52,4 +62,4 @@ The API can also include `code`, `retryable`, `details`, `current_updated_at`, `
 
 ## SDK errors
 
-TypeScript `LassoError` exposes `statusCode`, `errorType`, `requestId`, `code`, `retryable`, `currentUpdatedAt`, `details`, and `rawPayload`. Python `LassoError` exposes the corresponding snake_case fields and `raw_payload`.
+TypeScript `LassoError` exposes `statusCode`, `errorType`, `requestId`, `code`, `retryable`, `currentUpdatedAt`, `details`, and `rawPayload`. Python `LassoError` exposes the corresponding snake_case fields and `raw_payload`. Missing standard fields use SDK fallback values.

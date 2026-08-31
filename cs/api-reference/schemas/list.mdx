@@ -3,3 +3,5 @@ title: 'Seznam schémat'
 openapi: "openapi.yaml GET /schemas"
 description: 'Načtení stránkovaného seznamu vašich produktových schémat.'
 ---
+
+Handler podporuje `page` a `limit`. TypeScript a Python SDK aktuálně nabízejí argument `search`, ale API ho ignoruje; vrácené stránky filtrujte v klientovi.

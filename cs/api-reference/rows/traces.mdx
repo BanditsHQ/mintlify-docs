@@ -1,5 +1,7 @@
 ---
 title: 'Získat trasování řádku'
-description: 'Načtení trasování AI extrakce a obohacení pro řádek.'
+description: 'Vrací zaznamenaná data běhu enhancementu: prompty, text odpovědi, volání nástrojů, zdroje a volitelné shrnutí úvahy. Nezpřístupňuje soukromý chain of thought.'
 openapi: "openapi.yaml GET /tables/{table_id}/rows/{row_id}/traces"
 ---
+
+Trasování použijte ke kontrole vstupů, nástrojů, zdrojů a vygenerované odpovědi. `thought_summary` je omezené shrnutí, pokud je dostupné, nikoli soukromý řetězec uvažování modelu.

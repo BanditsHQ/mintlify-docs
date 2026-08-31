@@ -3,3 +3,5 @@ title: "Delete multiple rows"
 description: "Delete multiple rows."
 openapi: "openapi.yaml POST /tables/{table_id}/rows/bulk-delete"
 ---
+
+The handler deletes rows whose IDs match the table. Unknown IDs and IDs from another table are ignored. `deleted_count` reports the number actually removed.

@@ -1,9 +1,9 @@
 ---
 title: "Chyby"
-description: "Zpracujte chybovou obálku Lasso API, stabilní kódy a informace pro opakování požadavku."
+description: "Zpracujte standardní chybovou obálku Lasso API i chybová těla konkrétních endpointů."
 ---
 
-Chybové odpovědi používají jednu JSON obálku. Pole `status_code`, `error_type`, `message` a `request_id` jsou vždy přítomná.
+Většina veřejných handlerů používá následující standardní JSON obálku:
 
 ```json
 {
@@ -17,13 +17,23 @@ Chybové odpovědi používají jednu JSON obálku. Pole `status_code`, `error_t
 }
 ```
 
-Odpověď může obsahovat také `code`, `retryable`, `details`, `current_updated_at`, `attribute_id` nebo `attribute_key`. Pokud je `code` přítomný, používejte ho jako stabilní detailní identifikátor. Uchovejte celé původní tělo odpovědi.
+Standardní odpověď může obsahovat také `code`, `retryable`, `details`, `current_updated_at`, `attribute_id` nebo `attribute_key`. Pokud je `code` přítomný, používejte ho jako stabilní detailní identifikátor.
+
+## Těla konkrétních endpointů
+
+Některé handlery standardní helper nepoužívají. Nepředpokládejte proto, že každá neúspěšná odpověď obsahuje všechna čtyři standardní pole.
+
+- Validace Katalogu může vrátit `{ "error_type": "validation_error", "errors": [...] }`.
+- Zastaralý zápis do Katalogu může vrátit `{ "code": "stale_write", "current_updated_at": "..." }`.
+- Blokovaný export a konflikt závislostí schématu používají pole popsaná u daného endpointu.
+- Search a Enrich mohou nedostatek kreditů oznámit uvnitř HTTP `200`. Enhancement vrátí `202` ještě před kontrolou zůstatku; výslednou chybu sledujte ve stavu enhancementu.
+
+Uchovejte HTTP stav i celé původní tělo odpovědi.
 
 | Typ chyby | Obvyklý stav | Význam |
 | --- | --- | --- |
 | `invalid_request` | `400` | Chybný požadavek, parametr nebo metoda. |
 | `unauthenticated` | `401` | Chybějící, neplatný nebo deaktivovaný API klíč. |
-| `insufficient_credits` | `402` | Nedostatek kreditů. |
 | `forbidden` | `403` | Aktér nemůže akci provést. |
 | `not_found` | `404` | Zdroj ve společnosti klíče neexistuje. |
 | `conflict` | `409` | Požadavek je v konfliktu se stavem nebo závislostmi. |

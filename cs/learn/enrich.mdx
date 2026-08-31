@@ -1,24 +1,24 @@
 ---
 title: 'Obohacení dat'
-description: 'Přeměňte částečná produktová data na kompletní, zdrojované záznamy pomocí Lasso Enrich.'
+description: 'Dohledávejte a doplňujte cílová pole v částečných produktových záznamech pomocí Lasso Enrich.'
 ---
 
-Lasso Enrich vezme částečné produktové záznamy — stačí i jen název produktu nebo SKU — a vyplní každé chybějící pole zdrojovanými, citovanými daty. Každá hodnota je doplněna **basis** ukazujícím přesně, odkud informace pochází.
+Lasso Enrich vezme částečné produktové záznamy — stačí i název produktu nebo SKU — a dohledá cílová pole vašeho schématu. Pole zůstane beze změny, pokud worker hodnotu nezjistí. Při zapnutém webovém vyhledávání obsahují dohledané hodnoty metadata **basis**.
 
 ## Jak to funguje
 
 1. **Předejte, co máte** -- Poskytněte jednu nebo více položek s jakýmikoli daty, která už znáte.
 2. **Definujte cílové schéma** -- Řekněte Lassu, jaká pole chcete vyplnit (nebo použijte výchozí schéma).
-3. **Lasso prozkoumá každý produkt** -- AI prohledá databázi Lasso, najde produkt a extrahuje strukturovaná data.
-4. **Získejte kompletní záznamy** -- Každé pole je vyplněno s citacemi, zdůvodněním a skóre spolehlivosti.
+3. **Lasso prozkoumá každý produkt** -- Při zapnutém `web_search` používá AI webové nástroje a strukturuje nalezené informace.
+4. **Získejte dostupné hodnoty** -- Úspěšně dohledaná pole obsahují citace, shrnutí zdůvodnění a úroveň spolehlivosti. Nezjištěná pole zůstanou beze změny.
 
 ## Basis
 
-Každé obohacené pole obsahuje `basis`, který vám říká:
+Při zapnutém webovém vyhledávání dostane každé cílové pole položku `basis`, která obsahuje:
 
 - **citations** -- Použité zdroje (URL, název, úryvek)
 - **reasoning** -- Jak AI určila hodnotu
-- **confidence** -- `high` nebo `low`
+- **confidence** -- `high`, `medium` nebo `low`
 
 ## Kredity
 
@@ -30,11 +30,13 @@ Cena kreditů závisí na úrovni **thinking**:
 | `medium` | **2** | Vyvážená rychlost a kvalita *(výchozí)* |
 | `low` | **1** | Rychlé, jednoduché vyhledání |
 
-Služba řídí model použitý pro každou úroveň thinking. Za veřejný kontrakt považujte úroveň a cenu v kreditech, ne konkrétní název modelu.
+Služba řídí model použitý pro každou úroveň thinking. Zastaralý vstup `model` se ignoruje; za veřejný kontrakt považujte úroveň thinking a cenu v kreditech.
 
 ## Webové vyhledávání
 
-Ve výchozím nastavení Lasso používá webové vyhledávání k prozkoumání každého produktu a poskytuje `basis` s citacemi pro každé obohacené pole. Toto můžete vypnout pomocí `web_search: false` — AI vyplní pole ze svých vlastních znalostí bez citací, což je rychlejší a stále přesné pro známé produkty.
+Ve výchozím nastavení Lasso používá webové vyhledávání a vrací metadata `basis` pro cílová pole. S `web_search: false` používá worker znalosti modelu a `basis` vynechá; necitované hodnoty ověřte nezávisle.
+
+Pro 6 až 50 položek zadejte `webhook_url`. Bez něj aktuální handler vrátí `202`, ale neposkytuje veřejnou cestu k načtení výsledku.
 
 ## Další kroky
 

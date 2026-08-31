@@ -1,11 +1,11 @@
 ---
 title: "Enhance multiple columns for one row"
-description: "Enhances several columns for a single row in one AI call. Cheaper than individual cell enhancement (0.5 credits/column vs 2 credits/cell)."
+description: "Enhances several columns for one row. Regular columns cost 0.5 credits each; a Gallery Max image column uses the Gallery Max rate."
 openapi: "openapi.yaml POST /tables/{table_id}/enhance/bulk"
 ---
 
 ## Usage notes
 
-Use this operation when you want to enhance several columns of one row together. It costs 0.5 credits per requested column and returns `202`.
+Use this operation when you want to enhance several columns of one row together. It returns `202`. Regular columns cost 0.5 credits each. A Gallery Max image column configured in the table snapshot currently costs 16 credits, although the handler's `estimated_credits` still calculates every requested column at 0.5.
 
-Every column entry has its own `prompt` and may override `model`, `web_search`, or `target_language`. The row and all target columns must belong to the completed, unlocked table.
+Every column entry has its own `prompt` and may set `web_search` or `target_language`. The legacy per-column `model` field is accepted but ignored. The row and all target columns must belong to the completed, unlocked table. A bulk request can process at most one Gallery Max image column; additional Gallery Max columns fail asynchronously.

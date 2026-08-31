@@ -27,7 +27,7 @@ Použijte [API atributů](/cs/api-reference/attributes/list) pro list, vytvořen
 
 ## Bezpečné přejmenování a smazání
 
-Přejmenování nejdřív změní kanonický klíč a potom se pokusí migrovat každou závislost. Operace není atomická napříč všemi zdroji. Odpověď `207` znamená, že alespoň jedna závislá migrace selhala. Před pokračováním zkontrolujte všechny části `results`.
+Přejmenování změní kanonický klíč a podporovaná závislá data atomicky. Blokované, konfliktní, souběžné nebo zastaralé přejmenování vrátí `409` bez částečného dokončení. Při opakování požadavku s nejistým výsledkem předejte ID atributu v `attribute_id`.
 
 Trvalé smazání je bezpečné vůči závislostem. `DELETE /attributes/{key}` vrátí `409 attribute_in_use`, pokud atribut používá schéma, tabulka, produkt Katalogu, mapování nebo feed. Žádnou závislost automaticky nemaže.
 

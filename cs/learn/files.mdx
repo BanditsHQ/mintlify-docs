@@ -10,9 +10,10 @@ Lasso přijímá řadu formátů souborů jako zdrojová data pro extrakci. Nejp
 | Formát | Přípony | Poznámky |
 |---|---|---|
 | PDF | `.pdf` | Podporovány jsou jak skenované, tak textové PDF soubory. |
-| Tabulky | `.xlsx`, `.xls`, `.csv` | Každý list nebo soubor je parsován pro data o produktech. |
-| Obrázky | `.jpg`, `.png`, `.webp` | OCR extrahuje text z obrázků. |
-| Dokumenty | `.docx`, `.doc` | Word dokumenty jsou parsovány pro obsah. |
+| Tabulky | `.xlsx`, `.xls`, `.xlsm`, `.csv` | Každý list nebo soubor je parsován pro data o produktech. |
+| Obrázky | `.jpg`, `.jpeg`, `.png`, `.webp` | OCR extrahuje text z obrázků. |
+| Dokumenty | `.docx`, `.pptx` | Dokumenty Word a PowerPoint jsou parsovány pro obsah. |
+| Text a značkování | `.txt`, `.xml`, `.html`, `.htm` | Textový obsah se dekóduje a parsuje. |
 
 ## Postup nahrávání
 
@@ -51,7 +52,7 @@ const file = new File([buffer], "catalog.pdf", { type: "application/pdf" });
 const uploaded = await client.files.upload(file, "catalog.pdf");
 
 const table = await client.tables.create({
-  schema_id: "schema_abc",
+  schema_id: "9e1c77dd-8f10-41ca-bfe8-e672b89692d1",
   name: "My Catalog",
   file_ids: [uploaded.id],
 });
@@ -61,7 +62,7 @@ const table = await client.tables.create({
 uploaded = client.files.upload("/path/to/catalog.pdf")
 
 table = client.tables.create(
-    schema_id="schema_abc",
+    schema_id="9e1c77dd-8f10-41ca-bfe8-e672b89692d1",
     name="My Catalog",
     file_ids=[uploaded["id"]],
 )
@@ -70,10 +71,7 @@ table = client.tables.create(
 
 ## Alternativní zdroje
 
-Pokud nechcete nahrávat soubory, můžete také poskytnout:
-
-- **URL** -- Předejte `file_urls` s veřejně přístupnými URL adresami. Lasso je stáhne a zpracuje na straně serveru.
-- **Text** -- Předejte `source_text` se surovým textovým obsahem k extrakci.
+Pokud nechcete nahrávat soubor, předejte surový text v `source_text`. Vzdálený soubor nejprve stáhněte a nahrajte přes `POST /files`; přímé použití `file_urls` extrakční worker nepodporuje.
 
 ## Správa souborů
 

@@ -3,3 +3,5 @@ title: "List glossary terms"
 description: "List glossary terms."
 openapi: "openapi.yaml GET /glossary"
 ---
+
+This handler supports `page` and `limit`. The TypeScript and Python SDKs currently expose a `search` argument, but the API ignores it; filter the returned pages in your client.

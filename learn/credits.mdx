@@ -11,9 +11,10 @@ Lasso uses a credit-based system for extraction and enhancement operations.
 |---|---|
 | **Table extraction** | Varies by file size and complexity |
 | **Single cell enhancement** | ~2 credits per cell |
-| **Bulk enhancement** | ~0.5 credits per column |
+| **Bulk enhancement, regular column** | ~0.5 credits per column |
+| **Bulk enhancement, Gallery Max image column** | 16 credits per column |
 
-Credit estimates are returned when you create an enhancement job, so you know the cost before processing begins.
+Enhancement responses include an estimate. For bulk requests, the current public handler estimates every column at 0.5 credits even when the table snapshot configures a Gallery Max image column. Use the Gallery Max rate above for that column.
 
 ## Checking your balance
 
@@ -67,4 +68,9 @@ curl --request GET \
 
 ## Insufficient credits
 
-If you do not have enough credits for an operation, the API returns a `402` error with `error_type: "insufficient_credits"`. Check your balance before starting large enhancement jobs.
+The current public handlers do not consistently return `402` for insufficient credits:
+
+- Synchronous Search and Enrich return HTTP `200` with an `error` field and no results.
+- Enhancement returns `202` before the worker reserves credits. The affected enhancement cells later move to `error` status.
+
+Check `GET /credits/balance` before starting a large operation and inspect the operation result or enhancement status instead of relying on HTTP `402`.

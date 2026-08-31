@@ -8,8 +8,9 @@ import TableCreateExamples from "/snippets/api/table-create-examples.mdx";
 
 ## Poznámky k použití
 
-- Zadejte právě jeden zdroj: `file_ids`, `file_urls` nebo `source_text`.
-- V jedné extrakci můžete odeslat nejvýše 10 souborů. Duplicitní zdroje jsou odmítnuty.
+- Pro funkční extrakci zadejte právě jeden zdroj: neprázdné pole `file_ids` nebo neprázdné `source_text`.
+- `file_urls` zůstává přijímaným kompatibilním polem, ale extrakční worker URL nestáhne. Požadavek se může zařadit do fronty bez platného výsledku. Vzdálený soubor nejprve stáhněte a nahrajte přes `POST /files`.
+- Duplicitní názvy zdrojových souborů jsou odmítnuty. Celkový limit velikosti extrakce je 512 MB.
 - Vybrané Product Schema se při vytvoření zkopíruje do tabulky. Pozdější změny opakovaně použitelného Product Schema nepřepíšou snapshot tabulky.
 - Úspěšný požadavek vrátí `201` se stavem `queued_for_processing`. Dotazujte `GET /tables/{table_id}`, dokud stav nebude `completed`, `error` nebo `cancelled`.
 - Nastavte `webhook_url`, pokud chcete konečný výsledek extrakce získat bez dotazování.

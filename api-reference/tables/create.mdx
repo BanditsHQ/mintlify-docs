@@ -1,6 +1,6 @@
 ---
 title: "Create a table and start extraction"
-description: "Create a new table from files, URLs, or text. Extraction starts automatically. Provide exactly one of: file_ids, file_urls, or source_text."
+description: "Create a new table from uploaded files or raw text. Extraction starts automatically. Provide exactly one of: file_ids or source_text."
 openapi: "openapi.yaml POST /tables"
 ---
 
@@ -8,8 +8,9 @@ import TableCreateExamples from "/snippets/api/table-create-examples.mdx";
 
 ## Usage notes
 
-- Provide exactly one source: `file_ids`, `file_urls`, or `source_text`.
-- You may submit at most 10 files in one extraction. Duplicate sources are rejected.
+- For a working extraction, provide exactly one source: a non-empty `file_ids` array or non-empty `source_text`.
+- `file_urls` remains accepted as a legacy compatibility field, but the extraction worker does not download those URLs. The request can be queued without producing a valid extraction. Download the remote file and upload it with `POST /files` first.
+- Duplicate source file names are rejected. The combined extraction size limit is 512 MB.
 - The selected Product Schema is copied into the table when you create it. Later changes to the reusable Product Schema do not rewrite the table's snapshot.
 - A successful request returns `201` with status `queued_for_processing`. Poll `GET /tables/{table_id}` until the status is `completed`, `error`, or `cancelled`.
 - Set `webhook_url` to receive the final extraction result without polling.

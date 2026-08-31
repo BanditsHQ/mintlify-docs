@@ -3,3 +3,5 @@ title: "List active schemas"
 description: "Archived schemas are recoverable in the Dashboard but are intentionally excluded from this active public list."
 openapi: "openapi.yaml GET /schemas"
 ---
+
+This handler supports `page` and `limit`. The TypeScript and Python SDKs currently expose a `search` argument, but the API ignores it; filter the returned pages in your client.

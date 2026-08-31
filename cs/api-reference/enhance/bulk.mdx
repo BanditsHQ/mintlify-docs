@@ -6,6 +6,6 @@ openapi: "openapi.yaml POST /tables/{table_id}/enhance/bulk"
 
 ## Poznámky k použití
 
-Tuto operaci použijte, když chcete společně obohatit několik sloupců jednoho řádku. Stojí 0,5 kreditu za každý požadovaný sloupec a vrací `202`.
+Tuto operaci použijte, když chcete společně obohatit několik sloupců jednoho řádku. Vrací `202`. Běžný sloupec stojí 0,5 kreditu. Obrázkový sloupec Gallery Max nastavený ve snapshotu tabulky aktuálně stojí 16 kreditů, přestože `estimated_credits` handleru stále počítá všechny sloupce sazbou 0,5.
 
-Každá položka sloupce má vlastní `prompt` a může přepsat `model`, `web_search` nebo `target_language`. Řádek i všechny cílové sloupce musí patřit do dokončené a neuzamčené tabulky.
+Každá položka sloupce má vlastní `prompt` a může nastavit `web_search` nebo `target_language`. Zastaralé pole `model` se přijme, ale ignoruje. Řádek i všechny cílové sloupce musí patřit do dokončené a neuzamčené tabulky. Jeden bulk požadavek může zpracovat nejvýše jeden obrázkový sloupec Gallery Max; další selžou asynchronně.

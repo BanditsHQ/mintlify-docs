@@ -6,7 +6,7 @@ description: 'Export your extracted and enhanced data in multiple formats.'
 ## Export as JSON
 
 ```python
-data = client.export.json("tbl_abc123")
+data = client.export.json("d2b3dbe0-c77d-40d8-a5d2-480722489c64")
 print(data)  # [{"product_name": "...", "price": 29.99}, ...]
 ```
 
@@ -17,7 +17,7 @@ import httpx
 import os
 
 response = httpx.get(
-    "https://app.productlasso.com/api/v1/tables/tbl_abc123/export",
+    "https://app.productlasso.com/api/v1/tables/d2b3dbe0-c77d-40d8-a5d2-480722489c64/export",
     params={"format": "csv"},
     headers={"Authorization": f"Bearer {os.environ['LASSO_API_KEY']}"},
 )
@@ -28,7 +28,7 @@ csv_data = response.text
 ## Export as XLSX
 
 ```python
-client.export.xlsx("tbl_abc123", path="export.xlsx")
+client.export.xlsx("d2b3dbe0-c77d-40d8-a5d2-480722489c64", path="export.xlsx")
 ```
 
 ## Export images
@@ -36,13 +36,13 @@ client.export.xlsx("tbl_abc123", path="export.xlsx")
 Download all images from image columns as a ZIP:
 
 ```python
-client.export.images("tbl_abc123", path="images.zip")
+client.export.images("d2b3dbe0-c77d-40d8-a5d2-480722489c64", path="images.zip")
 ```
 
 ## Select specific columns
 
 ```python
-data = client.export.json("tbl_abc123", columns="product_name,price,image_url")
+data = client.export.json("d2b3dbe0-c77d-40d8-a5d2-480722489c64", columns="product_name,price,image_url")
 ```
 
 ## Pandas integration
@@ -50,7 +50,7 @@ data = client.export.json("tbl_abc123", columns="product_name,price,image_url")
 Load all rows as a pandas DataFrame for analysis:
 
 ```python
-df = client.tables.results_as_dataframe("tbl_abc123")
+df = client.tables.results_as_dataframe("d2b3dbe0-c77d-40d8-a5d2-480722489c64")
 
 expensive = df[df["price"] > 100]
 df.to_csv("products.csv", index=False)

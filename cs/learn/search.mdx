@@ -1,6 +1,6 @@
 ---
 title: 'Vyhledávání produktů'
-description: 'Najděte produkty v databázi Lasso pomocí dotazů v přirozeném jazyce.'
+description: 'Najděte produkty pomocí webového vyhledávání a dotazů v přirozeném jazyce.'
 ---
 
 Lasso Vyhledávání umožňuje najít produkty pomocí přirozeného jazyka. Popište, co hledáte, a Lasso vrátí strukturovaná, typovaná produktová data odpovídající vašemu schématu.
@@ -8,7 +8,7 @@ Lasso Vyhledávání umožňuje najít produkty pomocí přirozeného jazyka. Po
 ## Jak to funguje
 
 1. **Popište, co potřebujete** -- Napište dotaz v přirozeném jazyce, např. "Sony sluchátka s potlačením hluku do 5000 Kč".
-2. **Lasso prohledá svou databázi** -- Produkty odpovídající vašemu dotazu jsou nalezeny a seřazeny.
+2. **Lasso prohledá web** -- Worker získá webové výsledky odpovídající vašemu dotazu.
 3. **Výsledky jsou strukturovány** -- Každý produkt je extrahován do vašeho schématu s typovanými poli, zdrojovými URL a skóre spolehlivosti.
 
 ## Možnosti schématu
@@ -28,6 +28,8 @@ Ve výchozím nastavení je vyhledávání synchronní. Když předáte `webhook
 ## Kredity
 
 Každé vyhledávání stojí **5 kreditů**.
+
+Zastaralý vstup `model` nevybírá provider. Služba používá nakonfigurovaný Gemini provider. Při nedostatku kreditů synchronní endpoint aktuálně vrátí HTTP `200` s polem `error` a bez výsledků.
 
 ## Další kroky
 

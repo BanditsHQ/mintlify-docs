@@ -1,14 +1,14 @@
 ---
 title: "Rename an Attribute key and dependent data"
-description: "Renames the canonical key and attempts each dependent migration. This operation is not atomic across all dependent resources. A `207` response has `success: false`, retains sanitized per-resource result buckets, and must be inspected before the caller decides how to continue. To retry a partial rename, pass the returned `attribute.id` as `attribute_id` with the same old and new keys."
+description: "Atomically renames an Attribute key and its supported dependent data. A blocked, conflicting, busy, or stale rename returns `409` without partial completion."
 openapi: "openapi.yaml POST /attributes/{key}/rename"
 ---
 
-## Handle partial completion
+## Atomic behavior
 
-This operation first renames the canonical Attribute and then migrates dependent resources. Those dependent writes are not one atomic transaction.
+The handler previews the affected resources and then applies the key change and supported dependent migrations in one database operation.
 
-- `200` means every migration completed.
-- `207` means the canonical rename completed but at least one dependent migration failed. Inspect `results` before continuing.
-- To resume a partial rename, call the same endpoint with the same old and new keys and pass the returned `attribute.id` as `attribute_id`.
-- `errors` contains stable sanitized codes. It never exposes private resource IDs or raw database errors.
+- `200` means the atomic rename completed. Successful result buckets have `code: "ok"`, `error_count: 0`, and an empty `errors` array.
+- `409` means nothing was partially migrated. Detail codes include key conflicts, `rename_busy`, blockers, and `stale_preview`.
+- Pass `attribute_id` when retrying an uncertain request so the handler can identify the same Attribute even if its key already changed.
+- Most API clients should omit `expected_impact_revision`. If you provide an outdated token, the handler returns `409 stale_preview`.

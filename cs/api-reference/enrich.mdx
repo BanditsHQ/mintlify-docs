@@ -1,6 +1,6 @@
 ---
 title: 'Obohacení produktů'
-description: 'Předejte částečná produktová data a získejte zpět obohacené záznamy s vyplněnými chybějícími poli.'
+description: 'Dohledávejte cílová pole v částečných produktových záznamech. Pole může zůstat beze změny, pokud Lasso hodnotu nezjistí.'
 openapi: "openapi.yaml POST /enrich"
 ---
 
@@ -9,10 +9,16 @@ import EnrichExamples from "/snippets/api/enrich-examples.mdx";
 ## Poznámky k použití
 
 - Odešlete buď `schema_id`, nebo `columns`, nikdy obojí. Když vynecháte obě pole, Lasso použije výchozí Product Schema.
-- Požadavek může obsahovat nejvýše 50 produktů. Požadavky s nejvýše 5 produkty běží synchronně, pokud nenastavíte `webhook_url`; větší požadavky běží asynchronně.
+- Požadavek může obsahovat nejvýše 50 produktů. Pro synchronní odpověď odešlete 1 až 5 produktů. Pro 6 až 50 produktů musíte zadat `webhook_url`, protože veřejný endpoint pro načtení výsledku Enrich úlohy neexistuje.
 - `thinking` stojí 4 kredity za produkt pro `hard`, 2 pro `medium` a 1 pro `low`.
 - S `web_search: false` Lasso používá znalosti modelu a v poli `basis` nevrací citace.
 - Pole `context` použijte pro pokyny, které platí pro všechny položky požadavku.
+- `model` je zastaralé kompatibilní pole. Služba ho ignoruje; úroveň `thinking` vybírá modelový tier řízený službou.
+- Při nedostatku kreditů synchronní režim aktuálně vrátí HTTP `200` s `error: "Insufficient credits"`, bez obohacených položek a s `credits_used: 0`.
+
+<Warning>
+  Bez `webhook_url` neposílejte více než 5 položek. Aktuální handler požadavek přijme a vrátí `202`, ale pro dané ID neposkytuje cestu k načtení výsledku.
+</Warning>
 
 ## Příklady
 

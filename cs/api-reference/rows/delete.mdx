@@ -3,3 +3,5 @@ title: 'Smazat řádek'
 description: 'Smazání jednoho řádku z tabulky.'
 openapi: "openapi.yaml DELETE /tables/{table_id}/rows/{row_id}"
 ---
+
+U existující dokončené tabulky je smazání idempotentní. Handler vrátí `204`, když řádek smazal i když už řádek neexistoval. Pro chybějící řádek nevrací `404`.

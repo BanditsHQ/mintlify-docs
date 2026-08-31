@@ -3,3 +3,5 @@ title: "Update table metadata"
 description: "Update table metadata."
 openapi: "openapi.yaml PATCH /tables/{table_id}"
 ---
+
+Changing `schema_id` replaces the table's Product Schema snapshot for subsequent operations. It does not rename, remove, or remap keys in existing rows.
