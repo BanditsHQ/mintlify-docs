@@ -13,3 +13,9 @@ openapi: "openapi.yaml GET /credits/stats"
 - `currency_config` reflects the company's configured billing currency and cost-per-credit settings.
 
 The published TypeScript and Python SDKs do not yet expose this endpoint. Call it with direct HTTP.
+
+## Allocation and cost
+
+`summary.monthly_allocation` is the regular monthly allowance, not the remaining balance or the sum of purchased packages. `summary.cost_per_credit` and `currency_config` use configured subscription fees and allowance; they do not represent the actual price of a particular one-time purchase.
+
+Use [credit balance](/api-reference/credits/balance) for the available balance. Check package validity in the app's credit overview.

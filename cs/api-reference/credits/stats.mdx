@@ -13,3 +13,9 @@ description: 'Načtení agregovaných statistik využití kreditů za období, p
 - `currency_config` odráží firemní nastavení fakturační měny a ceny za kredit.
 
 Publikované TypeScript a Python SDK tento endpoint zatím neposkytují. Volejte ho přímo přes HTTP.
+
+## Příděl a náklady
+
+`summary.monthly_allocation` je pravidelný měsíční příděl, nikoli zbývající zůstatek nebo součet zakoupených balíčků. `summary.cost_per_credit` a `currency_config` používají nastavené poplatky a příděl předplatného; nevyjadřují skutečnou cenu konkrétního jednorázového nákupu.
+
+Pro dostupný zůstatek použijte [zůstatek kreditů](/cs/api-reference/credits/balance). Platnost balíčků zkontrolujte v přehledu kreditů v aplikaci.

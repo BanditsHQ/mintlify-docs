@@ -1,0 +1,187 @@
+---
+title: 'Šablony obsahu'
+sidebarTitle: 'Šablony obsahu'
+description: 'Vytvářejte opakovaně použitelné popisy produktů ve vizuálním editoru nebo vlastním HTML/CSS a exportujte je pro e-shop.'
+---
+
+Šablony obsahu určují rozvržení a zdroje obsahu pro formátovaný popis produktu. Použijte firemní šablonu u více produktů nebo upravte výchozí rozvržení. Váš e-shop určuje, které HTML a styly se při importu zachovají.
+
+## Vyberte nebo vytvořte šablonu
+
+<Steps>
+  <Step title="Otevřete sloupec s formátovaným textem">
+    V tabulce otevřete nastavení sloupce a najděte **Šablony obsahu**. Šablony jsou dostupné pro sloupce typu richtext.
+  </Step>
+  <Step title="Vyberte výchozí šablonu">
+    V knihovně zobrazte náhled firemní šablony nebo výchozího rozvržení a vyberte šablonu, kterou chcete použít. Pro nové rozvržení klikněte na **Vytvořit vlastní šablonu**.
+  </Step>
+  <Step title="Upravte rozvržení a náhled">
+    Začněte popisem produktu, obrázky a příběhem, technickými detaily nebo prázdným rozvržením. Přidejte sekce, změňte jejich pořadí a nastavte zdroje obsahu. Zkontrolujte náhled pro počítač i mobil s ukázkovým obsahem nebo produktem z tabulky.
+  </Step>
+  <Step title="Uložte šablonu i sloupec">
+    Vlastní šablonu uložte do knihovny a poté potvrďte **Uložit změny** v nastavení sloupce. Samotné uložení do knihovny změnu sloupce nepotvrdí. Spusťte obohacení produktů, které chcete vyplnit.
+  </Step>
+</Steps>
+
+Vytváření rozvržení a ukázkové náhledy nespotřebovávají kredity. Generování a obohacení obsahu produktů kredity používá; před spuštěním zkontrolujte odhad operace. Viz [AI obohacení](/cs/learn/enhancement) a [Kredity a fakturace](/cs/learn/credits).
+
+## Nastavte zdroje obsahu
+
+Pro každou sekci nebo deklarované pole vyberte zdroj obsahu:
+
+| Zdroj | Použití |
+| --- | --- |
+| Pevný obsah | Stejný nadpis, text nebo obrázek u všech produktů. |
+| Propojený sloupec | Hodnota, která už je v řádku produktu. |
+| Instrukce pro AI | Obsah pro konkrétní produkt vytvořený při obohacení. |
+
+Vizuální šablony podporují nadpisy, text, seznamy, obrázky s textem, specifikace a výzvy k akci. Pokud jsou dostupné opakované sekce, nastavte jednu sekci obrázek/text a její zdroje a opakujte ji pro seznam vlastností produktu. V náhledu ověřte chybějící hodnoty a dlouhý obsah.
+
+Náhled s vaším produktem zobrazí dostupné zdrojové hodnoty. Negeneruje chybějící obsah AI ani neověřuje import do e-shopu.
+
+## Opakované použití a úpravy
+
+Knihovna obsahuje uložené firemní šablony a výchozí rozvržení. Před výběrem si šablonu prohlédněte. Výchozí rozvržení upravte uložením vlastní kopie. Vytváření a správa firemních šablon závisí na vašich oprávněních.
+
+Existující obsah produktu si zachovává uloženou definici šablony. Úprava šablony v knihovně automaticky nezmění již vygenerované popisy. Novou definici použijte nebo obsah produktů znovu vygenerujte, až když chcete změnu převzít.
+
+Odebrání šablony ze sloupce změní jeho nastavení. Nepřegeneruje existující popisy produktů.
+
+## Začněte vlastním HTML/CSS
+
+Pokud je zapnuté vytváření kódových šablon, na úvodní obrazovce editoru vyberte **Vlastní HTML/CSS**. Fragment obsahu produktu upravte v záložkách **HTML**, **CSS** a volitelně **JavaScript**. Měnitelné hodnoty deklarujte v záložce **Pole obsahu** a propojte je s HTML podle příkladů níže.
+
+<Note>
+Pokud volbu **Vlastní HTML/CSS** nevidíte, vytváření kódových šablon ve vašem prostředí není zapnuté. Vizuální rozvržení můžete vytvářet dál. Existující kódový obsah zůstává dostupný pro úpravy a export. Interaktivní náhled JavaScriptu také závisí na dostupnosti náhledu; statický náhled skripty nespouští.
+</Note>
+
+## Vyberte podobu exportu
+
+V nastavení sloupce zvolte **Podoba obsahu při exportu**. Export tabulky do CSV, XLSX a JSON převádí popis na HTML; nevrací uložený JSON šablony. Formát souboru a podoba HTML jsou dvě různé volby.
+
+| Šablona | Volba | Výsledek |
+| --- | --- | --- |
+| Vizuální | Pouze třídy (výchozí) | Sémantické HTML s třídami rozvržení Lasso. V e-shopu načtěte vlastní CSS. |
+| Vizuální | Inline styly | Vestavěné styly Lasso v atributech prvků. Nejde o vlastní vzhled vašeho e-shopu. |
+| Vizuální | HTML bez stylů | Text, seznamy, odkazy, obrázky a tabulky bez tříd a stylů. |
+| Kódová | HTML + CSS (výchozí) | Autorské HTML, inline atributy a vložené CSS včetně media queries. |
+| Kódová | Pouze třídy | Autorské HTML a třídy bez vloženého CSS, odkazů na CSS a inline stylů. CSS šablony načtěte v e-shopu. |
+| Kódová | HTML bez stylů | Podporované sémantické HTML bez tříd, stylů a skriptů. Vlastní značky se rozbalí. |
+
+Kódové šablony nenabízejí převod do inline stylů: libovolné CSS, pseudoprvky a media queries nelze věrně převést na atributy. Dříve uložená volba inline nebo zákaznického exportu u kódových šablon použije **HTML + CSS**. Výslovná volba tříd nebo HTML bez stylů se nyní skutečně uplatní.
+
+Běžný export odstraňuje skripty a obsluhu událostí. **HTML se skripty** je samostatné, výslovné stažení v editoru kódového obsahu produktu. Použijte jej až po kontrole kódu webovým týmem a ověření podpory v e-shopu. Nejde o výchozí export tabulky. Popisy v CSV exportu Catalog zůstávají prostým textem, nikoli stylovaným HTML.
+
+Excel dovoluje nejvýše 32 767 znaků v jedné buňce. Delší popis exportujte jako CSV nebo přes veřejný export JSON, aby se zachoval celý obsah. Export XLSX vrátí srozumitelnou chybu místo zkrácení HTML šablony.
+
+## Vizuální HTML, kontrakt verze 1
+
+Cilte na následující třídy uvnitř kontejneru popisu v e-shopu. Nespoléhejte na obaly editoru, interní ID, značky výběru, přesné mezery ani počet sekcí. Opakované sekce obrázek/text používají stejné třídy rozvržení a lze je přesouvat mezi běžné sekce.
+
+| Selektor | Význam |
+| --- | --- |
+| `.product-content` | Kořen popisu. |
+| `.spacing-compact`, `.spacing-normal`, `.spacing-spacious` | Varianta rozestupů na kořeni. |
+| `.content-section` | Text, samostatný nadpis, seznam, specifikace nebo výzva k akci. |
+| `.hero-bullets` | Sekce hlavních vlastností. S obrázkem může použít rozvržení obrázek/text. |
+| `.image-left`, `.image-right` | Dva přímí potomci: obrázek a text v uvedeném vizuálním pořadí. |
+| `.image-above`, `.image-below` | Obrázek a text; CSS nastavuje vizuální pořadí nad/pod. |
+| `.two-column`, `.three-column` | Sloupcová rozvržení zachovaná v kompatibilním HTML. |
+| `.specs-table` | Sekce specifikací a/nebo její tabulka. Stylujte potomky `table`, `th` a `td`. |
+| `.cta` | Výzva k akci; akce je běžný odkaz. |
+
+Nadpisy používají `h1`–`h4`. Odstavce, seznamy, odkazy, zvýraznění a tabulky zachovávají sémantické HTML. URL a alternativní text obrázku patří do obsahu produktu, nikoli CSS. Chybějící nebo přeskočené sekce nemusí být přítomné. Vizuální náhled může ukazovat zástupný obrázek; před publikováním doplňte skutečné obrázky.
+
+```html
+<div class="product-content spacing-normal">
+  <section class="content-section hero-bullets">
+    <h2>Everyday comfort</h2><ul><li>Lightweight construction</li></ul>
+  </section>
+  <div class="image-left">
+    <img src="https://your-cdn.example/product.webp" alt="Front view">
+    <div><h3>Built for daily use</h3><p>Product benefit.</p></div>
+  </div>
+</div>
+```
+
+### Izolované responzivní CSS
+
+Importované HTML obalte vlastním kontejnerem, například `<div class="storefront-description">...</div>`. CSS načtěte v motivu e-shopu, nikoli v textovém poli produktu. Typografii, rozestupy a barvy upravte podle značky. Hranice 640 px je příklad, nikoli požadavek Lasso.
+
+```css
+.storefront-description { overflow-wrap: anywhere; }
+.storefront-description img { max-width: 100%; height: auto; }
+.storefront-description .product-content {
+  max-width: 100%; margin: 0; color: inherit; font: inherit;
+  --section-gap: 2rem; overflow-wrap: anywhere;
+}
+.storefront-description .product-content.spacing-compact { --section-gap: 1.25rem; }
+.storefront-description .product-content.spacing-spacious { --section-gap: 2.75rem; }
+.storefront-description .product-content :is(.content-section, .image-left, .image-right,
+  .image-above, .image-below, .two-column, .three-column) { margin-block: 0 var(--section-gap); }
+.storefront-description .product-content :is(.image-left, .image-right, .two-column) {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem;
+}
+.storefront-description .product-content .three-column {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem;
+}
+.storefront-description .product-content .image-below { display: flex; flex-direction: column-reverse; }
+.storefront-description .product-content :is(.image-left, .image-right) > * { min-width: 0; }
+.storefront-description .product-content img { max-width: 100%; height: auto; display: block; }
+.storefront-description .product-content table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.storefront-description .product-content :is(th, td) { padding: .75rem; text-align: left; border-bottom: 1px solid #ddd; overflow-wrap: anywhere; }
+.storefront-description .product-content .cta a { display: inline-block; padding: .6rem 1rem; border-radius: .5rem; }
+@media (max-width: 640px) {
+  .storefront-description .product-content :is(.image-left, .image-right, .two-column, .three-column) { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+}
+```
+
+## Kódové šablony
+
+Vývojář řídí HTML a názvy tříd. Kódová šablona nemusí používat vizuální třídy uvedené výše. V záložce **Pole obsahu** deklarujte pole a propojte je s HTML:
+
+- `data-field="title"` vyplní deklarované pole. Text se escapuje; formátovaný text podporuje omezenou sadu značek.
+- `data-field="photo"` patří na `img` pro obrázkové pole. Lasso nastaví URL a alternativní text.
+- `data-if="photo"` odstraní obal, pokud obrázek chybí. Podmínky používejte pro volitelný obsah.
+- `data-each="features"` opakuje vnitřní HTML pro seznam. `heading` a `description` deklarujte jako vnořená pole tohoto seznamu.
+
+```html
+<article class="client-product">
+  <h2 data-field="title"></h2>
+  <section data-if="photo"><img data-field="photo"></section>
+  <div data-each="features"><section><h3 data-field="heading"></h3><p data-field="description"></p></section></div>
+</article>
+```
+
+```css
+.storefront-description .client-product { overflow-wrap: anywhere; }
+.storefront-description .client-product img { display: block; max-width: 100%; height: auto; }
+.storefront-description .client-product > div { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+@media (max-width: 640px) {
+  .storefront-description .client-product > div { grid-template-columns: minmax(0, 1fr); }
+}
+```
+
+Zdrojem pole může být pevný obsah, propojený sloupec nebo pokyny pro AI. U seznamu ze sloupce mohou vnořená pole číst hodnoty jednotlivých položek. AI vyplňuje pole; nepřepisuje váš zdrojový kód. Existující produkty zachovají snímek definice i po úpravě šablony v knihovně. Jinou definici přijměte vědomým použitím nebo opětovným generováním.
+
+Používejte trvalé absolutní HTTPS adresy obrázků. Základní URL může vyřešit relativní HTML odkazy a obrázky; nepřepisuje CSS `url(...)`. Obrázky v CSS pozadí nebo vytvořené JavaScriptem nejsou součástí kontrol a oprav deklarovaných obrázkových polí. CSS omezte vlastní kořenovou třídou, aby neovlivnilo zbytek e-shopu. V seznamech neopakujte HTML ID.
+
+Statický náhled nespouští skripty. Spuštění skriptového náhledu je výslovné a izolované: externí knihovny skriptů/CSS, síťové požadavky, formuláře a navigace nejsou dostupné. Připravujte fragment produktu, nikoli import celého webu.
+
+## Pravidla kompatibility
+
+Verze 1 je výše uvedený základ vizuálního stylování. V této verzi zachovejte význam tříd; nové třídy a volitelné sekce mohou přibýt. Odstranění či přejmenování dokumentované třídy, změna jejího významu nebo významu exportních voleb vyžaduje před vydáním novou dokumentovanou verzi kontraktu a postup migrace.
+
+Kódové definice používají formát polí verze 2 a ukládají snímek pro každý produkt. Tím se chrání zdrojový kód; nezafixuje se motiv e-shopu, vzdálené obrázky ani JavaScriptové závislosti. Webový tým by měl uchovávat reprezentativní export ve svých testech a zopakovat jej před aktualizací Lasso či e-shopu.
+
+## Ověřte import
+
+1. Exportujte skutečný popis stejnou cestou CSV, XLSX, JSON nebo API, kterou e-shop používá.
+2. Importujte jej do lokálního e-shopu nebo testovací kopie. Porovnejte uložené HTML s exportem. Ověřte zachování tříd, bloků CSS, atributů a adres obrázků.
+3. Zkontrolujte desktop a mobil, dlouhé nadpisy, text bez mezer, prázdná volitelná pole, chybějící obrázky a maximální počet opakování.
+4. Ověřte načtení obrázků a alternativní text, čitelnost tabulek a obsah nepřesahující kontejner popisu.
+5. Ověřte nepřítomnost skriptů v běžném exportu. Pokud import odstraňuje CSS, zvolte třídy a styly nainstalujte do motivu.
+
+Lokální vzorek ověří vykreslení a přenos souborů. Teprve test skutečného importu prokáže, zda vaše platforma zachová potřebné HTML.
+
+Veřejné rozhraní exportu popisuje [Export dat](/cs/learn/exports).

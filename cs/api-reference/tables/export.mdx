@@ -24,3 +24,9 @@ Před exportem musí být tabulka dokončená. Parametr `columns` odešlete jako
 ## Příklady
 
 <ExportExamples />
+
+## Obsah šablon
+
+CSV, XLSX a JSON převádějí strukturované popisy ze šablon na HTML podle nastavení exportu sloupce. Běžný export odstraňuje skripty a obsluhu událostí. CSV export Catalog má jiné chování: popisy jsou prostý text.
+
+XLSX odmítne popis delší než 32 767 znaků v buňce místo jeho zkrácení. Pro delší obsah použijte CSV nebo JSON. Viz [Šablony obsahu](/cs/learn/content-templates) pro režimy stylování a ověření importu.

@@ -3,3 +3,9 @@ title: "Get current credit balance"
 description: "Get current credit balance."
 openapi: "openapi.yaml GET /credits/balance"
 ---
+
+## What the balance includes
+
+`balance` is the company's total available balance: regular credits plus unexpired one-time credits. `currency` is `credits`, not a payment currency. The response does not include package breakdowns or expiry dates; view those details in the app.
+
+See [Credits & billing](/learn/credits) for spending order, renewal, and purchases.

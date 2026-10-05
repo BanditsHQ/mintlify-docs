@@ -1,0 +1,187 @@
+---
+title: 'Content templates'
+sidebarTitle: 'Content templates'
+description: 'Create reusable product descriptions with visual layouts or your own HTML/CSS, then export them for your storefront.'
+---
+
+Content templates define the layout and content sources for a rich-text product description. Reuse a company template across products, or customize a built-in layout. Your storefront determines which HTML and styles survive import.
+
+## Choose or create a template
+
+<Steps>
+  <Step title="Open a rich-text column">
+    Open the column settings in your extraction table. Find **Content templates**. Templates are available for rich-text columns.
+  </Step>
+  <Step title="Choose a starting point">
+    Open the template library to preview a company template or built-in layout. Select the template you want to use. To create a layout, click **Create custom template**.
+  </Step>
+  <Step title="Build and preview">
+    Start with a product description, images and story, technical details, or an empty layout. Add sections, change their order, and configure their content sources. Check desktop and mobile previews with sample content or a product from your table.
+  </Step>
+  <Step title="Save the template and column">
+    Save a custom template to the library, then confirm **Save changes** in the column settings. Saving to the library alone does not apply the column change. Run enhancement for the products you want to fill.
+  </Step>
+</Steps>
+
+Creating a layout and viewing sample previews do not consume credits. Generating or enriching product content uses credits; review the operation estimate before starting. See [AI enhancement](/learn/enhancement) and [Credits & billing](/learn/credits).
+
+## Set content sources
+
+For each section or declared content field, choose where its content comes from:
+
+| Source | Use it for |
+| --- | --- |
+| Fixed content | The same heading, copy, or image in every product. |
+| Linked column | A value already present in the product row. |
+| AI instructions | Product-specific content generated during enhancement. |
+
+Visual templates support headings, text, lists, images with text, specifications, and calls to action. Where repeated sections are available, define one image/text section and its sources, then repeat it for a list of product features. Check missing values and long content in the preview.
+
+A preview using your product shows available source values. It does not generate missing AI content or verify your ecommerce import.
+
+## Reuse and edit safely
+
+The library contains your company's saved templates and built-in layouts. Preview a template before selecting it. Customize a built-in layout by saving your own copy. Creating and managing company templates depends on your permissions.
+
+Existing product content keeps its saved template definition. Editing a library template does not silently redesign descriptions that you already generated. Apply or regenerate the affected product content deliberately when you want it to adopt the new definition.
+
+Removing a template from the column changes its configuration. It does not regenerate existing product descriptions.
+
+## Start with your own HTML/CSS
+
+Where coded template creation is enabled, select **Use your HTML/CSS** in the builder's starting screen. Author a product content fragment in the **HTML**, **CSS**, and optional **JavaScript** tabs. Define the changing values in **Content fields**, then connect them to your markup as shown below.
+
+<Note>
+If **Use your HTML/CSS** is absent, coded template creation is not enabled in your environment. You can still create visual layouts. Existing coded content remains available for editing and export. Interactive JavaScript preview also depends on preview availability; the static preview does not run scripts.
+</Note>
+
+## Choose the export contract
+
+Select **Content appearance on export** in the column settings. Table CSV, XLSX and JSON exports render the description as HTML, rather than exposing the stored template JSON. The file format and HTML style mode are separate choices.
+
+| Template | Mode | Result |
+| --- | --- | --- |
+| Visual | Classes only (default) | Semantic HTML with Lasso layout classes. Load your own stylesheet on the storefront. |
+| Visual | Inline styles | Lasso's built-in styles as element attributes. These are not your site's brand stylesheet. |
+| Visual | Unstyled HTML | Text, lists, links, images and tables without classes or style attributes. |
+| Coded | HTML + CSS (default) | Authored HTML, inline attributes and embedded CSS, including media queries. |
+| Coded | Classes only | Authored HTML and classes without embedded CSS, stylesheet links or inline styles. Load the template CSS on the storefront. |
+| Coded | Unstyled HTML | Supported semantic HTML without classes, styles or scripts. Custom tags are unwrapped. |
+
+Coded templates do not offer inline conversion: arbitrary CSS, pseudo-elements and media queries cannot be faithfully converted into element attributes. Previously saved coded inline or customer-specific export choices resolve to **HTML + CSS**. Explicit classes and unstyled choices now take effect.
+
+Standard exports remove scripts and event handlers. **HTML with scripts** is a separate, explicit download in the coded product editor. Use it only after your web team reviews the code and the destination supports it. It is not the table export default. Catalog CSV descriptions remain plain text; they are not a styled HTML delivery channel.
+
+Excel limits a cell to 32,767 characters. If a description is longer, use CSV or the public JSON export to preserve the full content. XLSX returns a validation error instead of cutting off template HTML.
+
+## Visual markup contract, version 1
+
+Target the classes below within your storefront's description container. Do not rely on editor wrappers, internal IDs, selection markers, exact whitespace or the number of sections. Repeated image/text sections use the same image layout classes and can move between ordinary sections.
+
+| Selector | Meaning |
+| --- | --- |
+| `.product-content` | Description root. |
+| `.spacing-compact`, `.spacing-normal`, `.spacing-spacious` | Spacing variant on the root. |
+| `.content-section` | Text, standalone heading, list, specification or call-to-action section. |
+| `.hero-bullets` | Feature list section. An image can instead produce an image/text layout. |
+| `.image-left`, `.image-right` | Two direct children: image and text, in the named visual order. |
+| `.image-above`, `.image-below` | Image and text block; CSS sets their visual stacking order. |
+| `.two-column`, `.three-column` | Column layouts retained by compatible rich-text content. |
+| `.specs-table` | Specification section and/or its table. Style the `table`, `th` and `td` descendants. |
+| `.cta` | Call-to-action section; the action is an ordinary link. |
+
+Headings use `h1`–`h4`. Paragraphs, `ul`/`ol`/`li`, links, emphasis and tables retain semantic HTML. Image URLs and alt text belong to the product content, not the stylesheet. Missing or skipped sections may be absent. Visual previews can show placeholders for missing images: supply the actual images before publishing.
+
+```html
+<div class="product-content spacing-normal">
+  <section class="content-section hero-bullets">
+    <h2>Everyday comfort</h2><ul><li>Lightweight construction</li></ul>
+  </section>
+  <div class="image-left">
+    <img src="https://your-cdn.example/product.webp" alt="Front view">
+    <div><h3>Built for daily use</h3><p>Product benefit.</p></div>
+  </div>
+</div>
+```
+
+### A scoped, responsive stylesheet
+
+Wrap the imported HTML in your own container, for example `<div class="storefront-description">...</div>`. Load this CSS in your ecommerce theme, not in a product text field. Adjust typography, spacing and colors to your brand. The 640px breakpoint is an example, not a Lasso requirement.
+
+```css
+.storefront-description { overflow-wrap: anywhere; }
+.storefront-description img { max-width: 100%; height: auto; }
+.storefront-description .product-content {
+  max-width: 100%; margin: 0; color: inherit; font: inherit;
+  --section-gap: 2rem; overflow-wrap: anywhere;
+}
+.storefront-description .product-content.spacing-compact { --section-gap: 1.25rem; }
+.storefront-description .product-content.spacing-spacious { --section-gap: 2.75rem; }
+.storefront-description .product-content :is(.content-section, .image-left, .image-right,
+  .image-above, .image-below, .two-column, .three-column) { margin-block: 0 var(--section-gap); }
+.storefront-description .product-content :is(.image-left, .image-right, .two-column) {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem;
+}
+.storefront-description .product-content .three-column {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem;
+}
+.storefront-description .product-content .image-below { display: flex; flex-direction: column-reverse; }
+.storefront-description .product-content :is(.image-left, .image-right) > * { min-width: 0; }
+.storefront-description .product-content img { max-width: 100%; height: auto; display: block; }
+.storefront-description .product-content table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.storefront-description .product-content :is(th, td) { padding: .75rem; text-align: left; border-bottom: 1px solid #ddd; overflow-wrap: anywhere; }
+.storefront-description .product-content .cta a { display: inline-block; padding: .6rem 1rem; border-radius: .5rem; }
+@media (max-width: 640px) {
+  .storefront-description .product-content :is(.image-left, .image-right, .two-column, .three-column) { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+}
+```
+
+## Coded templates
+
+Your developer controls the HTML and class names. Coded templates do not require the visual class set above. Declare content fields in **Content fields**, then bind them in HTML:
+
+- `data-field="title"` fills a declared field. Text is escaped; rich text accepts a limited set of formatting tags.
+- `data-field="photo"` must be on an `img` for an image field. Lasso sets its URL and alt text.
+- `data-if="photo"` removes a wrapper when the image is empty. Use conditions for optional content.
+- `data-each="features"` repeats its child markup for a list. Declare `heading` and `description` as child fields of that list.
+
+```html
+<article class="client-product">
+  <h2 data-field="title"></h2>
+  <section data-if="photo"><img data-field="photo"></section>
+  <div data-each="features"><section><h3 data-field="heading"></h3><p data-field="description"></p></section></div>
+</article>
+```
+
+```css
+.storefront-description .client-product { overflow-wrap: anywhere; }
+.storefront-description .client-product img { display: block; max-width: 100%; height: auto; }
+.storefront-description .client-product > div { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+@media (max-width: 640px) {
+  .storefront-description .client-product > div { grid-template-columns: minmax(0, 1fr); }
+}
+```
+
+Field sources can be fixed content, a linked column or AI instructions. For a column-supplied list, child fields can read each list item. AI fills the fields; it does not rewrite your source code. Existing products retain their definition snapshot when you edit the library template. Apply or regenerate intentionally to adopt another definition.
+
+Use durable absolute HTTPS image URLs. An asset base can resolve relative HTML image/link paths; it does not rewrite CSS `url(...)`. CSS background images and images created by JavaScript are outside declared image-field checks and repairs. Scope CSS under your own root class to avoid styling the rest of the storefront. Avoid repeated HTML IDs inside lists.
+
+Static previews do not run scripts. Script preview is opt-in and sandboxed: external script/style libraries, fetch requests, forms and navigation are unavailable. Build a product fragment, not an import of an entire website.
+
+## Compatibility policy
+
+Version 1 is the visual styling baseline listed above. Preserve these class meanings within this contract version; additive classes and optional sections may appear. Removing or renaming a documented class, changing its meaning, or changing export-mode semantics requires a documented new contract version and migration guidance before release.
+
+Coded definitions use the version 2 field format and are snapshotted per product. That protects source reuse; it does not pin your ecommerce theme, remotely hosted images or JavaScript dependencies. Keep a representative exported fixture in your web team's tests and rerun it before upgrading Lasso or the storefront.
+
+## Verify your import
+
+1. Export a real description through the same CSV, XLSX, JSON or API path your shop uses.
+2. Import it into a local storefront or staging copy. Compare the stored HTML with the exported value. Check whether classes, style blocks, attributes and image URLs survive.
+3. Check desktop and mobile widths, very long headings, unbroken text, empty optional fields, missing images and the maximum repeat count.
+4. Check image loading and alt text. Verify table readability and that no layout overflows the description container.
+5. Confirm that scripts remain absent from ordinary exports. If the importer strips CSS, choose classes and install the stylesheet in the theme.
+
+A local fixture can verify rendering and file round trips. Only a test through your actual importer can establish that your ecommerce platform preserves the required markup.
+
+See [Exporting data](/learn/exports) for the public export interface.
