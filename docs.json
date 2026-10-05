@@ -98,6 +98,7 @@
                   "learn/enhancement",
                   "learn/files",
                   "learn/exports",
+                  "learn/content-templates",
                   "learn/glossary",
                   "learn/credits"
                 ]
@@ -292,6 +293,7 @@
                   "cs/learn/enhancement",
                   "cs/learn/files",
                   "cs/learn/exports",
+                  "cs/learn/content-templates",
                   "cs/learn/glossary",
                   "cs/learn/credits"
                 ]

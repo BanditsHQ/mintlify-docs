@@ -1,22 +1,84 @@
 ---
 title: 'Credits & billing'
-description: 'Understand how credits work and track your usage.'
+description: 'Understand regular and one-time credits, expiry, purchases, and usage reporting.'
 ---
 
-Lasso uses a credit-based system for extraction and enhancement operations.
+Lasso uses credits for extraction, search, enrichment, and AI content generation. Your company has one usable total balance, split into regular credits and one-time credits.
+
+## Understand your balances
+
+Open **Credits & reports** to view the two credit cards. The sidebar shows their combined available balance.
+
+| Balance | How it works |
+| --- | --- |
+| Regular credits | Your regular allowance. The card shows the remaining amount and renewal date; it excludes extra packages. |
+| One-time credits | Extra packages and eligible one-time grants. Each grant has its own remaining balance and validity date. These credits do not renew automatically. |
+
+Regular credits are spent first. After they run out, Lasso uses eligible one-time credits, starting with the package that expires soonest. Reservations for running jobs already count as used; refunds reduce that usage.
+
+Expand the regular card to see grants and usage in the current credit period. In the one-time card, **Active** lists packages with credits remaining and **History** lists used-up or expired packages. Expand a package to see its granted date, used, remaining, and expired credits. Detailed reporting depends on your permissions.
+
+## Renewal, rollover, and expiry
+
+Regular credit periods are monthly, including for annually billed subscriptions. When rollover is disabled, unused regular credits expire at the credit period deadline. When rollover is enabled for your company, unused regular credits accumulate without that expiry.
+
+One-time credits stay valid for 12 months after payment, or after being granted for partner-billed companies. They survive regular credit renewals and subscription changes. Rollover does not remove their expiry date.
+
+If a non-rollover plan change leaves more regular credits than the new allowance permits, the excess moves to the one-time balance with 12 months of validity from the transfer. The transfer preserves your total balance.
+
+Refunded usage returns to its original credit source and retains that source's validity. A refund does not renew an expired package or restore expired regular credits as fresh credits in a new period. Cancelling a running operation does not refund work that has already completed.
+
+## Add one-time credits
+
+You can add credits without changing your subscription. Your account needs permission to purchase credits. Ask your company administrator if the purchase action is unavailable.
+
+<Steps>
+  <Step title="Choose a package">
+    Open **Buy credits** or **Add credits** from the credit overview. Choose the currency and package. Review the price and validity before confirming.
+  </Step>
+  <Step title="Complete your billing flow">
+    For card billing, continue to Stripe Checkout and complete the one-time payment. For partner billing, review the confirmation and select **Confirm and add credits**. Partner confirmation grants the credits immediately and notifies billing managers; it does not represent a card payment.
+  </Step>
+  <Step title="Check confirmation">
+    For Stripe, credits are granted only after payment has been verified. Returning from Checkout alone does not prove fulfillment. If confirmation is delayed, use **Check again** and verify the package in your credit overview before buying another one. A cancelled unpaid checkout grants no credits.
+  </Step>
+</Steps>
+
+Current package prices exclude VAT. Card checkout adds 21% VAT; check the final total before payment.
+
+| Credits | EUR, excluding VAT | CZK, excluding VAT |
+| --- | --- | --- |
+| 1,000 | €56 | 1,400 Kč |
+| 5,000 | €240 | 6,000 Kč |
+| 10,000 | €440 | 11,000 Kč |
+| 25,000 | €1,000 | 25,000 Kč |
+
+For Stripe purchases, use the invoice links in billing history when available. Invoice visibility depends on billing permissions. Partner purchases follow your company's partner billing arrangement.
+
+## Track usage and costs
+
+In **Credits & reports**, choose a date range to compare credit usage over time and by service, module, user, or table. Billing and reporting permissions determine which details you can see.
+
+A monthly allocation is your regular allowance, not your combined remaining balance. The reported cost per credit is based on configured subscription fees and allowance. It is not the price paid for a particular one-time package. Do not treat a usage chart as an invoice.
+
+[Content templates](/learn/content-templates) can be created and previewed without spending credits. Generating their product content uses the enhancement operation's credit estimate.
 
 ## What consumes credits
+
+The in-app estimate depends on the selected mode, model, images, and number of products. Review it before starting. The regular public API rates below are not a universal price list for every text or image generation mode. For other operations, see [Product search](/learn/search) and [Data enrichment](/learn/enrich).
 
 | Operation | Credit cost |
 |---|---|
 | **Table extraction** | Varies by file size and complexity |
-| **Single cell enhancement** | ~2 credits per cell |
+| **Regular single-column enhancement, per row** | ~2 credits per cell |
 | **Bulk enhancement, regular column** | ~0.5 credits per column |
 | **Bulk enhancement, Gallery Max image column** | 16 credits per column |
 
 Enhancement responses include an estimate. For bulk requests, the current public handler estimates every column at 0.5 credits even when the table snapshot configures a Gallery Max image column. Use the Gallery Max rate above for that column.
 
 ## Checking your balance
+
+The public API returns the total available balance as `{ balance, currency: "credits" }`. It includes regular and unexpired one-time credits; it does not return package breakdowns or expiry dates. View those details in the app.
 
 <CodeGroup>
 ```typescript TypeScript
@@ -37,8 +99,8 @@ View your credit transaction history with optional filters:
 <CodeGroup>
 ```typescript TypeScript
 const usage = await client.credits.usage({
-  from: "2025-01-01T00:00:00Z",
-  to: "2025-03-31T23:59:59Z",
+  from: "2026-09-01T00:00:00Z",
+  to: "2026-09-30T23:59:59Z",
   service: "ai_field",
 });
 
@@ -47,8 +109,8 @@ console.log(`Total used: ${usage.total_used} credits`);
 
 ```python Python
 usage = client.credits.usage(**{
-    "from": "2025-01-01T00:00:00Z",
-    "to": "2025-03-31T23:59:59Z",
+    "from": "2026-09-01T00:00:00Z",
+    "to": "2026-09-30T23:59:59Z",
     "service": "ai_field",
 })
 

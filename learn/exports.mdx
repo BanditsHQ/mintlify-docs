@@ -99,3 +99,11 @@ df.to_csv("products.csv", index=False)
 ```
 
 This fetches all pages automatically and returns a ready-to-use DataFrame.
+
+## Template descriptions
+
+Table CSV, XLSX, and JSON exports render structured template content as HTML. Choose the export appearance in the column settings: visual templates support classes, inline styles, or unstyled HTML; coded templates support HTML + CSS, classes, or unstyled HTML. Standard exports remove scripts and event handlers.
+
+XLSX allows at most 32,767 characters per cell. Use CSV or JSON for longer descriptions; XLSX returns an error instead of truncating content. Catalog CSV descriptions are plain text.
+
+Verify the actual storefront import before publishing. See [Content templates](/learn/content-templates) for the creation workflow, HTML classes, and responsive CSS.

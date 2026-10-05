@@ -24,3 +24,9 @@ The table must be completed before export. Pass `columns` as a comma-separated l
 ## Examples
 
 <ExportExamples />
+
+## Template content
+
+CSV, XLSX, and JSON render structured template descriptions as HTML using the column's export settings. Standard exports remove scripts and event handlers. Catalog CSV is a separate contract: descriptions are plain text.
+
+XLSX rejects a description longer than 32,767 characters per cell instead of truncating it. Use CSV or JSON for longer content. See [Content templates](/learn/content-templates) for styling modes and import checks.

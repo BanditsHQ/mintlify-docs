@@ -1,22 +1,84 @@
 ---
 title: 'Kredity a fakturace'
-description: 'Zjistěte, jak fungují kredity, a sledujte své využití.'
+description: 'Zjistěte, jak fungují pravidelné a jednorázové kredity, jejich platnost, nákupy a přehledy spotřeby.'
 ---
 
-Lasso používá kreditový systém pro operace extrakce a obohacení.
+Lasso používá kredity pro extrakci, vyhledávání, obohacení a generování obsahu pomocí AI. Firma má jeden celkový dostupný zůstatek, rozdělený na pravidelné a jednorázové kredity.
+
+## Jak číst zůstatky
+
+Otevřete **Kredity a reporty** a zobrazte dvě kreditové karty. Postranní panel ukazuje jejich součet.
+
+| Zůstatek | Jak funguje |
+| --- | --- |
+| Pravidelné kredity | Pravidelný příděl. Karta ukazuje zbývající kredity a datum obnovení; další balíčky nezahrnuje. |
+| Jednorázové kredity | Dodatečné balíčky a odpovídající jednorázové příděly. Každý má vlastní zůstatek a datum platnosti. Automaticky se neobnovují. |
+
+Nejprve se spotřebovávají pravidelné kredity. Po jejich vyčerpání Lasso používá platné jednorázové kredity, počínaje balíčkem s nejbližší expirací. Rezervace běžících úloh se už počítají jako spotřeba; vrácené kredity tuto spotřebu snižují.
+
+Rozbalte pravidelnou kartu pro přehled přídělů a spotřeby v aktuálním kreditovém období. Na jednorázové kartě najdete v záložce **Aktivní** balíčky se zbývajícími kredity a v **Historii** vyčerpané nebo expirované balíčky. Rozbalený balíček ukáže datum přidělení, použité, zbývající a expirované kredity. Podrobné reporty závisí na vašich oprávněních.
+
+## Obnovení, převádění a expirace
+
+Pravidelné kreditové období je měsíční i při roční fakturaci předplatného. Pokud převádění kreditů není zapnuté, nevyužité pravidelné kredity expirují na konci kreditového období. Při zapnutém převádění se nevyužité pravidelné kredity hromadí bez této expirace.
+
+Jednorázové kredity platí 12 měsíců od platby nebo od přidělení u firem s partnerskou fakturací. Obnovení pravidelných kreditů ani změna předplatného je neodstraní. Převádění pravidelných kreditů neruší expiraci jednorázových balíčků.
+
+Pokud změna tarifu bez převádění ponechá více pravidelných kreditů, než dovoluje nový příděl, přebytek se přesune do jednorázového zůstatku s platností 12 měsíců od převodu. Celkový zůstatek se převodem nezmění.
+
+Vrácená spotřeba se připíše do původního zdroje kreditů a zachová jeho platnost. Vrácení neobnovuje expirovaný balíček ani nepřevádí expirované pravidelné kredity na nové kredity v dalším období. Zrušení běžící operace nevrací kredity za již dokončenou práci.
+
+## Přidejte jednorázové kredity
+
+Kredity můžete přidat bez změny předplatného. Váš účet potřebuje oprávnění k nákupu kreditů. Pokud akci nevidíte, obraťte se na správce firmy.
+
+<Steps>
+  <Step title="Vyberte balíček">
+    V přehledu kreditů otevřete **Koupit kredity** nebo **Přidat kredity**. Vyberte měnu a balíček. Před potvrzením zkontrolujte cenu a platnost.
+  </Step>
+  <Step title="Dokončete fakturační postup">
+    Při platbě kartou přejděte do Stripe Checkout a dokončete jednorázovou platbu. U partnerské fakturace zkontrolujte potvrzení a zvolte **Potvrdit a přidat kredity**. Potvrzení přidá kredity okamžitě a upozorní správce fakturace; neznamená platbu kartou.
+  </Step>
+  <Step title="Ověřte potvrzení">
+    Stripe kredity přidělí až po ověření platby. Samotný návrat z Checkout nepotvrzuje přidělení. Pokud se potvrzení zpozdí, použijte **Zkontrolovat znovu** a před dalším nákupem ověřte balíček v přehledu kreditů. Zrušená nezaplacená platba kredity nepřidá.
+  </Step>
+</Steps>
+
+Aktuální ceny balíčků jsou bez DPH. Při platbě kartou se v Checkout přidá 21 % DPH; před platbou zkontrolujte konečnou částku.
+
+| Kredity | EUR bez DPH | CZK bez DPH |
+| --- | --- | --- |
+| 1 000 | 56 € | 1 400 Kč |
+| 5 000 | 240 € | 6 000 Kč |
+| 10 000 | 440 € | 11 000 Kč |
+| 25 000 | 1 000 € | 25 000 Kč |
+
+U nákupů přes Stripe použijte dostupné odkazy na faktury v historii fakturace. Jejich viditelnost závisí na fakturačních oprávněních. Partnerské nákupy se řídí partnerskou fakturací vaší firmy.
+
+## Sledujte spotřebu a náklady
+
+V **Kreditech a reportech** vyberte období a porovnejte spotřebu v čase nebo podle služby, modulu, uživatele a tabulky. Rozsah podrobností určují vaše oprávnění pro fakturaci a reporty.
+
+Měsíční příděl je pravidelný příděl, nikoli celkový zbývající zůstatek. Vykazované náklady na kredit vycházejí z nastaveného poplatku za předplatné a přídělu. Nejde o cenu konkrétního jednorázového balíčku. Přehled spotřeby není faktura.
+
+[Šablony obsahu](/cs/learn/content-templates) můžete vytvářet a zobrazovat v náhledu bez spotřeby kreditů. Generování jejich produktového obsahu používá kreditový odhad operace obohacení.
 
 ## Co spotřebovává kredity
+
+Odhad v aplikaci závisí na vybraném režimu, modelu, obrázcích a počtu produktů. Před spuštěním jej zkontrolujte. Níže jsou běžné sazby veřejného API; nejde o univerzální ceník všech režimů generování textu a obrázků. Pro další operace viz [Vyhledávání](/cs/learn/search) a [Obohacení dat](/cs/learn/enrich).
 
 | Operace | Náklady v kreditech |
 |---|---|
 | **Extrakce tabulky** | Liší se podle velikosti souboru a složitosti |
-| **Obohacení jedné buňky** | ~2 kredity za buňku |
+| **Běžné obohacení jednoho sloupce, za řádek** | ~2 kredity za buňku |
 | **Hromadné obohacení, běžný sloupec** | ~0,5 kreditu za sloupec |
 | **Hromadné obohacení, obrázek Gallery Max** | 16 kreditů za sloupec |
 
 Odpověď enhancementu obsahuje odhad. Veřejný bulk handler aktuálně počítá každý sloupec jako 0,5 kreditu i tehdy, když snapshot tabulky nastavuje obrázkový sloupec Gallery Max. Pro takový sloupec použijte sazbu výše.
 
 ## Kontrola zůstatku
+
+Veřejné API vrací celkový dostupný zůstatek jako `{ balance, currency: "credits" }`. Zahrnuje pravidelné i platné jednorázové kredity; nevrací rozdělení balíčků ani data jejich expirace. Ty zobrazte v aplikaci.
 
 <CodeGroup>
 ```typescript TypeScript
@@ -37,8 +99,8 @@ Zobrazte historii kreditových transakcí s volitelnými filtry:
 <CodeGroup>
 ```typescript TypeScript
 const usage = await client.credits.usage({
-  from: "2025-01-01T00:00:00Z",
-  to: "2025-03-31T23:59:59Z",
+  from: "2026-09-01T00:00:00Z",
+  to: "2026-09-30T23:59:59Z",
   service: "ai_field",
 });
 
@@ -47,8 +109,8 @@ console.log(`Total used: ${usage.total_used} credits`);
 
 ```python Python
 usage = client.credits.usage(**{
-    "from": "2025-01-01T00:00:00Z",
-    "to": "2025-03-31T23:59:59Z",
+    "from": "2026-09-01T00:00:00Z",
+    "to": "2026-09-30T23:59:59Z",
     "service": "ai_field",
 })
 

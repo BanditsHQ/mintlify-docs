@@ -3,3 +3,9 @@ title: 'Získat zůstatek kreditů'
 openapi: "openapi.yaml GET /credits/balance"
 description: 'Kontrola aktuálního zůstatku kreditů.'
 ---
+
+## Co zůstatek zahrnuje
+
+`balance` je celkový dostupný zůstatek firmy: pravidelné kredity a platné jednorázové kredity. `currency` je `credits`, nikoli měna platby. Odpověď neobsahuje rozdělení balíčků ani jejich expiraci; podrobnosti najdete v aplikaci.
+
+Viz [Kredity a fakturace](/cs/learn/credits) pro pořadí spotřeby, obnovování a nákupy.

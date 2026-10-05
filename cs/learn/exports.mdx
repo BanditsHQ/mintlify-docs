@@ -99,3 +99,11 @@ df.to_csv("products.csv", index=False)
 ```
 
 Tato funkce automaticky načte všechny stránky a vrátí DataFrame připravený k použití.
+
+## Popisy ze šablon
+
+Export tabulky do CSV, XLSX a JSON převádí strukturovaný obsah šablony na HTML. V nastavení sloupce vyberte podobu exportu: vizuální šablony podporují třídy, inline styly nebo HTML bez stylů; kódové šablony HTML + CSS, třídy nebo HTML bez stylů. Běžné exporty odstraňují skripty a obsluhu událostí.
+
+XLSX dovoluje nejvýše 32 767 znaků v buňce. Delší popis exportujte do CSV nebo JSON; XLSX vrátí chybu místo zkrácení obsahu. Popisy v CSV exportu Catalog jsou prostý text.
+
+Před publikováním ověřte skutečný import do e-shopu. Viz [Šablony obsahu](/cs/learn/content-templates) pro postup tvorby, HTML třídy a responzivní CSS.

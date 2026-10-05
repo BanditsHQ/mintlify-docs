@@ -620,6 +620,7 @@ components:
           additionalProperties: true
         content_template:
           type: object
+          description: Rich-text content template configuration. See the Content templates guide for visual layouts, coded definitions, and export styling.
           additionalProperties: true
         always_export:
           type: boolean
@@ -730,6 +731,7 @@ components:
           additionalProperties: true
         content_template:
           type: object
+          description: Rich-text content template configuration. See the Content templates guide for visual layouts, coded definitions, and export styling.
           additionalProperties: true
         always_export:
           type: boolean
@@ -1203,8 +1205,10 @@ components:
       properties:
         balance:
           type: number
+          description: Total available company credits, including regular credits and unexpired one-time credits. Package breakdowns and expiry dates are not returned.
         currency:
           type: string
+          description: Credit unit, not the currency used to purchase a package.
           default: credits
       examples:
         - balance: 1248.5
@@ -1255,10 +1259,12 @@ components:
               type: [number, "null"]
             monthly_allocation:
               type: number
+              description: Regular monthly allowance, not remaining credits or purchased package totals.
             period_end:
               type: [string, "null"]
               format: date-time
             cost_per_credit:
+              description: Reporting rate based on configured subscription fees and allowance, not the actual price paid for a one-time package.
               oneOf:
                 - type: object
                   required: [amount, currency, monthly_fee, monthly_credits]
