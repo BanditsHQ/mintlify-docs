@@ -46,7 +46,7 @@ Before publishing an API sync, also compare the documented method/path pairs wit
 
 Keep `learn/content-templates.mdx` and `learn/credits.mdx` aligned with their Czech counterparts under `cs/learn/`. The template guide covers library selection, visual and coded authoring, content sources, saved product definitions, export styling, and storefront import checks. The credits guide covers regular and one-time balances, spending order, expiry, package purchases, and public reporting semantics.
 
-Before publishing these guides, verify package prices and purchase permissions against Stage, and distinguish coded authoring availability from existing coded content editing/export. Update related enhancement/export guides and API reference descriptions in both languages. Do not add dashboard-only purchase endpoints to the public API reference.
+Before publishing these guides, verify package prices and purchase permissions against Stage, and verify default HTML/CSS authoring separately from optional script preview availability. Update related enhancement/export guides and API reference descriptions in both languages. Do not add dashboard-only purchase endpoints to the public API reference.
 
 Validation: run `mint validate`, `mint broken-links`, and `mint a11y`, then preview the English and Czech templates and credits pages with `mint dev`. Confirm both template pages appear in navigation and preserve the existing public credit and export URLs.
 
