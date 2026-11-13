@@ -1,5 +1,5 @@
 ---
 title: "Get table column definitions"
-description: "Returns every column in the table's forked schema snapshot, including local helpers. API visibility does not imply Catalog or scheduled-sync eligibility. Filter canonical destinations to columns whose `kind` is `attribute`; a helper has `kind: helper` and `attribute_id: null`."
+description: "Get the columns from a table’s Product Schema snapshot, including shared Attributes and local helpers. Check which columns are Attributes."
 openapi: "openapi.yaml GET /tables/{table_id}/columns"
 ---

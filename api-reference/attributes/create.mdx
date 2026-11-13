@@ -1,6 +1,6 @@
 ---
 title: "Create or upsert Attributes"
-description: "A single payload returns a bare Attribute: `201` for a new key and `200` when the existing same-type key is updated. `{ \"attributes\": [...] }` performs up to 500 atomic database writes and returns `{ \"data\": [...] }`. Attribute webhook effects are dispatched after the database commit and are best-effort. Attribute type and relation kind are immutable for an existing key."
+description: "Create or upsert one company Attribute by key, or submit up to 500 Attributes in one atomic request. Existing keys keep their type."
 openapi: "openapi.yaml POST /attributes"
 ---
 

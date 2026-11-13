@@ -1,6 +1,6 @@
 ---
 title: "Add rows to a completed table"
-description: "Adds up to 1,000 rows atomically. Every object key must match a column in the table's forked schema snapshot. Mutations are rejected while the table is locked by another operation."
+description: "Add up to 1,000 rows to a completed, unlocked table in one atomic request. Every row key must match a column in the table’s schema."
 openapi: "openapi.yaml POST /tables/{table_id}/rows"
 ---
 
